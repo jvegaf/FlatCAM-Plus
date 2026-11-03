@@ -1,180 +1,181 @@
-# Design — Cutout Auto Interior Detection
+# Diseño: detección interior automática de recortes
 
-## Arquitetura da Solução
+## Arquitectura de la solución
 
-A mudança é localizada em um único arquivo (`appPlugins/ToolCutOut.py`) e consiste em:
-1. Uma função helper de classificação
-2. Modificação do loop de processamento no bloco `kind != 'single'`
+El cambio se encuentra en un único archivo (`appPlugins/ToolCutOut.py`) y consta de:
 
-Nenhuma mudança estrutural no projeto. Nenhuma dependência nova.
+1. Una función auxiliar de clasificación
+2. Modificación del bucle de procesamiento en el bloque `kind != 'single'`
 
----
-
-## Componentes Afetados
-
-```
-appPlugins/ToolCutOut.py
-  └── class CutOut
-       ├── _classify_contours(object_geo) → dict[int, bool]    [NOVO]
-       └── on_freeform_cutout()                                 [MODIFICADO]
-```
+No hay cambios estructurales en el proyecto. No hay nuevas dependencias.
 
 ---
 
-## Função Helper: `_classify_contours`
+## Componentes afectados
 
-```python
-def _classify_contours(self, geometries: list) -> set:
+```
+complementos de aplicación/ToolCutOut.py
+  └── clase recortada
+       ├── _classify_contours(object_geo) → dict[int, bool] [NUEVO]
+       └── on_freeform_cutout() [CAMBIADO]
+```
+
+---
+
+## Función auxiliar: `_classify_contours`
+
+```pitón
+def _classify_contours(self, geometrías: lista) -> establecer:
     """
-    Classifica polígonos como internos (contidos dentro de outro polígono maior).
-    
-    Args:
-        geometries: Lista de polígonos (output de flatten_shapely_geometry)
-    
-    Returns:
-        Set de índices dos polígonos classificados como internos.
-        Polígonos não presentes no set são considerados externos.
+    Clasifica polígonos como internos (contenidos dentro de otro polígono más grande).
+
+    Argumentos:
+        geometrías: Lista de polígonos (salida de flatten_shapely_geometry)
+
+    Devoluciones:
+        Conjunto de índices para polígonos clasificados como internos.
+        Los polígonos que no están presentes en el conjunto se consideran externos.
     """
 ```
 
 ### Algoritmo
 
 ```
-1. Se len(geometries) <= 1:
-     return set()  # Nada a classificar
+1. Si len(geometrías) <= 1:
+     return set() # Nada que ordenar
 
-2. Para cada polígono, calcular a área do Polygon preenchido (Polygon(geo.exterior))
-   - Isso transforma a "faixa estreita" (buffered LineString) em polígono sólido
+2. Para cada polígono, calcule el área del polígono relleno (Polygon(geo.exterior))
+   - Esto convierte la "franja estrecha" (LineString almacenada en búfer) en un polígono sólido
 
-3. Encontrar o polígono com MAIOR área preenchida → exterior_candidate
+3. Encuentra el polígono con el área rellena MÁS GRANDE → exterior_candidate
 
-4. Criar versão preenchida do exterior: exterior_filled = Polygon(exterior_candidate.exterior)
+4. Cree una versión rellena del exterior: exterior_filled = Polygon(exterior_candidate.exterior)
 
-5. Para cada outro polígono (index i):
-   a. Obter representative_point() do polígono
-   b. Se exterior_filled.contains(representative_point):
-        → Marcar index i como INTERIOR
-   c. Senão:
-        → Manter como EXTERIOR (não adicionar ao set)
+5. Para cada uno de los demás polígonos (índice i):
+   un. Obtener el punto_representante() del polígono
+   B. Si exterior_filled.contiene (punto_representante):
+        → Marcar índice i como INTERIOR
+   c. Más:
+        → Mantener como EXTERIOR (no agregar al conjunto)
 
-6. Retornar set de índices interiores
+6. Conjunto de índice interior de retorno
 ```
 
-### Por que `representative_point()` em vez de `contains(polygon)`
+### ¿Por qué `representative_point()` en lugar de `contiene(polígono)`?
 
-Os polígonos do Gerber são faixas estreitas (LineString bufferizada com aperture width ≈ 0.254mm). O `Polygon.contains(other_polygon)` pode retornar False porque a faixa do slot interno pode ter partes fora do exterior preenchido (nas bordas, devido ao buffer). Usar `representative_point()` (ponto garantidamente dentro do polígono) é mais robusto para testar "este polígono está geograficamente dentro do outro?".
+Los polígonos de Gerber son franjas estrechas (LineString amortiguado con un ancho de apertura ≈ 0,254 mm). `Polygon.contains(other_polygon)` puede devolver False porque la franja de la ranura interior puede tener partes fuera de la exterior rellenas (en los bordes, debido al almacenamiento en búfer). Usar `representative_point()` (un punto que se garantiza que estará dentro del polígono) es más sólido para probar "¿está este polígono geográficamente dentro del otro?".
 
-### Por que `Polygon(geo.exterior)` para preencher
+### Por qué llenar `Polygon(geo.exterior)`
 
-A solid_geometry do Gerber de profile é uma faixa oca (anel fino). Para testar containment, precisamos de um polígono PREENCHIDO (sem furo no meio). `Polygon(geo.exterior)` cria o polígono sólido a partir do contorno externo da faixa.
+El perfil Gerber solid_geometry es una tira hueca (anillo fino). Para probar la contención, necesitamos un polígono LLENADO (sin un agujero en el medio). `Polygon(geo.exterior)` crea el polígono sólido a partir del contorno exterior de la franja.
 
 ---
 
-## Modificação do Loop de Processamento
+## Modificación del bucle de procesamiento
 
-### Código Atual (linhas ~790-798 de ToolCutOut.py)
+### Código actual (líneas ~790-798 de ToolCutOut.py)
 
-```python
+```pitón
 object_geo = flatten_shapely_geometry(object_geo)
-for geom_struct in object_geo:
-    if cutout_obj.kind == 'gerber':
-        if margin >= 0:
-            geom_struct = (geom_struct.buffer(margin + abs(cut_dia / 2))).exterior
-        else:
-            geom_struct_buff = geom_struct.buffer(-margin + abs(cut_dia / 2))
-            geom_struct = geom_struct_buff.interiors
+para geom_struct en object_geo:
+    si cutout_obj.kind == 'gerber':
+        si margen >= 0:
+            geom_struct = (geom_struct.buffer(margen + abs(cut_dia / 2))).exterior
+        más:
+            geom_struct_buff = geom_struct.buffer(-margen + abs(cut_dia / 2))
+            geom_struct = geom_struct_buff.interiores
 ```
 
-### Código Proposto
+### Código propuesto
 
-```python
+```pitón
 object_geo = flatten_shapely_geometry(object_geo)
 
-# Classificar contornos internos vs externos
-interior_indices = self._classify_contours(object_geo)
+# Ordenar contornos internos y externos
+índices_interiores = self._classify_contours(object_geo)
 
-for i, geom_struct in enumerate(object_geo):
-    if cutout_obj.kind == 'gerber':
-        if margin >= 0:
-            buffered = geom_struct.buffer(margin + abs(cut_dia / 2))
-            if i in interior_indices:
-                # Recorte interno: offset para dentro do furo
-                if buffered.interiors:
+para i, geom_struct en enumerar (object_geo):
+    si cutout_obj.kind == 'gerber':
+        si margen >= 0:
+            almacenado en búfer = geom_struct.buffer (margen + abs (cut_dia / 2))
+            si estoy en interior_indices:
+                # Recorte interno: desplazado en el agujero
+                si está almacenado en búfer.interiores:
                     geom_struct = buffered.interiors[0]
-                else:
-                    # Fallback: se não tem interiors, usar exterior com warning
-                    self.app.log.warning(
-                        "Cutout: interior contour %d has no interiors after buffer. "
-                        "Using exterior as fallback." % i)
-                    geom_struct = buffered.exterior
-            else:
-                # Contorno externo: offset para fora da placa
-                geom_struct = buffered.exterior
-        else:
-            geom_struct_buff = geom_struct.buffer(-margin + abs(cut_dia / 2))
-            geom_struct = geom_struct_buff.interiors
+                más:
+                    # Alternativa: si no hay interior, use exterior con advertencia
+                    self.app.log.advertencia(
+                        "Recorte: el contorno interior %d no tiene interiores después de la zona de influencia."
+                        "Usar el exterior como alternativa". %i)
+                    geom_struct = almacenado en búfer.exterior
+            más:
+                # Contorno externo: desplazado hacia el exterior del tablero
+                geom_struct = almacenado en búfer.exterior
+        más:
+            geom_struct_buff = geom_struct.buffer(-margen + abs(cut_dia / 2))
+            geom_struct = geom_struct_buff.interiores
 ```
 
 ---
 
-## Diagrama de Fluxo
+## Diagrama de flujo
 
 ```
 on_freeform_cutout()
     │
-    ├── kind == 'single' → fluxo atual (sem mudança)
+    ├── tipo == 'único' → flujo actual (sin cambios)
     │
-    └── kind != 'single' (Panel)
+    └── tipo != 'soltero' (Panel)
          │
          ├── flatten_shapely_geometry(object_geo)
          │
-         ├── _classify_contours(object_geo) → interior_indices  [NOVO]
+         ├── _classify_contours(object_geo) → interior_indices [NUEVO]
          │
-         └── for i, geom_struct in enumerate(object_geo):
+         └── para i, geom_struct en enumerar (object_geo):
               │
-              ├── margin >= 0:
-              │    ├── i in interior_indices → buffered.interiors[0]  [NOVO]
-              │    └── i NOT in interior_indices → buffered.exterior  [EXISTENTE]
+              ├── margen >= 0:
+              │ ├── i en interior_indices → buffered.interiors[0] [NUEVO]
+              │ └── NO estoy en interior_indices → buffered.exterior [EXISTENTE]
               │
-              └── margin < 0: → fluxo atual (sem mudança)
+              └── margen < 0: → flujo actual (sin cambios)
 ```
 
 ---
 
-## Tratamento de Edge Cases
+## Tratamiento de casos extremos
 
-| Case | Detecção | Ação |
-|------|----------|------|
-| 1 polígono | `len(geometries) <= 1` | Return set() → zero mudança |
-| Múltiplos polígonos sem containment (painel) | `contains()` retorna False para todos | Set vazio → todos tratados como exteriores |
-| Slot tocando borda | `representative_point()` pode estar fora do exterior | Tratado como externo (correto) |
-| Geometry aberta (sem interiors após buffer) | `buffered.interiors` é vazio | Fallback para `.exterior` + log warning |
-| Polígonos degenerados | `representative_point()` levanta exceção | try/except → tratado como externo |
-
----
-
-## Impacto em Outros Fluxos
-
-| Fluxo | Impacto |
-|-------|---------|
-| Kind = Single | NENHUM — código não é alcançado |
-| Margin < 0 | NENHUM — branch separado, não afetado |
-| Mouse bites | NENHUM — processado depois, usa mesma lógica sem _classify |
-| Gaps/Bridges | NENHUM — aplicados depois via any_cutout_handler() |
-| Geometry (não Gerber) | NENHUM — branch `else` separado, não afetado |
-| geo_init (gerar CNCJob) | NENHUM — recebe solid_geo já processado |
+| Caso | Detección | Acción |
+| ------ | ---------- | ------ |
+| 1 polígono | `len(geometrías) <= 1` | Conjunto de retorno () → cambio cero |
+| Múltiples polígonos sin contención (panel) | `contiene()` devuelve Falso para todos | Conjunto vacío → todo tratado como exterior |
+| Borde de juego de tragamonedas | `representative_point()` puede estar fuera del exterior | Tratado como externo (correcto) |
+| Geometría abierta (sin interiores después del buffering) | `buffered.interiors` está vacío | Recurrir a `.exterior` + advertencia de registro |
+| Polígonos degenerados | `representative_point()` genera una excepción | intentar/excepto → tratado como externo |
 
 ---
 
-## Dependências
+## Impacto en otros flujos
 
-- **Shapely >= 2.0** (já em uso): `Polygon`, `representative_point()`, `contains()`
-- Nenhuma dependência nova
+| Flujo | Impacto |
+| ------- | -------- |
+| Tipo = Soltero | NINGUNO: no se alcanza el código |
+| Margen < 0 | NINGUNO: sucursal separada y no afectada |
+| Mordeduras de ratón | NINGUNO: procesado más tarde, utiliza la misma lógica sin _classify |
+| Brechas/Puentes | NINGUNO: se aplica más tarde a través de any_cutout_handler() |
+| Geometría (no Gerber) | NINGUNO — rama separada `else`, no afectada |
+| geo_init (generar CNCJob) | NINGUNO: recibe solid_geo ya procesado |
 
 ---
 
-## Riscos Residuais
+## Dependencias
 
-1. **Gerber com polígono "interno" que na verdade é uma marca/logo:** Raro em layer de profile, mas possível. Mitigação: funciona corretamente se o polígono está contido — o offset inside é semanticamente correto para qualquer shape que deve ser "recortada" da placa.
+- **Shapely >= 2.0** (ya en uso): `Polygon`, `representative_point()`, `contains()`
+- No hay nuevas dependencias
 
-2. **Performance com muitos polígonos:** Teórico — PCBs com >20 slots no profile são extremamente raros. Se necessário no futuro, usar STRtree para queries espaciais O(log n).
+---
+
+## Riesgos residuales
+
+1. **Gerber con polígono "interno" que en realidad es una marca/logotipo:** Raro en las capas del perfil, pero posible. Mitigación: funciona correctamente si el polígono está contenido; el desplazamiento interior es semánticamente correcto para cualquier forma que deba "cortarse" de la placa.
+
+2. **Rendimiento con muchos polígonos:** Teórico: los PCB con >20 ranuras de perfil son extremadamente raros. Si es necesario en el futuro, utilice STRtree para consultas espaciales O(log n).

@@ -1,74 +1,81 @@
-# Tasks — Cutout Auto Interior Detection
+# Tareas: Detección interior automática de recortes
 
-## Implementação
+## Implementación
 
-### Task 1: Criar função helper `_classify_contours`
-- **Arquivo:** `appPlugins/ToolCutOut.py`
-- **Localização:** Método da classe `CutOut`, antes de `on_freeform_cutout()`
-- **Ação:** Implementar a função que recebe lista de geometrias e retorna set de índices interiores
-- **Critério de aceite:** Função retorna set vazio para 1 polígono, retorna índices corretos para 2+ polígonos com containment
+### Tarea 1: Crear la función auxiliar `_classify_contours`
 
-### Task 2: Modificar loop de processamento em `on_freeform_cutout()`
-- **Arquivo:** `appPlugins/ToolCutOut.py`
-- **Localização:** Bloco `else` (kind != 'single'), linhas ~790-798
-- **Ação:** 
-  - Adicionar chamada a `_classify_contours()` antes do loop
-  - Converter `for geom_struct` em `for i, geom_struct in enumerate()`
-  - Dentro do `if margin >= 0:`, bifurcar entre `.exterior` e `.interiors[0]` conforme classificação
-  - Adicionar fallback com log warning para interiors vazio
-- **Critério de aceite:** Gerber com outline + slot interno gera paths com offsets corretos (outside para exterior, inside para slot)
+- **Archivo:** `appPlugins/ToolCutOut.py`
+- **Ubicación:** Método de la clase `CutOut`, antes de `on_freeform_cutout()`
+- **Acción:** Implementar la función que recibe una lista de geometrías y devuelve un conjunto de índices interiores
+- **Criterios de aceptación:** La función devuelve un conjunto vacío para 1 polígono, devuelve índices correctos para más de 2 polígonos con contención
 
-### Task 3: Adicionar import de `Polygon` no topo do arquivo
-- **Arquivo:** `appPlugins/ToolCutOut.py`
-- **Localização:** Bloco de imports (topo do arquivo)
-- **Ação:** Verificar se `Polygon` da Shapely já está importado. Se não, adicionar.
-- **Critério de aceite:** Sem ImportError ao usar `Polygon(geo.exterior)`
+### Tarea 2: Modificar el bucle de procesamiento en `on_freeform_cutout()`
 
-### Task 4: Testar com Gerber do usuário (Fusion 360 — engrenagem + slot triangular)
-- **Ação:** 
-  - Importar o Gerber de profile no FlatCAM Plus
-  - Executar Cutout com Kind=Panel
-  - Verificar visualmente que o contorno externo tem offset outside e o slot interno tem offset inside
-- **Critério de aceite:** Ambos os toolpaths estão do lado correto conforme imagem de referência
+- **Archivo:** `appPlugins/ToolCutOut.py`
+- **Ubicación:** bloque `else` (tipo! = 'único'), líneas ~790-798
+- **Acción:**
+  - Agregar llamada a `_classify_contours()` antes del bucle
+  - Convertir `para geom_struct` a `para i, geom_struct en enumerate()`
+  - Dentro de `if margin >= 0:`, bifurcación entre `.exterior` y `.interiors[0]` según clasificación
+  - Agregar respaldo con advertencia de registro para interiores vacíos
+- **Criterios de aceptación:** Gerber con contorno + ranura interna genera caminos con desplazamientos correctos (de afuera a exterior, de adentro a ranura)
 
-### Task 5: Testar regressão — Gerber com polígono único
-- **Ação:**
-  - Importar Gerber de profile simples (retangular ou curvo, sem slots)
-  - Executar Cutout com Kind=Panel e Kind=Single
-  - Verificar que resultado é idêntico ao comportamento anterior
-- **Critério de aceite:** Zero diferença no toolpath gerado vs versão sem a modificação
+### Tarea 3: Agregar la importación `Polygon` a la parte superior del archivo
 
-### Task 6: Testar regressão — Painel com múltiplas PCBs
-- **Ação:**
-  - Importar Gerber de painel com 2+ outlines lado a lado (sem containment)
-  - Executar Cutout com Kind=Panel
-  - Verificar que TODOS os contornos recebem offset outside
-- **Critério de aceite:** Comportamento idêntico ao anterior para painéis reais
+- **Archivo:** `appPlugins/ToolCutOut.py`
+- **Ubicación:** Bloque de importaciones (parte superior del archivo)
+- **Acción:** Compruebe si `Polygon` de Shapely ya está importado. Si no, agregue.
+- **Criterios de aceptación:** Sin ImportError al usar `Polygon(geo.exterior)`
 
-### Task 7: Testar edge case — Gerber com slot tocando borda
-- **Ação:**
-  - Criar ou encontrar Gerber com slot que intersecta o outline externo
-  - Executar Cutout
-  - Verificar que slot não é classificado como "interior"
-- **Critério de aceite:** Slot tratado como contorno externo (offset outside)
+### Tarea 4: Prueba con el usuario Gerber (Fusion 360 — engranaje + ranura triangular)
+
+- **Acción:**
+  - Importar el perfil Gerber en FlatCAM Plus
+  - Ejecutar recorte con Kind=Panel
+  - Comprobar visualmente que el contorno externo tiene un desplazamiento exterior y la ranura interna tiene un desplazamiento interior
+- **Criterios de aceptación:** Ambas trayectorias están en el lado correcto según la imagen de referencia.
+
+### Tarea 5: Prueba de regresión: Gerber con un solo polígono
+
+- **Acción:**
+  - Importación perfil simple Gerber (rectangular o curvo, sin ranuras)
+  - Ejecutar recorte con Kind=Panel y Kind=Single
+  - Comprobar qué resultado es idéntico al comportamiento anterior.
+- **Criterios de aceptación:** Cero diferencia en la trayectoria generada vs la versión sin modificación
+
+### Tarea 6: Prueba de regresión: panel con múltiples PCB
+
+- **Acción:**
+  - Importe Gerber desde el panel con más de 2 contornos uno al lado del otro (sin contención)
+  - Ejecutar recorte con Kind=Panel
+  - Comprobar que TODOS los contornos reciben un desplazamiento exterior
+- **Criterios de aceptación:** Comportamiento idéntico al anterior para paneles reales
+
+### Tarea 7: Caso de borde de prueba: Gerber con ranura tocando el borde
+
+- **Acción:**
+  - Crea o encuentra Gerber con una ranura que se cruza con el contorno exterior.
+  - Ejecutar recorte
+  - Comprobar que la ranura no esté clasificada como "interior"
+- **Criterios de aceptación:** Ranura tratada como desplazada exterior
 
 ---
 
-## Ordem de Execução
+## Orden de ejecución
 
 ```
-Task 3 (import) → Task 1 (helper) → Task 2 (loop) → Task 4 (teste principal) → Task 5-7 (regressão)
+Tarea 3 (importar) → Tarea 1 (ayudante) → Tarea 2 (bucle) → Tarea 4 (prueba principal) → Tarea 5-7 (regresión)
 ```
 
 ---
 
-## Estimativa
+## Estimación
 
-| Task | Esforço |
-|------|---------|
-| Task 1 | 15 min |
-| Task 2 | 15 min |
-| Task 3 | 2 min |
-| Task 4 | 10 min |
-| Task 5-7 | 15 min |
-| **Total** | **~1 hora** |
+| Tarea | Esfuerzo |
+| ------ | --------- |
+| Tarea 1 | 15 minutos |
+| Tarea 2 | 15 minutos |
+| Tarea 3 | 2 minutos |
+| Tarea 4 | 10 minutos |
+| Tarea 5-7 | 15 minutos |
+| **Totales** | **~1 hora** |
