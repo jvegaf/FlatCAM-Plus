@@ -521,6 +521,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     app.setApplicationName(APP_NAME)
+    app.setDesktopFileName("flatcam-plus")
     app.setApplicationDisplayName("%s %s" % (APP_NAME, APP_VERSION))
 
     # apply style
