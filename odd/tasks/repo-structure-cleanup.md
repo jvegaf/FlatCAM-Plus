@@ -486,3 +486,23 @@ decisions.
   duplicate; the frozen layout it could not verify is what that correction now covers with a test.
   Defers honestly: no frozen build was executed, and its scratch directory in `/tmp` was left
   behind (`/tmp/fcverify.ehI1f8`) after tmpfs filled.
+- **L40 — Re-review of the corrected slice (lineage `review-6b96d6898e9d63c1`)**: the correction
+  produced a candidate whose target identity differed from the frozen one, so the previous
+  authority could not close: its targeted-validation slot was rejected by `gentle_review_capture`
+  as `missing or stale` on three attempts (object form, exact serialized string, and the group
+  tool, which answered that validation is not a reviewer group), all with
+  `mutation_performed: false`. `review-30a653f091737138` is therefore left `reviewing` with
+  `correction_required` and its correction unvalidated; abandoning it is a human decision, not a
+  cleanup step. A fresh ordinary review of `d5282be..HEAD` was started for the corrected tree
+  (`review-6b96d6898e9d63c1`, tier `high`, 178 files, 1182 changed lines, lenses `readability` and
+  `reliability`, 199 KB prompts each) and closed **approved** with no severe finding, so no refuter
+  and no second correction: the R3-001 frozen-layout fix held up on a cold read. The
+  acknowledgement burned the authority (consumed revision `sha256:50d0087d...`, target
+  `sha256:e0f5361d...`). Four advisory findings, all `informational` and none opening a correction,
+  stay recorded by location only because their text is pruned with the burned authority (L19, L26):
+  R2-001 (readability, `tests/test_locale_resolution.py:52-54`, WARNING), R2-002 (readability,
+  `flatcam_plus/appTranslation.py:22-26`, SUGGESTION), R3-001 (reliability,
+  `flatcam_plus/appTranslation.py:23-27`, WARNING) and R3-002 (reliability,
+  `tests/test_locale_resolution.py:35-54`, SUGGESTION). Both worth checking first: the alias
+  comment block (the same lines the independent verifier flagged as A1, now rewritten) and the
+  frozen-layout test body.
