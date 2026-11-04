@@ -96,7 +96,7 @@ from appParsers.ParseGerber import Gerber
 from flatcam_plus.camlib import to_dict, Geometry, CNCjob
 
 # App Pre-processors
-from appPreProcessor import load_preprocessors
+from flatcam_plus.appPreProcessor import load_preprocessors
 
 # App appEditors
 from appEditors.appGeoEditor import AppGeoEditor

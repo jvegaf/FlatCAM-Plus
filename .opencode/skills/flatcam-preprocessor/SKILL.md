@@ -15,7 +15,7 @@ Load when creating or editing a module under `preprocessors/`, changing emitted 
 
 ## Hard Rules
 
-- Put each preprocessor in `preprocessors/<name>.py` and subclass `PreProc` from `appPreProcessor`.
+- Put each preprocessor in `preprocessors/<name>.py` and subclass `PreProc` from `flatcam_plus.appPreProcessor`.
 - The class name is the user-visible preprocessor name. Registration is automatic: `ABCPreProcRegister` registers on class creation, and `load_preprocessors()` imports every `preprocessors/*.py`. Never add a central registry edit.
 - Implement every abstract method: `start_code`, `lift_code`, `down_code`, `toolchange_code`, `up_to_zero_code`, `rapid_code`, `linear_code`, `end_code`, `feedrate_code`, `spindle_code`, `spindle_stop_code`.
 - Read parameters from the `p` mapping: `p['feedrate']`, `p['z_cut']`, `p['z_move']`, `p['z_feedrate']`, `p['multidepth']`, `p['toolchange']`, `p['units']`, `p['obj_options']`, `p['xy_toolchange']`, `p['xy_end']`.
@@ -47,7 +47,7 @@ Report: file and class name, methods implemented, emitted safety commands, selec
 
 ## References
 
-- `appPreProcessor.py` — `PreProc` contract and registration.
+- `flatcam_plus/appPreProcessor.py` — `PreProc` contract and registration.
 - `preprocessors/default.py` — full reference implementation.
 - `preprocessors/GRBL_11_pen_plotter.py` — plotter-safe output example.
 - `PLOTTER_WORKFLOW.md` — plotter generation and validation flow.

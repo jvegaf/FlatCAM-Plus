@@ -7,7 +7,7 @@
 # MIT Licence                                              #
 # ##########################################################
 
-from appPreProcessor import AppPreProcTools
+from flatcam_plus.appPreProcessor import AppPreProcTools
 
 
 class Paste_Marlin(AppPreProcTools):

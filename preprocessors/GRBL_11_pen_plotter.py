@@ -7,7 +7,7 @@
 # See:      appPlugins/cnc_control/LICENSE                  #
 # ##########################################################
 
-from appPreProcessor import PreProc
+from flatcam_plus.appPreProcessor import PreProc
 
 
 class GRBL_11_pen_plotter(PreProc):

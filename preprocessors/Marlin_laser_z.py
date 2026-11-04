@@ -7,7 +7,7 @@
 # License:      MIT Licence                                #
 # ##########################################################
 
-from appPreProcessor import PreProc
+from flatcam_plus.appPreProcessor import PreProc
 
 
 class Marlin_laser_z(PreProc):

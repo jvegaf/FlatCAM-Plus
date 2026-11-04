@@ -11,7 +11,7 @@
 # MIT Licence                                                #
 ##############################################################
 
-from appPreProcessor import PreProc
+from flatcam_plus.appPreProcessor import PreProc
 import math
 
 

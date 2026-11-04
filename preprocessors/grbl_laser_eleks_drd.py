@@ -7,7 +7,7 @@
 # MIT Licence                                              #
 # ########################################################## ##
 
-from appPreProcessor import PreProc
+from flatcam_plus.appPreProcessor import PreProc
 import math
 # This post processor is configured to output code for
 # lasers without Z Axis

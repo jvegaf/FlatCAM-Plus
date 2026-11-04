@@ -9,7 +9,7 @@
 # MIT Licence                                              #
 # ##########################################################
 
-from appPreProcessor import PreProc
+from flatcam_plus.appPreProcessor import PreProc
 
 # This post processor is configured to output code that
 # is compatible with almost any version of Grbl.

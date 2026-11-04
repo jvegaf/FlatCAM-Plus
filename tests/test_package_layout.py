@@ -2,7 +2,8 @@
 
 T4.2b moved the modules that only ``appMain`` and the preferences manager imported by name and
 deleted the pool module nothing referenced; T4.3 moved ``camlib``, the geometry and G-code core;
-T4.4 moved ``appTool``, the base class of every tool and editor plugin. This test pins those
+T4.4 moved ``appTool``, the base class of every tool and editor plugin, and T4.4b moved
+``appPreProcessor``, whose contract the path-loaded preprocessors import. This test pins those
 facts so a later phase cannot leave a half-migrated tree behind.
 """
 
@@ -19,6 +20,7 @@ PACKAGE_MODULES = (
     "appWorkerStack",
     "camlib",
     "appTool",
+    "appPreProcessor",
 )
 DELETED_MODULES = ("appPool",)
 

@@ -75,7 +75,12 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
     phase stays open as T4.4b.
   - **T4.4b** — Move `appPreProcessor` (29 statements) together with the preprocessor discovery:
     the `SourceFileLoader` glob, the fixed module name and the metaclass registry are risk
-    register item 2, so this slice needs its own verification of the registry.
+    register item 2, so this slice needs its own verification of the registry. Status: done in
+    the commit that adds `appPreProcessor` to `tests/test_package_layout.py`. The 28 preprocessor
+    modules and the single `appMain` importer became `from flatcam_plus.appPreProcessor import
+    ...`; the discovery itself needed no change because `load_preprocessors` globs
+    `app.app_home/preprocessors` and `app.data_path/preprocessors`, never the module's own
+    location. The registry was verified by a mutation check, not only by a green suite.
   - **T4.5** — Move `appTranslation` (172 statements across 173 files) in two or three slices of
     about 400 authored lines.
   - **T4.6** — Move `appMain` and turn `flatcam.py` into a root launcher that keeps
@@ -139,11 +144,11 @@ From L28, ordered by how likely it is to break silently rather than loudly:
 This feature's slices are T1+T2 (14 files, 84 insertions, 137 deletions, `aedf5e7`), T3
 (7 files, 214 insertions in `dbf3c1a` plus 49 insertions and 3 deletions in `1e890ea`), and the
 T4 phase slices: T4.1 `420318b` (paths), T4.2 `c3fccc4` (version pilot), T4.2b `60f72bb`
-(low-fanout modules), T4.3 `0424299` (camlib, 43 files, 55 insertions, 49 deletions), and T4.4
-(this commit; appTool, 58 files, 99 insertions, 65 deletions). Each T4 slice stays under one
-review slice on its own.
+(low-fanout modules), T4.3 `0424299` (camlib, 43 files, 55 insertions, 49 deletions), T4.4
+`367862b` (appTool, 58 files, 99 insertions, 65 deletions) and T4.4b (this commit;
+`appPreProcessor`, 30 files). Each T4 slice stays under one review slice on its own.
 
-After this commit `dev` is 27 commits ahead of `origin/main` with about 3.8k added and 0.5k
+After this commit `dev` is 28 commits ahead of `origin/main` with about 3.9k added and 0.5k
 deleted lines (`git diff --numstat origin/main..dev`, lock files and `requirements.txt`
 excluded), which is well past one review slice. That backlog predates this work and grows by
 one commit per T4 phase. Push, pull request creation and merge remain human decisions and must
@@ -171,11 +176,10 @@ paths, T4.2 and T4.2b moved the six low-fanout modules, T4.3 moved `camlib` and 
 `appTool`. The tree is consistent at every commit: `dev` is 5 commits ahead of `origin/dev` and
 62 tests pass.
 
-T4.4b (moving `appPreProcessor` together with the preprocessor discovery) is the next phase and
-the first one that touches the path-loaded modules, so it needs its own commit and its own
-verification of the `SourceFileLoader` registry. T4.5 (`appTranslation`), T4.6 (`appMain`) and
-T4.7 (`descartes`, `libs`) stay after it. Push and merge of the 5 unpushed commits remain human
-decisions.
+T4.5 (moving `appTranslation`, 172 statements across 173 files) is the next phase: the largest
+fanout of the migration, so it goes in two or three slices of about 400 authored lines, each with
+its own commit. T4.6 (`appMain` plus the `flatcam.py` launcher) and T4.7 (`descartes`, `libs`)
+stay after it. Push and merge of the 6 unpushed commits remain human decisions.
 
 ## Log
 
@@ -342,3 +346,19 @@ decisions.
   observations and 0 sessions. The task document is therefore the only continuity source, and it
   was missing the log entries for T4.1 to T4.3 too; the Tasks section carried them. Recorded here
   so no later session trusts a mirror that was never written.
+- **L32 — T4.4b executed (`appPreProcessor`)**: RED first — adding `appPreProcessor` to
+  `PACKAGE_MODULES` failed the same three guards. Then `git mv appPreProcessor.py
+  flatcam_plus/appPreProcessor.py` and the 29 import sites became `from
+  flatcam_plus.appPreProcessor import ...`: 28 of them are preprocessor modules and one is
+  `appMain.py:99`. `load_preprocessors` itself needed no edit because it globs
+  `app.app_home/preprocessors` and `app.data_path/preprocessors`, never the module's own file
+  location — the T4.1 anchoring is what made that true. Verification beyond the suite: a mutation
+  check replaced one preprocessor's import with the old root name and
+  `test_loads_the_gcode_preprocessors` failed, which proves the registry assertion is
+  discriminating; the file was restored and the suite re-run. `tests/test_package_layout.py`
+  reports 25 passed, `tests/test_app_boot.py` plus `tests/test_gcode_output.py` 8 passed.
+  `.opencode/skills/flatcam-preprocessor/SKILL.md` points at `flatcam_plus/appPreProcessor.py`.
+- **L33 — Git identity was unset**: the T4.4 commit failed with "Author identity unknown"; neither
+  the local nor the global config had `user.name`/`user.email`, although every earlier commit is
+  authored by `Jose Vega <josevega234@gmail.com>`. Set repository-local only, matching the
+  existing history, so no global configuration changed.
