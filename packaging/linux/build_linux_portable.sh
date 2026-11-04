@@ -197,7 +197,6 @@ build_portable() {
         # ``libs`` is not shipped as data: it is a subpackage of ``flatcam_plus``, so
         # ``--collect-submodules flatcam_plus`` below already collects it as code.
         # ``appCommon`` is a ``flatcam_plus`` subpackage now; the entry below collects it.
-        --collect-submodules appEditors
         --collect-submodules appGUI
         --collect-submodules appPlugins
         --collect-submodules tclCommands

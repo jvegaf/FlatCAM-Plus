@@ -2,9 +2,9 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 
-from appEditors.appExcEditor import AppExcEditor
-from appEditors.appGeoEditor import AppGeoEditor
-from appEditors.appGerberEditor import AppGerberEditor
+from flatcam_plus.appEditors.appExcEditor import AppExcEditor
+from flatcam_plus.appEditors.appGeoEditor import AppGeoEditor
+from flatcam_plus.appEditors.appGerberEditor import AppGerberEditor
 
 from appGUI.GUIElements import FCFileSaveDialog, FCMessageBox
 from flatcam_plus.camlib import to_dict, dict2obj, ET, ParseError

@@ -12,7 +12,7 @@
 
 from PyQt6 import QtCore
 
-from appEditors.appTextEditor import AppTextEditor
+from flatcam_plus.appEditors.appTextEditor import AppTextEditor
 from flatcam_plus.appObjects.AppObjectTemplate import FlatCAMObj
 from appGUI.ObjectUI import ScriptObjectUI
 

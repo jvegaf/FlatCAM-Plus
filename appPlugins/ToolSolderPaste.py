@@ -27,7 +27,7 @@ import builtins
 from flatcam_plus.appCommon.Common import LoudDict
 
 from flatcam_plus.camlib import distance
-from appEditors.appTextEditor import AppTextEditor
+from flatcam_plus.appEditors.appTextEditor import AppTextEditor
 
 from io import StringIO
 

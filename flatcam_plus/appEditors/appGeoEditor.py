@@ -21,15 +21,15 @@ from appGUI.GUIElements import FCLabel, GLay, FCDoubleSpinner, FCTree, FCButton,
     FCTextEdit
 from appGUI.VisPyVisuals import ShapeCollection
 
-from appEditors.geo_plugins.GeoBufferPlugin import BufferSelectionTool
-from appEditors.geo_plugins.GeoPaintPlugin import PaintOptionsTool
-from appEditors.geo_plugins.GeoTextPlugin import TextInputTool
-from appEditors.geo_plugins.GeoTransformationPlugin import TransformEditorTool
-from appEditors.geo_plugins.GeoPathPlugin import PathEditorTool
-from appEditors.geo_plugins.GeoSimplificationPlugin import SimplificationTool
-from appEditors.geo_plugins.GeoRectanglePlugin import RectangleEditorTool
-from appEditors.geo_plugins.GeoCirclePlugin import CircleEditorTool
-from appEditors.geo_plugins.GeoCopyPlugin import CopyEditorTool
+from flatcam_plus.appEditors.geo_plugins.GeoBufferPlugin import BufferSelectionTool
+from flatcam_plus.appEditors.geo_plugins.GeoPaintPlugin import PaintOptionsTool
+from flatcam_plus.appEditors.geo_plugins.GeoTextPlugin import TextInputTool
+from flatcam_plus.appEditors.geo_plugins.GeoTransformationPlugin import TransformEditorTool
+from flatcam_plus.appEditors.geo_plugins.GeoPathPlugin import PathEditorTool
+from flatcam_plus.appEditors.geo_plugins.GeoSimplificationPlugin import SimplificationTool
+from flatcam_plus.appEditors.geo_plugins.GeoRectanglePlugin import RectangleEditorTool
+from flatcam_plus.appEditors.geo_plugins.GeoCirclePlugin import CircleEditorTool
+from flatcam_plus.appEditors.geo_plugins.GeoCopyPlugin import CopyEditorTool
 
 from vispy.geometry import Rect
 

@@ -28,7 +28,7 @@ from appGUI.preferences.general.GeneralPreferencesUI import GeneralPreferencesUI
 from appGUI.preferences.geometry.GeometryPreferencesUI import GeometryPreferencesUI
 from appGUI.preferences.gerber.GerberPreferencesUI import GerberPreferencesUI
 from appGUI.preferences.machine.MachinePreferencesUI import MachinePreferencesUI
-from appEditors.appGeoEditor import FCShapeTool
+from flatcam_plus.appEditors.appGeoEditor import FCShapeTool
 
 import webbrowser
 

@@ -80,7 +80,7 @@ follow its native lifecycle without treating it as delivery approval.
 | Document objects (Gerber, Excellon, Geometry, CNCJob) | `flatcam_plus/appObjects/` |
 | Parsers (Gerber, Excellon, DXF, SVG, HPGL2) | `flatcam_plus/appParsers/` |
 | GUI, plot canvases, themes, preferences | `appGUI/` |
-| Object editors and their plugins | `appEditors/` |
+| Object editors and their plugins | `flatcam_plus/appEditors/` |
 | G-code preprocessors | `preprocessors/` |
 | Tcl shell commands | `tclCommands/` |
 | Persisted defaults/preferences | `flatcam_plus/defaults.py` |

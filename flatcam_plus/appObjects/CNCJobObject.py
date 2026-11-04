@@ -12,7 +12,7 @@
 
 from PyQt6 import QtCore, QtWidgets
 
-from appEditors.appTextEditor import AppTextEditor
+from flatcam_plus.appEditors.appTextEditor import AppTextEditor
 from flatcam_plus.appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted
 from appGUI.GUIElements import FCFileSaveDialog, FCCheckBox
 from appGUI.ObjectUI import CNCObjectUI

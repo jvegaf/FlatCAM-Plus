@@ -6,21 +6,21 @@
 # MIT Licence                                              #
 # ##########################################################
 
-from appEditors.grb_plugins.GrbCommon import DrawToolUtilityShape, DrawToolShape, DrawTool, ShapeToolEditorGrb
+from flatcam_plus.appEditors.grb_plugins.GrbCommon import DrawToolUtilityShape, DrawToolShape, DrawTool, ShapeToolEditorGrb
 
 from flatcam_plus.camlib import distance, arc, three_point_circle, flatten_shapely_geometry
 from appGUI.GUIElements import *
 
 from flatcam_plus.appTool import AppTool
-from appEditors.grb_plugins.GrbPadPlugin import PadEditorTool
+from flatcam_plus.appEditors.grb_plugins.GrbPadPlugin import PadEditorTool
 
-from appEditors.grb_plugins.GrbBufferPlugin import BufferEditorTool
-from appEditors.grb_plugins.GrbTransformationPlugin import TransformEditorTool
-from appEditors.grb_plugins.GrbPadArrayPlugin import GrbPadArrayEditorTool
-from appEditors.grb_plugins.GrbTrackPlugin import GrbTrackEditorTool
-from appEditors.grb_plugins.GrbSimplificationPlugin import SimplificationTool
-from appEditors.grb_plugins.GrbCopyPlugin import CopyEditorTool
-from appEditors.grb_plugins.GrberRegionPlugin import GrbRegionEditorTool
+from flatcam_plus.appEditors.grb_plugins.GrbBufferPlugin import BufferEditorTool
+from flatcam_plus.appEditors.grb_plugins.GrbTransformationPlugin import TransformEditorTool
+from flatcam_plus.appEditors.grb_plugins.GrbPadArrayPlugin import GrbPadArrayEditorTool
+from flatcam_plus.appEditors.grb_plugins.GrbTrackPlugin import GrbTrackEditorTool
+from flatcam_plus.appEditors.grb_plugins.GrbSimplificationPlugin import SimplificationTool
+from flatcam_plus.appEditors.grb_plugins.GrbCopyPlugin import CopyEditorTool
+from flatcam_plus.appEditors.grb_plugins.GrberRegionPlugin import GrbRegionEditorTool
 
 # import inspect
 

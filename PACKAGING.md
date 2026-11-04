@@ -179,7 +179,6 @@ python -m PyInstaller flatcam.py \
   --add-data "config:config" \
   --add-data "locale:locale" \
   --add-data "preprocessors:preprocessors" \
-  --collect-submodules appEditors \
   --collect-submodules appGUI \
   --collect-submodules appPlugins \
   --collect-submodules tclCommands \
@@ -270,7 +269,6 @@ python -m PyInstaller flatcam.py \
   --add-data "config:config" \
   --add-data "locale:locale" \
   --add-data "preprocessors:preprocessors" \
-  --collect-submodules appEditors \
   --collect-submodules appGUI \
   --collect-submodules appPlugins \
   --collect-submodules tclCommands \

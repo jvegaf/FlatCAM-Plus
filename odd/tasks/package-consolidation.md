@@ -123,3 +123,13 @@ green at every commit.
   `ModuleNotFoundError`. 147 tests before, 159 after. Leftovers recorded, not fixed: two prose
   references to the old path (`ToolNCC.py` docstring, a `test_gcode_output.py` comment) and the
   pre-existing `.po` source references and one log string.
+- **L9 — T5 done after a failed worker report**: the worker that executed this slice reported an
+  error after finishing the work, so the slice was verified before it was trusted rather than
+  rerun: `git status` showed the 31 staged renames plus the import rewrites, `grep` found zero
+  old-name importers and zero `--collect-submodules appEditors` entries, the guard carried the
+  package and its three subpackages, and the suite was green. Diffs sampled on two application
+  files change one import line each; `appEditors` moved with its `__init__.py` and each of the
+  three plugin subpackages too. 159 tests before, 165 after. The lesson is recorded rather than
+  acted on: a failed worker is not evidence that its side effects are partial, and the checks that
+  prove the tree consistent (grep for the old name, grep for the collect entry, the layout guard,
+  the suite) are the same ones the slice needed anyway.

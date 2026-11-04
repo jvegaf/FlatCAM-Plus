@@ -99,11 +99,11 @@ from flatcam_plus.camlib import to_dict, Geometry, CNCjob
 from flatcam_plus.appPreProcessor import load_preprocessors
 
 # App appEditors
-from appEditors.appGeoEditor import AppGeoEditor
-from appEditors.appExcEditor import AppExcEditor
-from appEditors.appGerberEditor import AppGerberEditor
-from appEditors.appTextEditor import AppTextEditor
-from appEditors.appGCodeEditor import AppGCodeEditor
+from flatcam_plus.appEditors.appGeoEditor import AppGeoEditor
+from flatcam_plus.appEditors.appExcEditor import AppExcEditor
+from flatcam_plus.appEditors.appGerberEditor import AppGerberEditor
+from flatcam_plus.appEditors.appTextEditor import AppTextEditor
+from flatcam_plus.appEditors.appGCodeEditor import AppGCodeEditor
 
 # App Workers
 from flatcam_plus.appProcess import *

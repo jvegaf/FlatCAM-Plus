@@ -11,7 +11,7 @@ from flatcam_plus.appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCEntry, FCCheckBox
 from appGUI.VisPyVisuals import ShapeCollection
 from flatcam_plus.camlib import AppRTreeStorage
-from appEditors.appGeoEditor import DrawToolShape
+from flatcam_plus.appEditors.appGeoEditor import DrawToolShape
 
 import math
 import logging

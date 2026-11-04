@@ -10,15 +10,15 @@ from flatcam_plus.camlib import distance, arc, AppRTreeStorage
 
 from PyQt6 import QtCore, QtWidgets, QtGui
 from PyQt6.QtCore import Qt
-from appEditors.exc_plugins.ExcDrillPlugin import ExcDrillEditorTool
-from appEditors.exc_plugins.ExcSlotPlugin import ExcSlotEditorTool
-from appEditors.exc_plugins.ExcDrillArrayPlugin import ExcDrillArrayEditorTool
-from appEditors.exc_plugins.ExcSlotArrayPlugin import ExcSlotArrayEditorTool
-from appEditors.exc_plugins.ExcResizePlugin import ExcResizeEditorTool
-from appEditors.exc_plugins.ExcCopyPlugin import ExcCopyEditorTool
+from flatcam_plus.appEditors.exc_plugins.ExcDrillPlugin import ExcDrillEditorTool
+from flatcam_plus.appEditors.exc_plugins.ExcSlotPlugin import ExcSlotEditorTool
+from flatcam_plus.appEditors.exc_plugins.ExcDrillArrayPlugin import ExcDrillArrayEditorTool
+from flatcam_plus.appEditors.exc_plugins.ExcSlotArrayPlugin import ExcSlotArrayEditorTool
+from flatcam_plus.appEditors.exc_plugins.ExcResizePlugin import ExcResizeEditorTool
+from flatcam_plus.appEditors.exc_plugins.ExcCopyPlugin import ExcCopyEditorTool
 
 from appGUI.GUIElements import FCEntry, FCTable, FCDoubleSpinner, FCButton, FCLabel, GLay
-from appEditors.appGeoEditor import FCShapeTool, DrawTool, DrawToolShape, DrawToolUtilityShape, AppGeoEditor
+from flatcam_plus.appEditors.appGeoEditor import FCShapeTool, DrawTool, DrawToolShape, DrawToolUtilityShape, AppGeoEditor
 
 from shapely import LineString, LinearRing, MultiLineString, Polygon, MultiPolygon, Point
 from shapely.geometry.base import BaseGeometry

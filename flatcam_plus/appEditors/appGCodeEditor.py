@@ -9,7 +9,7 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 from PyQt6.QtCore import Qt
 
-from appEditors.appTextEditor import AppTextEditor
+from flatcam_plus.appEditors.appTextEditor import AppTextEditor
 from flatcam_plus.appObjects.CNCJobObject import CNCJobObject
 from appGUI.GUIElements import FCTextArea, FCEntry, FCButton, FCTable, GLay, FCLabel
 
