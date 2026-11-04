@@ -211,3 +211,20 @@ every commit, that it still runs from a bundle is not.
   old paths describe what was true when they were written, and the `.po` `#:` lines are xgettext
   source references that the next extraction regenerates. Every current, user-facing or executable
   reference now names `flatcam_plus/<package>/`. 190 tests still pass; the pass touches no import.
+- **L14 — Native review of the documentation slice, and why the feature cannot be one candidate**:
+  `assess` over the whole feature (`7e8721e..a6fe2ea`) reports **579 changed paths and 318 211
+  changed lines** at tier high. A candidate that size cannot be captured: the lens prompt is built
+  from the frozen trees, and the previous feature already hit ~199 KB per lens at 178 paths, so one
+  transaction for all eight moves would end in `lens_context_budget_exceeded`. The review therefore
+  ran on the last unit, `48bb3c8..a6fe2ea` (the documentation and prose pass, 10 files, 87 lines).
+  The provider rated it **high** because the pass touches `packaging/linux/build_linux_portable.sh`
+  and picked all four lenses by default; the four runs were cheap (≈29.7 KB prompts) and the review
+  closed **approved with no finding at all**, acknowledged and burned
+  (`review-9dfb095a62e5d124`, consumed revision `sha256:89be42f7...`). One facade note for the next
+  session: the first group submission was rejected as "not the complete distinct group" because the
+  bindings had been retyped from the status output; resubmitting them byte-identical from a fresh
+  STATUS worked. **The eight code slices of this feature were not natively reviewed as individual
+  candidates**: they were verified per slice by a worker with RED/GREEN, a mutation check and the
+  layout guard, and by the parent on the combined tree (190 tests, the boot test, the Tcl registry
+  test). Whether to spend eight more review transactions on them is the human's call, and it is the
+  only outstanding question this feature leaves.
