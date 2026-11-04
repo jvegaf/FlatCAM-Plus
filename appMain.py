@@ -621,13 +621,13 @@ class App(QtCore.QObject):
         self.decimals = int(self.options['units_precision'])
 
         if self.options["global_theme"] == 'default':
-            self.resource_location = 'assets/resources'
+            self.resource_location = os.path.join(self.app_home, 'assets', 'resources')
         elif self.options["global_theme"] == 'light':
-            self.resource_location = 'assets/resources'
+            self.resource_location = os.path.join(self.app_home, 'assets', 'resources')
             qlightsheet.STYLE_SHEET = light_style_sheet.L_STYLE_SHEET
             self.qapp.setStyleSheet(libs.qdarktheme.load_stylesheet('light'))
         else:
-            self.resource_location = 'assets/resources/dark_resources'
+            self.resource_location = os.path.join(self.app_home, 'assets', 'resources', 'dark_resources')
             qdarksheet.STYLE_SHEET = dark_style_sheet.D_STYLE_SHEET
             self.qapp.setStyleSheet(libs.qdarktheme.load_stylesheet())
 

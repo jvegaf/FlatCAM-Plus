@@ -147,9 +147,11 @@ class AppPreProcTools(object, metaclass=ABCPreProcRegister):
 
 
 def load_preprocessors(app):
+    # Anchored to the application directory, not to the process CWD: the CWD is only guaranteed
+    # because App.__init__ chdirs there, and that coupling breaks as soon as the modules move.
     preprocessors_path_search = [
         os.path.join(app.data_path, 'preprocessors', '*.py'),
-        os.path.join('preprocessors', '*.py')
+        os.path.join(app.app_home, 'preprocessors', '*.py')
     ]
     import glob
     for path_search in preprocessors_path_search:

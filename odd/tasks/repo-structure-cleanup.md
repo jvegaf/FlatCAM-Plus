@@ -46,8 +46,10 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
   Covers S3 in full.
 - **T4 (S4)** — Move the root modules into a package. Route: inline for the small slices, worker
   for the mechanical import sweeps. Phases:
-  - **T4.1** — Anchor the CWD-dependent paths to one module constant, with a test that chdirs
+  - **T4.1** — Anchor the CWD-dependent paths to the app directory, with a test that chdirs
     away. No module moves. Covers S4's prerequisite and the riskiest coupling (L28 #1).
+    Status: done in the commit that introduces `tests/test_app_paths.py`; `resource_location` is
+    now absolute and the preprocessor glob no longer reads the CWD.
   - **T4.2** — `flatcam_plus/` skeleton; move `appVersion`, `defaults`, `appDatabase`,
     `appProcess`, `appWorker`, `appWorkerStack` (9 import statements) and delete the dead
     `appPool`. Update the four packaging scripts that read `appVersion.py` by path.
