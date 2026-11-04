@@ -647,3 +647,25 @@ is the only remaining verification gap (see Known follow-ups).
   recorded as a Known follow-up with the exact key list rather than fixed blind: unlike the CNC job
   generator, the right defaults for an HPGL2 import are a product question and there is no HPGL2
   sample in `tests/data/` to verify against.
+
+## Delivery slices
+
+The human chose slices over one candidate. Each slice is a local branch cut at its tip; the base
+of each is the previous slice's tip, so the pull requests chain instead of stacking on `main`.
+Line counts exclude `uv.lock` and `requirements.txt`.
+
+| slice branch | commits | changed lines | content |
+| --- | --- | --- | --- |
+| `slice/1-structure` | `aedf5e7`..`a298916` | 276 | S1 artifacts and layout, S2 dependency manifest |
+| `slice/2-test-net` | `dbf3c1a`..`7a9269f` | 583 | S3 headless fixture, domain tests, CI, review follow-ups |
+| `slice/3-paths-and-core` | `fbf81ba`..`0424299` | 447 | T4 plan, path anchoring, version, low-fanout modules, `camlib` |
+| `slice/4-tool-and-preprocessor` | `367862b`..`d5282be` | 570 | `appTool`, `appPreProcessor` and the out-of-tree name shim |
+| `slice/5-translation` | `ef000e5`..`1ca9424` | 624 | `appTranslation` with the locale anchoring |
+| `slice/6-controller` | `b0aac63` | 217 | `appMain` with `_APP_ROOT` |
+| `slice/7-vendored-trees` | `7046492`..`ebceebc` | 378 | `descartes`, `libs`, declared `pythonpath`, build-script data argument |
+| `slice/8-defect-fixes` | `d45b6dc` | 187 | the two L12 defects plus the spindle-speed default |
+
+Everything before `aedf5e7` is the branch backlog that predates this feature: it is already on
+`origin/dev` and is not part of these slices. `dev` is 6 commits ahead of `origin/dev`
+(`ef000e5`..`d45b6dc`); pushing them and opening the chained pull requests are human decisions,
+and `gh` is not authenticated in this session, so they were not attempted.
