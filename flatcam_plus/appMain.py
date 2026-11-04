@@ -73,8 +73,8 @@ from flatcam_plus.appCommon.Common import AppLogging
 from flatcam_plus.appCommon.AutoUpdater import AutoUpdater
 from flatcam_plus.appCommon.RegisterFileKeywords import RegisterFK, Extensions, KeyWords
 
-from appHandlers.appIO import appIO
-from appHandlers.appEdit import appEditor
+from flatcam_plus.appHandlers.appIO import appIO
+from flatcam_plus.appHandlers.appEdit import appEditor
 
 from flatcam_plus.appDatabase import ToolsDB2
 

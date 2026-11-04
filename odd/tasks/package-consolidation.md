@@ -50,7 +50,8 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
   `--collect-submodules` entry in the four build scripts, update the layout guards. Status: done in
   the commit that adds `APP_PACKAGES` to `tests/test_package_layout.py`; `appCommon` already had an
   `__init__.py`, so unlike `libs` it needed no new one.
-- **T2 (S1, S2)** — `appHandlers` (3 files, 4 importers).
+- **T2 (S1, S2)** — `appHandlers` (3 files, 2 importers). Status: done in the commit that adds
+  it to `APP_PACKAGES`/`APP_MODULES`; its only importers were the two `appMain` lines.
 - **T3 (S1, S2)** — `appParsers` (8 files, 51 importers).
 - **T4 (S1, S2)** — `appObjects` (10 files, 63 importers).
 - **T5 (S1, S2)** — `appEditors` (31 files, 82 importers).
@@ -92,3 +93,10 @@ green at every commit.
   last old-name importer; GREEN: 53 in that file. Mutation check: pointing
   `appObjects/AppObjectTemplate.py` back at `from appCommon.Common import LoudDict` fails the guard
   by path. 125 tests before, 132 after; no statement outside an import line changed.
+- **L6 — T2 done and done inline**: `appHandlers` is small enough that a worker handoff would have
+  cost more than the change: `git mv appHandlers flatcam_plus/appHandlers`, two import lines in
+  `flatcam_plus/appMain.py`, the `--collect-submodules appHandlers` entry retired from the four
+  build scripts and from both `PACKAGING.md` snippets, and the guard extended. RED: five guard
+  cases failed. Mutation check: pointing `appMain`'s `appIO` import back at `appHandlers` fails the
+  guard by path and makes `flatcam_plus.appMain` unimportable, which is the intended loud failure.
+  132 tests before, 137 after.

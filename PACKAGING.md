@@ -181,7 +181,6 @@ python -m PyInstaller flatcam.py \
   --add-data "preprocessors:preprocessors" \
   --collect-submodules appEditors \
   --collect-submodules appGUI \
-  --collect-submodules appHandlers \
   --collect-submodules appObjects \
   --collect-submodules appParsers \
   --collect-submodules appPlugins \
@@ -275,7 +274,6 @@ python -m PyInstaller flatcam.py \
   --add-data "preprocessors:preprocessors" \
   --collect-submodules appEditors \
   --collect-submodules appGUI \
-  --collect-submodules appHandlers \
   --collect-submodules appObjects \
   --collect-submodules appParsers \
   --collect-submodules appPlugins \
