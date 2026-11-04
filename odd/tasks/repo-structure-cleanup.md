@@ -369,3 +369,12 @@ Push and merge of the 7 unpushed commits remain human decisions.
   the local nor the global config had `user.name`/`user.email`, although every earlier commit is
   authored by `Jose Vega <josevega234@gmail.com>`. Set repository-local only, matching the
   existing history, so no global configuration changed.
+- **L34 — Native review of the T4.4/T4.4b slice (lineage `review-6c60462ff0763e44`)**: tier
+  `medium`, 91 files, lenses `readability` and `reliability`, both captured first try; the refuter
+  confirmed one CRITICAL, deterministic, `introduced` finding. **R3-001**: moving `appPreProcessor`
+  without a shim silently breaks the user preprocessors that `load_preprocessors` also loads from
+  `app.data_path`, because they import the old root name. Correction, within the frozen budget:
+  `flatcam_plus/appPreProcessor.py` keeps the legacy name resolvable in `sys.modules` and
+  `tests/test_package_layout.py` pins it; RED (`ModuleNotFoundError`) observed before the fix.
+  The finding is a real gap in D-plan: "no shim layer" was right for in-tree imports and wrong for
+  the out-of-tree extension point.

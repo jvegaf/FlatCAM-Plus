@@ -51,3 +51,8 @@ def test_no_module_outside_the_package_imports_the_root_name(name):
             with open(path, encoding="utf-8") as handle:
                 if offender in handle.read():
                     pytest.fail("{} still imports the root module {}".format(path, name))
+
+
+def test_the_pre_t44b_module_name_still_resolves():
+    moved = importlib.import_module("flatcam_plus.appPreProcessor")
+    assert importlib.import_module("appPreProcessor") is moved

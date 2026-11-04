@@ -9,6 +9,7 @@
 
 from importlib.machinery import SourceFileLoader
 import os
+import sys
 from abc import ABCMeta, abstractmethod
 
 # module-root dictionary of preprocessors
@@ -17,6 +18,11 @@ import logging
 
 log = logging.getLogger('base')
 preprocessors = {}
+
+# Preprocessors that live outside this tree, in the user data directory, are written by users
+# against the pre-T4.4b module name. Keep that name resolvable so those files import instead of
+# failing and being skipped without an error.
+sys.modules.setdefault('appPreProcessor', sys.modules[__name__])
 
 
 class ABCPreProcRegister(ABCMeta):
