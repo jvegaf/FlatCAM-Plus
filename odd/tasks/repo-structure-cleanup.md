@@ -97,9 +97,13 @@ decisions and must account for it.
 
 ## Next step
 
-T3 is done: the suite boots the real application headless, covers the four critical domains and
-runs in CI. T4 (moving the root modules into a package) is unblocked but not authorized; it
-still touches 210 import sites and needs an explicit go-ahead first.
+T3 is done: the suite boots the real application headless, covers the four critical domains, runs
+in CI, and its advisory review findings are addressed. T4 (moving the root modules into a package)
+is unblocked but not authorized; it still touches 210 import sites and needs an explicit go-ahead
+first.
+
+`dev` now carries a new unreviewed candidate on top of the approved slice (the finding fixes),
+which is expected: review is per candidate, not per session.
 
 ## Log
 
@@ -168,3 +172,49 @@ still touches 210 import sites and needs an explicit go-ahead first.
   creates a new automated pipeline on the remote and changes what a push runs. The test files
   only read application state, but the boot fixture does spawn the app's worker pool and writes
   to a temporary `HOME`. No application behavior changed.
+- **L17 — User (verbatim)**: "levanta los 5 hallazgos". Authorizes fixing the advisory review
+  findings on the T3 tests, and nothing else.
+- **L18 — Native review outcome**: the harness offered `dev` against `main` (17 commits, ~3.7k
+  lines) and the provider stopped on `lens_context_budget_exceeded` without creating authority.
+  The scope was reduced to `origin/dev..HEAD` (8 files, 346 lines, tier `high`, correction budget
+  173) as lineage `review-0082196c125db361`. Lenses `risk`, `readability` and `reliability` were
+  selected; `readability` needed three capture attempts because of two host-relay transport
+  failures (`Stream ended without finish_reason`, then `terminated`), each time reoffered by
+  STATUS with nothing burned. The review closed `approved` and the acknowledgement burned the
+  authority. Five advisory findings, all `informational`, none opening a correction:
+  R2-001 `tests/test_gerber_parse.py:12-24`, R2-002 `tests/test_app_boot.py:18-20`,
+  R2-003 `tests/test_excellon_parse.py:23-27`, R3-001 `tests/test_gerber_parse.py:19`,
+  R3-002 `tests/test_gcode_output.py:17-39`.
+- **L19 — The finding text no longer exists**: the closure exposed only id, lens, location and
+  severity; the reviewer artifacts (`rart1_...`) are pruned when the authority is consumed.
+  Evidence: `.git/gentle-ai/review-transactions/v2/` holds only an unrelated lineage, and
+  `.git/gentle-ai/review-transactions/terminal-consumption/v1/9eaae396....json` is the sole
+  remainder of this one. A search of the repository, `.git`, `.gentle-ai`, and the Pi session
+  transcripts found no artifact body. The fixes below are therefore derived from lens, line
+  range and severity, not from the reviewer's literal wording; the user authorized reading the
+  native store, and that path was dead.
+- **L20 — Defect of my own that the net caught, and the finding that exposed it**: the committed
+  `tests/test_gerber_parse.py` shipped `X90000Y0D01*` on the lower vertex. It survived because the
+  M3 mutation-check restore copied an already-mutated backup, and because a bounds-only assertion
+  cannot see a vertex that still spans the same extent. The file now carries an area assertion
+  (11x11 outer minus the 9x9 hole) that M-A proves discriminating.
+- **L21 — What each finding produced**: R2-001 and R3-001 (both on the Gerber test) moved the
+  sample sources to `tests/data/*.gbr`/`*.drl` behind a `sample_input` fixture, made the parse
+  fixtures module-scoped, and replaced the opaque `(object, warning)` tuple with a named tuple;
+  the same shape was applied to the Excellon test for R2-003. R2-002 (boot test) replaced a
+  vacuous `isdir` assertion with a real isolation proof, `QSettings(...).fileName()` living under
+  the session home. R3-002 (G-code test) added a header assertion for the copied bounds and tool
+  diameter and derives the expected feedrate from the job instead of hard-coding it. The vacuous
+  Excellon "clean file" assertion was deleted rather than kept: `Excellon.parse_lines` always
+  returns `None`, so it could never fail.
+- **L22 — Isolation bug found while fixing R2-002**: Qt caches its user-scope settings directory
+  at first use, so setting `HOME` and `XDG_CONFIG_HOME` inside a fixture is too late once any
+  test module imports Qt at collection time; the app wrote into the real `~/.config`. The
+  variables are now set at `tests/conftest.py` import time, and the boot test fails if that ever
+  regresses.
+- **L23 — Verification for L17-L22**: `uv run --with pytest pytest tests -q` reports 36 passed
+  (37 before the vacuous test was removed). Mutation checks, all reverted: M-A moves the lower
+  vertex to 9 mm and fails `test_builds_the_stroked_outline`; M-B copies `xmax` 99 into the job
+  and fails `test_header_reports_the_source_extent_and_tool`; M-C appends a garbage drill line
+  and fails `test_reads_every_drill_hit`. The isolation assertion was observed failing before the
+  conftest move, which is the only reason it is trusted now.
