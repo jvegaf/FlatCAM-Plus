@@ -101,6 +101,7 @@ $pyInstallerArgs = @(
     "--collect-submodules", "appParsers",
     "--collect-submodules", "appPlugins",
     "--collect-submodules", "tclCommands",
+    "--collect-submodules", "flatcam_plus",
     "--collect-all", "PyQt6",
     "--collect-all", "vispy",
     "--collect-all", "shapely",

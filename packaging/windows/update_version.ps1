@@ -14,9 +14,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# ---- appVersion.py ----
+# ---- flatcam_plus/version.py ----
 $releaseDate = Get-Date -Format "yyyy/MM/dd"
-$versionFile = Join-Path $RootDir "appVersion.py"
+$versionFile = Join-Path $RootDir "flatcam_plus\version.py"
 
 if (-not (Test-Path $versionFile)) {
     throw "Dosya bulunamadi: $versionFile"
@@ -26,7 +26,7 @@ $content = Get-Content $versionFile -Raw -Encoding UTF8
 $content = $content -replace 'APP_VERSION\s*=\s*"[^"]*"', "APP_VERSION = `"$Version`""
 $content = $content -replace 'APP_VERSION_DATE\s*=\s*"[^"]*"', "APP_VERSION_DATE = `"$releaseDate`""
 [System.IO.File]::WriteAllText($versionFile, $content, [System.Text.Encoding]::UTF8)
-Write-Host "[OK] appVersion.py guncellendi: $Version ($releaseDate)"
+Write-Host "[OK] flatcam_plus/version.py guncellendi: $Version ($releaseDate)"
 
 # ---- FlatCAMPlus.iss ----
 $issFile = Join-Path $RootDir "packaging\windows\FlatCAMPlus.iss"

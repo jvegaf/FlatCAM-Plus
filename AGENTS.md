@@ -97,9 +97,11 @@ Search targeted symbols instead of reading them whole.
   registry edit is required.
 - **Tcl commands**: after adding a command module, append its import to the
   explicit alphabetical list in `tclCommands/__init__.py` (it is not autodiscovered).
-- **Two unrelated versions**: `appVersion.py` holds the application version
-  (`APP_VERSION = "1.2.0"`). `defaults.py`'s `version` (`8.992`) is the
+- **Two unrelated versions**: `flatcam_plus/version.py` holds the application
+  version (`APP_VERSION = "1.2.0"`). `defaults.py`'s `version` (`8.992`) is the
   preferences-file format version; it is not the app version. Do not sync them.
+  The build scripts extract `APP_VERSION` from that file by path, so it must stay
+  a single-line assignment at `flatcam_plus/version.py`.
 - **Persisted state**: QSettings organization/application is
   `"Open Source"` / `"FlatCAM_Plus"`. User data and `log.txt` go to `~/.FlatCAM`
   on Linux/macOS and `%APPDATA%\FlatCAM` on Windows.

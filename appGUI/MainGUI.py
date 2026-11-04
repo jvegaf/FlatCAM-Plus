@@ -14,7 +14,7 @@ from PyQt6.QtCore import QSettings
 
 import platform
 
-from appVersion import APP_NAME
+from flatcam_plus.version import APP_NAME
 from appCommon.recent_projects import load_recent_project_paths
 
 from appGUI.GUIElements import *

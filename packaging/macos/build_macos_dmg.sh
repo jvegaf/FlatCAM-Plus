@@ -89,7 +89,7 @@ cd "$ROOT_DIR"
 VERSION="$("$PYTHON_BIN" - <<'PY'
 import re
 from pathlib import Path
-text = Path("appVersion.py").read_text(encoding="utf-8")
+text = Path("flatcam_plus/version.py").read_text(encoding="utf-8")
 match = re.search(r'APP_VERSION\s*=\s*["\']([^"\']+)["\']', text)
 print(match.group(1) if match else "0.0.0")
 PY
@@ -228,6 +228,7 @@ build_app() {
         --collect-submodules appParsers
         --collect-submodules appPlugins
         --collect-submodules tclCommands
+        --collect-submodules flatcam_plus
         --collect-all PyQt6
         --collect-all vispy
         --collect-all shapely

@@ -59,7 +59,7 @@ except ImportError as exc:
 import appTranslation as fcTranslate
 from appMain import App
 from appGUI import VisPyPatches
-from appVersion import APP_NAME, APP_VERSION
+from flatcam_plus.version import APP_NAME, APP_VERSION
 from appCommon.recent_projects import load_recent_project_paths
 
 from appGUI.GUIElements import FCMessageBox

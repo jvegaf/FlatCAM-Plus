@@ -16,7 +16,7 @@ from PyQt6.QtGui import QAction
 import os.path
 import sys
 
-from appVersion import APP_BETA, APP_VERSION, APP_VERSION_DATE
+from flatcam_plus.version import APP_BETA, APP_VERSION, APP_VERSION_DATE
 
 from datetime import datetime as dt
 from copy import deepcopy, copy

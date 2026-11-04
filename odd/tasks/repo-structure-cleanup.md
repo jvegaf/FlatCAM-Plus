@@ -50,9 +50,12 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
     away. No module moves. Covers S4's prerequisite and the riskiest coupling (L28 #1).
     Status: done in the commit that introduces `tests/test_app_paths.py`; `resource_location` is
     now absolute and the preprocessor glob no longer reads the CWD.
-  - **T4.2** — `flatcam_plus/` skeleton; move `appVersion`, `defaults`, `appDatabase`,
-    `appProcess`, `appWorker`, `appWorkerStack` (9 import statements) and delete the dead
-    `appPool`. Update the four packaging scripts that read `appVersion.py` by path.
+  - **T4.2** — `flatcam_plus/` skeleton and the version pilot: `appVersion` moved to
+    `flatcam_plus/version.py`, `appVersion.py` deleted, the three import sites and the five
+    build scripts that parsed it by path updated, and `flatcam_plus` added to every
+    `--collect-submodules` list. Status: done in the commit that adds
+    `tests/test_version_module.py`. The remaining low-fanout modules (`defaults`,
+    `appDatabase`, `appProcess`, `appWorker`, `appWorkerStack`, dead `appPool`) move in T4.2b.
   - **T4.3** — Move `camlib` (35 statements across 35 files).
   - **T4.4** — Move `appTool` (53 statements) or `appPreProcessor` (29) and the preprocessor
     discovery with it.

@@ -18,7 +18,7 @@ $InstallerScript = Join-Path $ScriptDir "FlatCAMPlus.iss"
 Set-Location $RootDir
 
 if ([string]::IsNullOrWhiteSpace($Version)) {
-    $versionMatch = Select-String -Path (Join-Path $RootDir "appVersion.py") -Pattern 'APP_VERSION\s*=\s*"([^"]+)"' | Select-Object -First 1
+    $versionMatch = Select-String -Path (Join-Path $RootDir "flatcam_plus\version.py") -Pattern 'APP_VERSION\s*=\s*"([^"]+)"' | Select-Object -First 1
     if ($versionMatch) {
         $Version = $versionMatch.Matches[0].Groups[1].Value
     } else {
@@ -352,6 +352,7 @@ function Build-PyInstallerTarget {
         "--collect-submodules", "appParsers",
         "--collect-submodules", "appPlugins",
         "--collect-submodules", "tclCommands",
+        "--collect-submodules", "flatcam_plus",
         "--collect-all", "PyQt6",
         "--collect-all", "vispy",
         "--collect-all", "shapely",

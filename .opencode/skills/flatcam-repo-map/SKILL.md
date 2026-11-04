@@ -20,7 +20,7 @@ Load for any non-trivial change, code-location question, architecture decision, 
 - Python is `3.14` via `uv`. Use `uv sync`, then `.venv/bin/python flatcam.py`. There is no `flatcam-plus` console script to launch.
 - `appMain.py`, `camlib.py`, and `appDatabase.py` are 160–350 KB. Never read them whole; grep exact symbols or use CodeGraph.
 - PyQt6 widgets stay on the GUI thread. Move long work to `self.app.worker_task.emit({'fcn': ..., 'params': [...]})` or `FCProcess`; never block the event loop.
-- Do not sync `appVersion.py` (`APP_VERSION`) with `defaults.py` `version` (the preferences-file format).
+- Do not sync `flatcam_plus/version.py` (`APP_VERSION`) with `defaults.py` `version` (the preferences-file format).
 - User state: QSettings `"Open Source"/"FlatCAM_Plus"`; data and `log.txt` live in `~/.FlatCAM` on Linux/macOS. `config/configuration.txt` is read only on Windows.
 
 ## Decision Gates
