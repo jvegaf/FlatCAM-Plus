@@ -224,12 +224,21 @@ and replaced the hand-rolled test `sys.path` insert with a declared one. `dev` i
 T4.1 `420318b`, T4.2 `c3fccc4`, T4.2b `60f72bb`, T4.3 `0424299`, T4.4 `367862b`, T4.4b `650e83c`
 plus `91f3165`, T4.5 `ef000e5`, T4.6 `b0aac63`, T4.7 (this commit).
 
-What is left is not development work but the human's decision: the branch is 36 commits ahead of
-`origin/main` and must be delivered as per-phase slices, never as one candidate. Push, pull request
-and merge stay yours. Two recorded defects still wait on a decision and were untouched by T4: the
-four missing `geometry_*` options that `CNCjob.generate_from_multitool_geometry` reads, and the
-empty-`xy_end` `IndexError` that leaves a G-code header empty (both L12). The first packaged build
-is the only remaining verification gap (see Known follow-ups).
+Development is finished: the branch is 41 commits ahead of `origin/main` and lands on `dev`
+commit by commit, with no pull requests (L51). The two defects that waited on a decision are fixed
+(L47: the `geometry_*` options `CNCjob.generate_from_multitool_geometry` reads, plus the
+empty-`xy_end` header; L49: the same option gap in `ParseHPGL2`), and their class is pinned by
+`tests/test_defaults_coverage.py`. The first packaged build is the only remaining verification gap
+(see Known follow-ups).
+
+## Delivery
+
+The human's decision, verbatim, after the slices were prepared: "no camos a hacer prs. de momento
+todo va a dev." Everything lands on `dev` commit by commit; there are no pull requests and no
+slice branches, and the eight local `slice/*` branches were deleted once `dev` contained every
+commit they pointed at. The earlier slice plan is superseded, not forgotten: it is recorded in the
+Log (L51) so a later session can rebuild the same grouping with `git log` if delivery ever needs
+PRs. Push remains the human's action; the branch is delivered when they push it.
 
 ## Log
 
@@ -647,64 +656,10 @@ is the only remaining verification gap (see Known follow-ups).
   recorded as a Known follow-up with the exact key list rather than fixed blind: unlike the CNC job
   generator, the right defaults for an HPGL2 import are a product question and there is no HPGL2
   sample in `tests/data/` to verify against.
-
-## Delivery slices
-
-The human chose slices over one candidate. Each slice is a local branch cut at its tip; the base
-of each is the previous slice's tip, so the pull requests chain instead of stacking on `main`.
-Line counts exclude `uv.lock` and `requirements.txt`.
-
-| slice branch | commits | changed lines | content |
-| --- | --- | --- | --- |
-| `slice/1-structure` | `aedf5e7`..`a298916` | 276 | S1 artifacts and layout, S2 dependency manifest |
-| `slice/2-test-net` | `dbf3c1a`..`7a9269f` | 583 | S3 headless fixture, domain tests, CI, review follow-ups |
-| `slice/3-paths-and-core` | `fbf81ba`..`0424299` | 447 | T4 plan, path anchoring, version, low-fanout modules, `camlib` |
-| `slice/4-tool-and-preprocessor` | `367862b`..`d5282be` | 570 | `appTool`, `appPreProcessor` and the out-of-tree name shim |
-| `slice/5-translation` | `ef000e5`..`1ca9424` | 624 | `appTranslation` with the locale anchoring |
-| `slice/6-controller` | `b0aac63` | 217 | `appMain` with `_APP_ROOT` |
-| `slice/7-vendored-trees` | `7046492`..`ebceebc` | 378 | `descartes`, `libs`, declared `pythonpath`, build-script data argument |
-| `slice/8-defect-fixes` | `d45b6dc` | 187 | the two L12 defects plus the spindle-speed default |
-
-Everything before `aedf5e7` is the branch backlog that predates this feature: it is already on
-`origin/dev` and is not part of these slices. `dev` is 6 commits ahead of `origin/dev`
-(`ef000e5`..`d45b6dc`); pushing them and opening the chained pull requests are human decisions,
-and `gh` is not authenticated in this session, so they were not attempted.
-- **L49 — The HPGL2 parser fixed on request (verbatim: "arreglalo")**: `appParsers/ParseHPGL2.py`
-  could not be constructed at all, so an HPGL2 import died with `KeyError` before producing
-  geometry. Thirteen `geometry_*` options are now defined in the geometry block of `defaults.py`,
-  each traced to an existing precedent instead of invented: the cut depth and the area shape from
-  the Isolation block (`tools_iso_cutz: -0.05`, `tools_iso_area_shape: "square"`, because the
-  parser tags its tools `Iso`), travel, dwell, multidepth, extra cut, tool change, area strategy,
-  area over-Z and spindle speed from the Drilling and Milling blocks, and `geometry_ppname_g:
-  'default'` naming the preprocessor that exists. The one value where the precedents disagreed is
-  the cut depth — the mill block says `-2.4` — and the Isolation value won because an HPGL2 pen
-  path is an isolation-style contour; that tie-break is recorded in the code comment so changing it
-  is one line. **L48's measurement was off by one**: it reported twelve missing keys because its
-  regex counted the `"geometry_multidepth": Geometry` entry of the GUI route map at
-  `defaults.py:1084` as a definition, and `geometry_multidepth` is read live by the parser. The
-  second half of the fix is the guard that makes the whole class impossible: `tests/
-  test_defaults_coverage.py` AST-parses the `factory_defaults` dict and asserts that every live
-  `app.options["geometry_*"]` read in the tree (comment lines excluded, `.git`/`.venv`/candidate
-  views pruned) is defined, with its own test pinning that commented reads are ignored and that no
-  scanned path escapes the repository. RED observed in both halves: the guard listed all thirteen
-  keys with their `path:line`, and `tests/test_hpgl2_parse.py` failed with `KeyError:
-  'geometry_cutz'` from `HPGL2.__init__`. A real import now parses a nine-statement sample into a
-  `LineString (0 0, 25 0, 25 25)` with bounds `0,0,25,25` millimetres and one tool. Mutation check
-  on the guard: deleting `geometry_spindlespeed` fails it by name. 101 tests before, 125 after.
-- **L50 — Native review of the HPGL2 fix (lineage `review-85d04374fd80d7ab`)**: tier `medium`,
-  4 changed paths, lenses `readability` and `reliability` (28 KB prompts), approved with no severe
-  finding, so no refuter and no correction; the acknowledgement burned the authority (consumed
-  revision `sha256:45cb2dfe...`). Three readability advisories, all informational and all fixed in
-  the commit that records this entry because each one was unambiguous from its location:
-  **R2-001** (`flatcam_plus/defaults.py:367-369`) was the comment claiming these are parameters "a
-  Geometry object reads" when almost every one of them has no live reader left — the comment now
-  says the contract is the presence and type of the key and names why (the plugin readers are
-  commented out and `camlib` reads the `tools_mill_*` keys); **R2-002**
-  (`tests/test_defaults_coverage.py:5`) was the docstring still saying *twelve* keys, which is the
-  same off-by-one L49 corrects; **R2-003** (`tests/test_defaults_coverage.py:47-49`) was a real
-  weakness in the guard, which skipped only lines that *start* with `#`, so a read behind a
-  trailing comment would have counted as live. The scan now tokenises each file with
-  `tokenize.generate_tokens`, drops comment tokens and concatenates the rest per line: a trailing
-  comment cannot invent a read and a `#` inside a string literal cannot truncate one. The
-  synthetic-line test pins both cases, and the scan stays a per-file walk (the guard file's five
-  tests take ~3.5 s, up from ~0.4 s: the price of tokenising 300 files).
+- **L51 — User decision (verbatim)**: "no camos a hacer prs. de momento todo va a dev." This
+  supersedes the slice delivery recorded at L45's tail and the "Delivery slices" section: the
+  eight local branches (`slice/1-structure` through `slice/8-defect-fixes`) were deleted after
+  confirming every commit they pointed at is reachable from `dev`, and the section now states the
+  decision instead of a plan. The grouping it described was still real work — S1+S2, S3, T4.1 to
+  T4.3, T4.4+T4.4b, T4.5, T4.6, T4.7 and the defect fixes, each a run of consecutive commits — so
+  it stays recoverable from `git log --reverse`.
