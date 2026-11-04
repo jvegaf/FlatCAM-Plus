@@ -171,10 +171,10 @@ to be sliced per phase.
 
 ## Next step
 
-T4 is authorized (L27) and five of its phases are done: T4.1 anchored the CWD-dependent paths,
+T4 is authorized (L27) and six of its phases are done: T4.1 anchored the CWD-dependent paths,
 T4.2 and T4.2b moved the six low-fanout modules, T4.3 moved `camlib`, T4.4 moved `appTool` and
-T4.4b moved `appPreProcessor`. The tree is consistent at every commit: `dev` is 7 commits ahead
-of `origin/dev`, 68 tests pass, and every phase keeps its tests, docs and skills in the same
+T4.4b moved `appPreProcessor`. The tree is consistent at every commit: `dev` is 10 commits ahead
+of `origin/dev`, 69 tests pass, and every phase keeps its tests, docs and skills in the same
 commit.
 
 T4.5 (moving `appTranslation`, 172 statements across 173 files) is the next phase and it has a
@@ -186,7 +186,7 @@ to anchor `locale/` to the application directory explicitly — the same fix T4.
 resources — and prove it with a test that asserts the language list is non-empty from the moved
 module. Then the 172 import sites go in two or three commits of about 400 authored lines.
 T4.6 (`appMain` plus the `flatcam.py` launcher) and T4.7 (`descartes`, `libs`) stay after it.
-Push and merge of the 7 unpushed commits remain human decisions.
+Push and merge of the 10 unpushed commits remain human decisions.
 
 ## Log
 
@@ -378,3 +378,9 @@ Push and merge of the 7 unpushed commits remain human decisions.
   `tests/test_package_layout.py` pins it; RED (`ModuleNotFoundError`) observed before the fix.
   The finding is a real gap in D-plan: "no shim layer" was right for in-tree imports and wrong for
   the out-of-tree extension point.
+- **L35 — Review outcome for the T4.4/T4.4b slice**: the two lenses ran in one group (readability
+  102 476 prompt bytes, reliability 102 455), the refuter raised R3-001, the bounded correction
+  landed in `91f3165`, and the targeted validator approved it. The acknowledgement burned the
+  authority (consumed revision `sha256:28e84312...`, target `sha256:da6c9cf3...`). One advisory
+  finding stayed open and is now fixed separately: R2-doc-phase-count, readability, SUGGESTION,
+  this document's phase count and commit count.
