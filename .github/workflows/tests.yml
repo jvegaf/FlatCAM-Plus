@@ -1,0 +1,35 @@
+name: tests
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    env:
+      # The suite boots the real application; it must never need a display server.
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the Qt runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            libegl1 libgl1 libxkbcommon0 libdbus-1-3
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.14"
+          enable-cache: true
+
+      - name: Install dependencies from the lockfile
+        run: uv sync --frozen
+
+      - name: Run the test suite
+        run: uv run --with pytest pytest tests -q

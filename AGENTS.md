@@ -24,9 +24,18 @@ uv run --with pytest pytest tests/test_classify_contours.py -v
   pip-installable subset for virtualenv remediation. There is no conda
   environment file.
 - `pytest` is not a project dependency; use the `--with pytest` form above.
-  Tests are standalone (currently only contour classification, shapely-only).
-- No CI, lint, formatter, or type-check configuration exists. Do not assume or
-  invent one.
+  Most tests are shapely-only. `tests/conftest.py` provides a session-scoped
+  `fc_app` fixture that boots the real application headless
+  (`QT_QPA_PLATFORM=offscreen`) under a throwaway `HOME`, so the suite never
+  reads or writes `~/.FlatCAM`. Because the app builds a `multiprocessing.Pool`
+  whose forkserver child re-imports the main module, any boot driver must keep
+  top-level work behind `if __name__ == "__main__"`.
+- `appMain.App` parses `sys.argv` with getopt at import time and exits on
+  unknown options; `tests/conftest.py` replaces `sys.argv` so pytest's own flags
+  cannot reach it.
+- CI is `.github/workflows/tests.yml`: `uv sync --frozen` plus the suite on Ubuntu
+  with the offscreen Qt platform. There is no lint, formatter, or type-check
+  configuration. Do not assume or invent one.
 
 ## Development workflow — Organic Driven Development (ODD)
 
@@ -72,6 +81,8 @@ follow its native lifecycle without treating it as delivery approval.
 | G-code preprocessors | `preprocessors/` |
 | Tcl shell commands | `tclCommands/` |
 | Persisted defaults/preferences | `defaults.py` |
+| Test suite and headless app fixture | `tests/`, `tests/conftest.py` |
+| CI workflow | `.github/workflows/tests.yml` |
 
 `appMain.py`, `camlib.py`, and `appDatabase.py` are very large (~160–350 KB).
 Search targeted symbols instead of reading them whole.
