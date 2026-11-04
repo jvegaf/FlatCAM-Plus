@@ -6,8 +6,8 @@
 from PyQt6.QtCore import QSettings
 
 from appGUI.preferences.OptionsGroupUI import OptionsGroupUI
-from appPlugins.cnc_control.machine_profile_editor import MachineProfilesEditor
-from appPlugins.cnc_control.machine_profiles import normalize_machine_profiles
+from flatcam_plus.appPlugins.cnc_control.machine_profile_editor import MachineProfilesEditor
+from flatcam_plus.appPlugins.cnc_control.machine_profiles import normalize_machine_profiles
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

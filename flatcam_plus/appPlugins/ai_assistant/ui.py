@@ -9,7 +9,7 @@ import html
 from PyQt6 import QtGui, QtWidgets
 
 from appGUI.PanelStyles import apply_modern_panel_style
-from appPlugins.cnc_control.widgets import FluidStyleButton
+from flatcam_plus.appPlugins.cnc_control.widgets import FluidStyleButton
 
 from flatcam_plus import appTranslation as fcTranslate
 

@@ -14,9 +14,9 @@ from PyQt6.QtCore import pyqtSignal
 
 from appGUI.GUIElements import VerticalScrollArea
 from flatcam_plus.appTool import AppTool
-from appPlugins.ai_assistant.dialogs import AIAssistantSettingsDialog
-from appPlugins.ai_assistant.providers import default_settings, provider_spec, request_completion, test_connection
-from appPlugins.ai_assistant.ui import AIAssistantUI
+from flatcam_plus.appPlugins.ai_assistant.dialogs import AIAssistantSettingsDialog
+from flatcam_plus.appPlugins.ai_assistant.providers import default_settings, provider_spec, request_completion, test_connection
+from flatcam_plus.appPlugins.ai_assistant.ui import AIAssistantUI
 
 from flatcam_plus import appTranslation as fcTranslate
 

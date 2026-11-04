@@ -12,11 +12,11 @@ from PyQt6.QtCore import Qt, pyqtSignal
 
 from flatcam_plus.appTool import AppTool
 from appGUI.GUIElements import FCFileSaveDialog, VerticalScrollArea
-from appPlugins.cnc_control.dialogs import MachineProfileDialog, MacroDialog
-from appPlugins.cnc_control.machine_profiles import normalize_machine_profile, normalize_machine_profiles
-from appPlugins.cnc_control.profiles import CNC_PROFILES
-from appPlugins.cnc_control.transports import HttpTransport, SerialTransport, TcpTransport
-from appPlugins.cnc_control.ui import CNCControlUI, CNCPreviewModal
+from flatcam_plus.appPlugins.cnc_control.dialogs import MachineProfileDialog, MacroDialog
+from flatcam_plus.appPlugins.cnc_control.machine_profiles import normalize_machine_profile, normalize_machine_profiles
+from flatcam_plus.appPlugins.cnc_control.profiles import CNC_PROFILES
+from flatcam_plus.appPlugins.cnc_control.transports import HttpTransport, SerialTransport, TcpTransport
+from flatcam_plus.appPlugins.cnc_control.ui import CNCControlUI, CNCPreviewModal
 
 import builtins
 import gettext

@@ -15,7 +15,7 @@ Load when working on the PCB Plotter tool, the `GRBL_11_pen_plotter` preprocesso
 
 ## Hard Rules
 
-- The plotter is a separate GUI path: `Plugins > PCB Plotter` in `appPlugins/ToolPlotter.py`, preset `Plotter Pen`, preprocessor `GRBL_11_pen_plotter`. Do not alter the CNC milling flow to add plotter behavior.
+- The plotter is a separate GUI path: `Plugins > PCB Plotter` in `flatcam_plus/appPlugins/ToolPlotter.py`, preset `Plotter Pen`, preprocessor `GRBL_11_pen_plotter`. Do not alter the CNC milling flow to add plotter behavior.
 - The `Plotter Pen` Tools DB preset is seeded at startup and must not overwrite existing user values; only fill missing fields.
 - Every exported plotter G-code must pass `python scripts/validate_pen_plotter_gcode.py <file.gcode>` before physical use.
 - The validator requires: no `M03`/`M04`, a `G20` or `G21` unit command, `G90`, a pen-up Z move before the first XY move, and no rapid XY travel while the pen is down.

@@ -34,7 +34,14 @@ DELETED_MODULES = ("appPool",)
 # Application packages that used to be top-level importables and are now subpackages of
 # ``flatcam_plus``. ``appCommon`` is the first of the eight; each later slice adds its own entry
 # here so a root copy or a root-name importer cannot come back.
-APP_PACKAGES = ("appCommon", "appEditors", "appHandlers", "appObjects", "appParsers")
+APP_PACKAGES = (
+    "appCommon",
+    "appEditors",
+    "appHandlers",
+    "appObjects",
+    "appParsers",
+    "appPlugins",
+)
 APP_MODULES = (
     "appCommon",
     "appCommon.AutoUpdater",
@@ -66,6 +73,10 @@ APP_MODULES = (
     "appParsers.ParseGerber",
     "appParsers.ParseHPGL2",
     "appParsers.ParseSVG",
+    "appPlugins",
+    "appPlugins.ai_assistant",
+    "appPlugins.cnc_control",
+    "appPlugins.cnc_preview_3d",
 )
 
 # Directories that used to be top-level importables and are now subpackages. They are vendored

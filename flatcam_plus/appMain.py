@@ -110,7 +110,7 @@ from flatcam_plus.appProcess import *
 from flatcam_plus.appWorkerStack import WorkerStack
 
 # App Plugins
-from appPlugins import *
+from flatcam_plus.appPlugins import *
 
 try:
     from numpy import Inf
@@ -1951,7 +1951,7 @@ class App(QtCore.QObject):
 
 
         try:
-            from appPlugins.ToolImage import ToolImage
+            from flatcam_plus.appPlugins.ToolImage import ToolImage
             self.image_tool = ToolImage(self)
             self.image_tool.install(icon=QtGui.QIcon(self.resource_location + '/image32.png'),
                                     pos=self.ui.menufileimport,

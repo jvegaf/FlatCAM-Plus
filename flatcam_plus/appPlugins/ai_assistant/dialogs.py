@@ -8,8 +8,8 @@ import gettext
 from PyQt6 import QtWidgets
 
 from appGUI.PanelStyles import apply_modern_panel_style
-from appPlugins.ai_assistant.providers import provider_ids, provider_spec
-from appPlugins.cnc_control.widgets import FluidStyleButton
+from flatcam_plus.appPlugins.ai_assistant.providers import provider_ids, provider_spec
+from flatcam_plus.appPlugins.cnc_control.widgets import FluidStyleButton
 
 from flatcam_plus import appTranslation as fcTranslate
 

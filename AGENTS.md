@@ -76,7 +76,7 @@ follow its native lifecycle without treating it as delivery approval.
 | Application controller, menus, tool registration | `flatcam_plus/appMain.py` (`class App`) |
 | Geometry/CNC algorithms | `flatcam_plus/camlib.py` |
 | Shared helpers (logging, `LoudDict`, updater, recent projects) | `flatcam_plus/appCommon/` |
-| Tool plugins (Cutout, Isolation, Drilling, …) | `appPlugins/Tool*.py` |
+| Tool plugins (Cutout, Isolation, Drilling, …) | `flatcam_plus/appPlugins/Tool*.py` |
 | Document objects (Gerber, Excellon, Geometry, CNCJob) | `flatcam_plus/appObjects/` |
 | Parsers (Gerber, Excellon, DXF, SVG, HPGL2) | `flatcam_plus/appParsers/` |
 | GUI, plot canvases, themes, preferences | `appGUI/` |
@@ -150,7 +150,7 @@ Load the matching skill from `.opencode/skills/<name>/SKILL.md` before working:
 | --- | --- |
 | `flatcam-odd-workflow` | Every authorized change; read before implementing or delegating |
 | `flatcam-repo-map` | Locating code, choosing a layer, or any non-trivial change |
-| `flatcam-tool-plugin` | Adding or changing a tool under `appPlugins/` |
+| `flatcam-tool-plugin` | Adding or changing a tool under `flatcam_plus/appPlugins/` |
 | `flatcam-object-model` | Adding or changing a document object under `flatcam_plus/appObjects/` |
 | `flatcam-preprocessor` | Changing G-code output under `preprocessors/` |
 | `flatcam-tcl-command` | Adding or changing a Tcl shell command |

@@ -18,7 +18,7 @@ Load when running tests, adding a regression test, or verifying a change in this
 - Run tests with `uv run --with pytest pytest tests -q`. `pytest` is NOT a project dependency; never assume it is installed.
 - Run one file with `uv run --with pytest pytest tests/test_<name>.py -v`.
 - `python flatcam.py` requires a real display. Do not assume or invent headless support; gate display-dependent checks or leave them as manual smoke tests.
-- Importing `appPlugins`/`flatcam_plus.appObjects` pulls in PyQt6 and a live `App`. Keep pure logic in importable functions and test those; the existing `tests/test_classify_contours.py` deliberately duplicates logic for this reason.
+- Importing `flatcam_plus.appPlugins`/`flatcam_plus.appObjects` pulls in PyQt6 and a live `App`. Keep pure logic in importable functions and test those; the existing `tests/test_classify_contours.py` deliberately duplicates logic for this reason.
 - There is no CI, linter, formatter, or type-check configuration. Do not invent commands or claim they pass.
 - Put scratch state outside the worktree in a `mktemp -d` directory; remove it after use.
 - Verify behavior changes with a focused test first, then the full suite once.

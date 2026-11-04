@@ -11,7 +11,7 @@ import gettext
 from PyQt6 import QtWidgets
 
 from flatcam_plus.appTool import AppTool
-from appPlugins.cnc_preview_3d.ui import CNCPreview3DUI
+from flatcam_plus.appPlugins.cnc_preview_3d.ui import CNCPreview3DUI
 
 from flatcam_plus import appTranslation as fcTranslate
 

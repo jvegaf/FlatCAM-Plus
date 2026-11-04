@@ -180,7 +180,6 @@ python -m PyInstaller flatcam.py \
   --add-data "locale:locale" \
   --add-data "preprocessors:preprocessors" \
   --collect-submodules appGUI \
-  --collect-submodules appPlugins \
   --collect-submodules tclCommands \
   --collect-submodules flatcam_plus \
   --collect-all PyQt6 \
@@ -270,7 +269,6 @@ python -m PyInstaller flatcam.py \
   --add-data "locale:locale" \
   --add-data "preprocessors:preprocessors" \
   --collect-submodules appGUI \
-  --collect-submodules appPlugins \
   --collect-submodules tclCommands \
   --collect-submodules flatcam_plus \
   --collect-all PyQt6 \

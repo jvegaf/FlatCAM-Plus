@@ -1028,7 +1028,7 @@ class CNCJobObject(FlatCAMObj, CNCjob):
 
     def active_machine_profile(self):
         try:
-            from appPlugins.cnc_control.machine_profiles import normalize_machine_profiles
+            from flatcam_plus.appPlugins.cnc_control.machine_profiles import normalize_machine_profiles
 
             settings = QtCore.QSettings("Open Source", "FlatCAM_Plus")
             profiles = []

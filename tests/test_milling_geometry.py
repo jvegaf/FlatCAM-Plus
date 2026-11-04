@@ -10,7 +10,7 @@ import importlib
 import pytest
 from shapely.geometry import Point
 
-milling = importlib.import_module("appPlugins.ToolMilling")
+milling = importlib.import_module("flatcam_plus.appPlugins.ToolMilling")
 
 
 class _FakeLog:

@@ -17,7 +17,7 @@ from vispy.util.quaternion import Quaternion
 from PyQt6 import QtCore, QtWidgets
 
 from appGUI.GUIElements import FCLabel
-from appPlugins.cnc_control.widgets import FluidStyleButton
+from flatcam_plus.appPlugins.cnc_control.widgets import FluidStyleButton
 from flatcam_plus.appTool import AppTool
 
 from flatcam_plus import appTranslation as fcTranslate

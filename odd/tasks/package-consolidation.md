@@ -57,7 +57,9 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
 - **T4 (S1, S2)** — `appObjects` (10 files, 32 importers). Status: done in the commit that adds
   it to `APP_PACKAGES`/`APP_MODULES`; 19 of the rewrites are inside the moved package.
 - **T5 (S1, S2)** — `appEditors` (31 files, 82 importers).
-- **T6 (S1, S2)** — `appPlugins` (47 files, 96 importers).
+- **T6 (S1, S2)** — `appPlugins` (47 files, 48 importers). Status: done in the commit that adds
+  it to `APP_PACKAGES` with its three subpackages; one dynamic
+  `importlib.import_module("appPlugins.ToolMilling")` target in a test came along.
 - **T7 (S1, S2, S3)** — `tclCommands` (76 files, 298 importers) with the discovery prefix derived
   from `__name__` and a registry test that fails when it comes back empty.
 - **T8 (S1, S2)** — `appGUI` (86 files, 580 importers), the largest slice, last so it lands on a
@@ -133,3 +135,14 @@ green at every commit.
   acted on: a failed worker is not evidence that its side effects are partial, and the checks that
   prove the tree consistent (grep for the old name, grep for the collect entry, the layout guard,
   the suite) are the same ones the slice needed anyway.
+- **L10 — T6 done**: `appPlugins` moved with its three subpackages and its LICENSE files; 48
+  import statements rewritten, including the 29 in the package's own `__init__.py` and the
+  `try/except ImportError` wrapper around `ToolImage`, plus one dynamic
+  `importlib.import_module("appPlugins.ToolMilling")` target in a test that no import rewrite would
+  have caught on its own. The build-script entry is retired in all six places and the prose
+  repointed in `AGENTS.md` and four skill files. RED: six guard cases, naming
+  `MachinePrefGroupUI.py`; GREEN: 92 in that file, and the boot test with its plugin-count and
+  preprocessor-registry assertions. Mutation check fails the guard by path and makes `appMain`
+  unimportable. 165 tests before, 171 after. Leftovers recorded: `README.md`, `CHANGELOG.md`,
+  `.kiro/**`, `locale/**/*.po`, the `pyproject.toml` comment and one preprocessor comment still
+  name the old path in prose, which is the T9 pass's job.
