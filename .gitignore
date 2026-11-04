@@ -167,3 +167,5 @@ recent.json
 PLOTTER_ROADMAP.md
 PLOTTER_TASKS.md
 /.atl
+# Local AI runtime state
+.atl/
