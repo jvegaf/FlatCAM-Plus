@@ -6,7 +6,7 @@
 # MIT Licence                                                 #
 # ########################################################## ##
 
-from camlib import Geometry, grace
+from flatcam_plus.camlib import Geometry, grace
 
 import shapely.affinity as affinity
 from shapely import Point, LineString, LinearRing, MultiLineString, MultiPolygon

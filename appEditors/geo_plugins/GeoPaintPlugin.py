@@ -3,7 +3,7 @@ from PyQt6 import QtWidgets
 from appTool import AppToolEditor
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCFrame, FCButton, GLay, FCDoubleSpinner, FCComboBox, \
     FCCheckBox
-from camlib import Geometry
+from flatcam_plus.camlib import Geometry
 
 from shapely import Polygon
 from shapely.ops import unary_union

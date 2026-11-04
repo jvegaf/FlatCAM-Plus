@@ -50,4 +50,4 @@ Report: object class and `kind`, `ser_attrs` changes, defaults added, creation p
 - `appObjects/AppObjectTemplate.py` — `FlatCAMObj` lifecycle and serialization.
 - `appObjects/AppObject.py` — `new_object` and collection signals.
 - `appObjects/ObjectCollection.py` — collection queries.
-- `camlib.py` — `to_dict` / `dict2obj` serializers.
+- `flatcam_plus/camlib.py` — `to_dict` / `dict2obj` serializers.

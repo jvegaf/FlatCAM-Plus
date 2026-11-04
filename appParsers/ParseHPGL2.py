@@ -7,7 +7,7 @@
 # MIT Licence                                                #
 # ############################################################
 
-from camlib import arc, three_point_circle, grace
+from flatcam_plus.camlib import arc, three_point_circle, grace
 
 import numpy as np
 import re

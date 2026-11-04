@@ -27,7 +27,7 @@ import appTranslation as fcTranslate
 import builtins
 
 from appParsers.ParseGerber import Gerber
-from camlib import grace, flatten_shapely_geometry
+from flatcam_plus.camlib import grace, flatten_shapely_geometry
 from matplotlib.backend_bases import KeyEvent as mpl_key_event
 
 fcTranslate.apply_language('strings')

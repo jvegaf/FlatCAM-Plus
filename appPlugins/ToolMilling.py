@@ -28,7 +28,7 @@ import builtins
 
 from appParsers.ParseExcellon import Excellon
 from matplotlib.backend_bases import KeyEvent as mpl_key_event
-from camlib import grace, is_isolation_job_type
+from flatcam_plus.camlib import grace, is_isolation_job_type
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

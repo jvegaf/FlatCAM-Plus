@@ -7,7 +7,7 @@ from copy import deepcopy
 
 from shapely import box
 from shapely.ops import linemerge
-from camlib import flatten_shapely_geometry
+from flatcam_plus.camlib import flatten_shapely_geometry
 
 
 class TclCommandCutout(TclCommand):

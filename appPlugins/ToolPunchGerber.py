@@ -24,7 +24,7 @@ import appTranslation as fcTranslate
 import builtins
 
 from appParsers.ParseGerber import Gerber
-from camlib import Geometry
+from flatcam_plus.camlib import Geometry
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

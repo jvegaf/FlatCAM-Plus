@@ -10,7 +10,7 @@ from tclCommands.TclCommand import TclCommand
 
 import collections
 
-from camlib import get_bounds
+from flatcam_plus.camlib import get_bounds
 
 import logging
 import gettext

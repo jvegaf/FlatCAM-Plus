@@ -1,7 +1,7 @@
 from tclCommands.TclCommand import TclCommandSignaled
 
 import collections
-from camlib import Geometry
+from flatcam_plus.camlib import Geometry
 
 import gettext
 import appTranslation as fcTranslate

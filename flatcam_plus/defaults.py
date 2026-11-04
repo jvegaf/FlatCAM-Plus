@@ -25,7 +25,7 @@ FIXED_LIGHT_UI_DEFAULTS = {
     "global_cursor_color": '#FF0000',
 }
 from appCommon.Common import LoudDict
-from camlib import to_dict, Geometry
+from .camlib import to_dict, Geometry
 import simplejson
 import logging
 import gettext

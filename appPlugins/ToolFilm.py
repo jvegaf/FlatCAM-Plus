@@ -11,7 +11,7 @@ from appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, FCCheckBox, \
     FCComboBox2, RadioSet, FCDoubleSpinner, FCSpinner, FCFileSaveDialog, OptionalHideInputSection
 
-from camlib import flatten_shapely_geometry
+from flatcam_plus.camlib import flatten_shapely_geometry
 
 import logging
 from copy import deepcopy

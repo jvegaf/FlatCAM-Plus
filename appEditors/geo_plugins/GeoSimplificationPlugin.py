@@ -4,7 +4,7 @@ from appTool import AppToolEditor
 from appGUI.GUIElements import VerticalScrollArea, GLay, FCLabel, FCButton, FCFrame, FCTextEdit, FCEntry, \
     FCDoubleSpinner
 
-# from camlib import  flatten_shapely_geometry
+# from flatcam_plus.camlib import  flatten_shapely_geometry
 from copy import deepcopy
 
 import gettext

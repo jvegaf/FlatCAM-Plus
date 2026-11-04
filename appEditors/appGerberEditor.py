@@ -8,7 +8,7 @@
 
 from appEditors.grb_plugins.GrbCommon import DrawToolUtilityShape, DrawToolShape, DrawTool, ShapeToolEditorGrb
 
-from camlib import distance, arc, three_point_circle, flatten_shapely_geometry
+from flatcam_plus.camlib import distance, arc, three_point_circle, flatten_shapely_geometry
 from appGUI.GUIElements import *
 
 from appTool import AppTool

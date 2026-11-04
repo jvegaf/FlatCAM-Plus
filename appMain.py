@@ -93,7 +93,7 @@ from appObjects.AppObject import AppObject
 # App Parsing files
 from appParsers.ParseExcellon import Excellon
 from appParsers.ParseGerber import Gerber
-from camlib import to_dict, Geometry, CNCjob
+from flatcam_plus.camlib import to_dict, Geometry, CNCjob
 
 # App Pre-processors
 from appPreProcessor import load_preprocessors

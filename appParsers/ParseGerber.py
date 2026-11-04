@@ -1,6 +1,6 @@
 
 from PyQt6 import QtWidgets
-from camlib import Geometry, arc, arc_angle, ApertureMacro, grace, flatten_shapely_geometry
+from flatcam_plus.camlib import Geometry, arc, arc_angle, ApertureMacro, grace, flatten_shapely_geometry
 
 from appParsers.ParseDXF import getdxfgeo
 from appParsers.ParseSVG import svgparselength, getsvggeo, svgparse_viewbox

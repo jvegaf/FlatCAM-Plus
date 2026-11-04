@@ -16,7 +16,7 @@ from appEditors.appTextEditor import AppTextEditor
 from appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted
 from appGUI.GUIElements import FCFileSaveDialog, FCCheckBox
 from appGUI.ObjectUI import CNCObjectUI
-from camlib import CNCjob
+from flatcam_plus.camlib import CNCjob
 
 import os
 import sys

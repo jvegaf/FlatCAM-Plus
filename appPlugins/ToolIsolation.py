@@ -30,7 +30,7 @@ import builtins
 
 from appParsers.ParseGerber import Gerber
 from matplotlib.backend_bases import KeyEvent as mpl_key_event
-from camlib import grace, flatten_shapely_geometry
+from flatcam_plus.camlib import grace, flatten_shapely_geometry
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

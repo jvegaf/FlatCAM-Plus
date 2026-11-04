@@ -61,7 +61,12 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
     relative import of `appWorker`, and the dead `appPool` deleted. Status: done in the commit
     that adds `tests/test_package_layout.py`, which also fails if any file outside the package
     still imports a moved name.
-  - **T4.3** — Move `camlib` (35 statements across 35 files).
+  - **T4.3** — Move `camlib` (35 statements across 35 files). Status: done in the commit that
+    adds `camlib` to `tests/test_package_layout.py`. 33 external importers became
+    `from flatcam_plus.camlib import ...` and the two package-internal ones (`defaults`,
+    `appDatabase`) use `from .camlib import`. No preprocessor imports `camlib`, so the
+    path-loaded preprocessors — the one place a broken import would not fail loudly — are not
+    involved in this phase at all.
   - **T4.4** — Move `appTool` (53 statements) or `appPreProcessor` (29) and the preprocessor
     discovery with it.
   - **T4.5** — Move `appTranslation` (172 statements across 173 files) in two or three slices of

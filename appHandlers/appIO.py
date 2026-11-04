@@ -7,7 +7,7 @@ from appEditors.appGeoEditor import AppGeoEditor
 from appEditors.appGerberEditor import AppGerberEditor
 
 from appGUI.GUIElements import FCFileSaveDialog, FCMessageBox
-from camlib import to_dict, dict2obj, ET, ParseError
+from flatcam_plus.camlib import to_dict, dict2obj, ET, ParseError
 from appParsers.ParseHPGL2 import HPGL2
 
 from appObjects.ObjectCollection import GerberObject, ExcellonObject, GeometryObject, ScriptObject, CNCJobObject

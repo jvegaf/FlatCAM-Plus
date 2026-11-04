@@ -35,7 +35,7 @@ Load when adding or editing a module in `tclCommands/`, exposing a tool through 
 1. Copy the closest existing command, such as `TclCommandCutout.py`.
 2. Rename the module and class; keep them identical.
 3. Fill `aliases`, `arg_names`, `option_types`, `required`, and `help`.
-4. Implement `execute()` using `self.app.collection`, `self.app.new_object`, or `camlib` helpers.
+4. Implement `execute()` using `self.app.collection`, `self.app.new_object`, or `flatcam_plus.camlib` helpers.
 5. Import the module in `tclCommands/__init__.py` in alphabetical position.
 6. Exercise the command through the Tcl shell or a targeted script.
 

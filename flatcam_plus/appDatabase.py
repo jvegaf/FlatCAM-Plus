@@ -3,7 +3,7 @@ from PyQt6 import QtGui, QtCore, QtWidgets
 from appGUI.GUIElements import FCEntry, FCButton, FCDoubleSpinner, FCComboBox, FCCheckBox, FCSpinner, \
     FCTree, RadioSet, FCFileSaveDialog, FCLabel, FCComboBox2, GLay
 from appGUI.PanelStyles import apply_modern_panel_style
-from camlib import to_dict
+from .camlib import to_dict
 
 import sys
 import simplejson as json

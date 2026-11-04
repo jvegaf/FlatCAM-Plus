@@ -44,7 +44,7 @@ All development in this repository follows ODD. Do not ask whether to use it.
 1. **Authorize.** Investigation, explanation, and review stay read-only until a
    change is explicitly requested.
 2. **Explore before writing.** Use CodeGraph or targeted grep; never read
-   `appMain.py`, `camlib.py`, or `flatcam_plus/appDatabase.py` whole.
+   `appMain.py`, `flatcam_plus/camlib.py`, or `flatcam_plus/appDatabase.py` whole.
 3. **Resolve uncertainty.** Ask one focused question only for a real product or
    design decision, then wait.
 4. **Classify.** Small work (understood, contained risk, resumable from the
@@ -72,7 +72,7 @@ follow its native lifecycle without treating it as delivery approval.
 | Area | Entry point |
 | --- | --- |
 | Application controller, menus, tool registration | `appMain.py` (`class App`) |
-| Geometry/CNC algorithms | `camlib.py` |
+| Geometry/CNC algorithms | `flatcam_plus/camlib.py` |
 | Tool plugins (Cutout, Isolation, Drilling, …) | `appPlugins/Tool*.py` |
 | Document objects (Gerber, Excellon, Geometry, CNCJob) | `appObjects/` |
 | Parsers (Gerber, Excellon, DXF, SVG, HPGL2) | `appParsers/` |
@@ -84,7 +84,8 @@ follow its native lifecycle without treating it as delivery approval.
 | Test suite and headless app fixture | `tests/`, `tests/conftest.py` |
 | CI workflow | `.github/workflows/tests.yml` |
 
-`appMain.py`, `camlib.py`, and `flatcam_plus/appDatabase.py` are very large (~160–350 KB).
+`appMain.py`, `flatcam_plus/camlib.py`, and `flatcam_plus/appDatabase.py` are very large
+(~160–350 KB).
 Search targeted symbols instead of reading them whole.
 
 ## Conventions and gotchas

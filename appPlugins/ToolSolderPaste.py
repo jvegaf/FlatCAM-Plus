@@ -26,7 +26,7 @@ import builtins
 
 from appCommon.Common import LoudDict
 
-from camlib import distance
+from flatcam_plus.camlib import distance
 from appEditors.appTextEditor import AppTextEditor
 
 from io import StringIO

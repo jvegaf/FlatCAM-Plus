@@ -6,7 +6,7 @@
 # MIT Licence                                              #
 # ##########################################################
 
-from camlib import distance, arc, AppRTreeStorage
+from flatcam_plus.camlib import distance, arc, AppRTreeStorage
 
 from PyQt6 import QtCore, QtWidgets, QtGui
 from PyQt6.QtCore import Qt

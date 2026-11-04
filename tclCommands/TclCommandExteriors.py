@@ -1,5 +1,5 @@
 from tclCommands.TclCommand import TclCommandSignaled
-from camlib import Geometry
+from flatcam_plus.camlib import Geometry
 
 import collections
 

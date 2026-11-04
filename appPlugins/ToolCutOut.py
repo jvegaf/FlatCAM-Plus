@@ -10,7 +10,7 @@ from PyQt6 import QtWidgets, QtGui, QtCore
 from appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, RadioSet, \
     FCDoubleSpinner, FCComboBox2, OptionalInputSection, FCCheckBox
-from camlib import flatten_shapely_geometry
+from flatcam_plus.camlib import flatten_shapely_geometry
 
 import math
 import logging

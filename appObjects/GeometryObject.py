@@ -19,7 +19,7 @@ from shapely import MultiLineString, LinearRing, Polygon, MultiPolygon, LineStri
 from shapely.affinity import scale, translate
 from shapely.ops import unary_union
 
-from camlib import Geometry, flatten_shapely_geometry
+from flatcam_plus.camlib import Geometry, flatten_shapely_geometry
 
 import re
 import ezdxf

@@ -1,5 +1,5 @@
 from tclCommands.TclCommand import TclCommandSignaled
-from camlib import CNCjob
+from flatcam_plus.camlib import CNCjob
 
 import collections
 

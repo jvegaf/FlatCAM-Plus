@@ -1,8 +1,8 @@
-"""The low-fanout modules live inside the package.
+"""The migrated modules live inside the package.
 
-T4.2b moved the modules that only ``appMain`` and the preferences manager imported by name, and
-deleted the pool module nothing referenced. This test pins both facts so a later phase cannot
-leave a half-migrated tree behind.
+T4.2b moved the modules that only ``appMain`` and the preferences manager imported by name and
+deleted the pool module nothing referenced; T4.3 moved ``camlib``, the geometry and G-code core.
+This test pins those facts so a later phase cannot leave a half-migrated tree behind.
 """
 
 import importlib
@@ -10,7 +10,7 @@ import os
 
 import pytest
 
-PACKAGE_MODULES = ("defaults", "appDatabase", "appProcess", "appWorker", "appWorkerStack")
+PACKAGE_MODULES = ("defaults", "appDatabase", "appProcess", "appWorker", "appWorkerStack", "camlib")
 DELETED_MODULES = ("appPool",)
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

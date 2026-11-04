@@ -34,7 +34,7 @@ import appTranslation as fcTranslate
 import builtins
 
 from appParsers.ParseGerber import Gerber
-from camlib import Geometry, AppRTreeStorage, grace, flatten_shapely_geometry
+from flatcam_plus.camlib import Geometry, AppRTreeStorage, grace, flatten_shapely_geometry
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

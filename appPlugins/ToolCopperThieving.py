@@ -13,7 +13,7 @@ from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, G
 
 from appCommon.Common import LoudDict
 from appCommon.Common import GracefulException as grace
-from camlib import flatten_shapely_geometry
+from flatcam_plus.camlib import flatten_shapely_geometry
 
 import logging
 from copy import deepcopy

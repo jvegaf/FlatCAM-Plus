@@ -1,5 +1,5 @@
 from tclCommands.TclCommand import TclCommandSignaled
-from camlib import ParseError
+from flatcam_plus.camlib import ParseError
 
 import collections
 

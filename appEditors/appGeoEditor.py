@@ -16,7 +16,7 @@ from PyQt6.QtCore import Qt
 # import inspect
 import math
 
-from camlib import distance, arc, three_point_circle, Geometry, AppRTreeStorage, flatten_shapely_geometry
+from flatcam_plus.camlib import distance, arc, three_point_circle, Geometry, AppRTreeStorage, flatten_shapely_geometry
 from appGUI.GUIElements import FCLabel, GLay, FCDoubleSpinner, FCTree, FCButton, FCFrame, FCCheckBox, FCEntry, \
     FCTextEdit
 from appGUI.VisPyVisuals import ShapeCollection

@@ -16,7 +16,7 @@ from appGUI.ObjectUI import GerberObjectUI
 from appParsers.ParseGerber import Gerber
 from appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted, ValidationError
 
-from camlib import flatten_shapely_geometry
+from flatcam_plus.camlib import flatten_shapely_geometry
 
 from shapely import MultiLineString, LinearRing, MultiPolygon, Polygon, LineString, Point
 from shapely.geometry import box

@@ -10,7 +10,7 @@ from PyQt6 import QtWidgets, QtCore, QtGui
 from appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, FCCheckBox, \
     RadioSet, FCDoubleSpinner, FCSpinner, OptionalInputSection
-from camlib import grace
+from flatcam_plus.camlib import grace
 
 import logging
 from copy import deepcopy
