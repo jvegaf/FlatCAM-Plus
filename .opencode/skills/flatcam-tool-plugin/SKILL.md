@@ -19,7 +19,7 @@ Load when adding or changing a tool/plugin under `appPlugins/`, its menu action,
 - Keep the tool class and its `...UI` class in one `appPlugins/Tool<Name>.py` file. Build the UI on `self.layout` using widgets from `appGUI.GUIElements`.
 - Override `install()` and call `AppTool.install(self, icon, separator, shortcut=..., **kwargs)`; pass menu placement through `pos=`, `before=`, `separator=`, `icon=`, `shortcut=`.
 - Register the instance in BOTH `App.install_tools` (instantiate + `install()`) and the `self.app_plugins` list in `appMain.py`. `App.init_tools` rebuilds tools after layout changes by calling `install_tools`.
-- Persist user-editable values as `tools_<tool>_*` keys in `defaults.py`; read them via `self.app.options[...]`. Use `self.default_data` for per-job parameters.
+- Persist user-editable values as `tools_<tool>_*` keys in `flatcam_plus/defaults.py`; read them via `self.app.options[...]`. Use `self.default_data` for per-job parameters.
 - Report to the user with `self.app.inform.emit(...)` using `[success]`, `[warning]`, or `[ERROR]` prefixes; log with `self.app.log`.
 - Never run heavy geometry or file work in a UI slot; dispatch through `self.app.worker_task` or `FCProcess`.
 
@@ -50,4 +50,4 @@ Report: new or edited files, class names, menu placement, defaults added, regist
 - `appTool.py` — `AppTool` and `AppToolEditor` contracts.
 - `appPlugins/ToolDistance.py` — minimal panel plus UI example.
 - `appMain.py` — `install_tools` registration and `app_plugins` list.
-- `defaults.py` — option key naming.
+- `flatcam_plus/defaults.py` — option key naming.

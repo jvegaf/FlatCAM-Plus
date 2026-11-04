@@ -30,7 +30,7 @@ Load when adding a document type, changing persisted object state, touching `app
 | --- | --- |
 | New persisted field | Add it to `ser_attrs`; update `from_dict` compatibility |
 | New document type | Subclass `FlatCAMObj`, add `kind`/`ui_type`, register in `AppObject.classdict` |
-| New default option | Add `<kind>_<name>` in `defaults.py`; read it from `obj_options` |
+| New default option | Add `<kind>_<name>` in `flatcam_plus/defaults.py`; read it from `obj_options` |
 | Plot-only concern | Use the existing `plot()` and shape collection |
 
 ## Execution Steps

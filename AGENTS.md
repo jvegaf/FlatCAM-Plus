@@ -44,7 +44,7 @@ All development in this repository follows ODD. Do not ask whether to use it.
 1. **Authorize.** Investigation, explanation, and review stay read-only until a
    change is explicitly requested.
 2. **Explore before writing.** Use CodeGraph or targeted grep; never read
-   `appMain.py`, `camlib.py`, or `appDatabase.py` whole.
+   `appMain.py`, `camlib.py`, or `flatcam_plus/appDatabase.py` whole.
 3. **Resolve uncertainty.** Ask one focused question only for a real product or
    design decision, then wait.
 4. **Classify.** Small work (understood, contained risk, resumable from the
@@ -80,11 +80,11 @@ follow its native lifecycle without treating it as delivery approval.
 | Object editors and their plugins | `appEditors/` |
 | G-code preprocessors | `preprocessors/` |
 | Tcl shell commands | `tclCommands/` |
-| Persisted defaults/preferences | `defaults.py` |
+| Persisted defaults/preferences | `flatcam_plus/defaults.py` |
 | Test suite and headless app fixture | `tests/`, `tests/conftest.py` |
 | CI workflow | `.github/workflows/tests.yml` |
 
-`appMain.py`, `camlib.py`, and `appDatabase.py` are very large (~160–350 KB).
+`appMain.py`, `camlib.py`, and `flatcam_plus/appDatabase.py` are very large (~160–350 KB).
 Search targeted symbols instead of reading them whole.
 
 ## Conventions and gotchas
@@ -98,7 +98,7 @@ Search targeted symbols instead of reading them whole.
 - **Tcl commands**: after adding a command module, append its import to the
   explicit alphabetical list in `tclCommands/__init__.py` (it is not autodiscovered).
 - **Two unrelated versions**: `flatcam_plus/version.py` holds the application
-  version (`APP_VERSION = "1.2.0"`). `defaults.py`'s `version` (`8.992`) is the
+  version (`APP_VERSION = "1.2.0"`). `flatcam_plus/defaults.py`'s `version` (`8.992`) is the
   preferences-file format version; it is not the app version. Do not sync them.
   The build scripts extract `APP_VERSION` from that file by path, so it must stay
   a single-line assignment at `flatcam_plus/version.py`.

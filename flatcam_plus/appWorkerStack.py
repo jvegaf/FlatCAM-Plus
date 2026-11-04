@@ -1,6 +1,6 @@
 
 from PyQt6 import QtCore
-from appWorker import Worker
+from .appWorker import Worker
 
 
 class WorkerStack(QtCore.QObject):

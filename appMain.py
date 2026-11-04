@@ -76,11 +76,11 @@ from appCommon.RegisterFileKeywords import RegisterFK, Extensions, KeyWords
 from appHandlers.appIO import appIO
 from appHandlers.appEdit import appEditor
 
-from appDatabase import ToolsDB2
+from flatcam_plus.appDatabase import ToolsDB2
 
 # App defaults (preferences)
-from defaults import AppDefaults, FIXED_LIGHT_UI_DEFAULTS
-from defaults import AppOptions
+from flatcam_plus.defaults import AppDefaults, FIXED_LIGHT_UI_DEFAULTS
+from flatcam_plus.defaults import AppOptions
 
 # App Objects
 from appGUI.preferences.OptionsGroupUI import OptionsGroupUI
@@ -106,8 +106,8 @@ from appEditors.appTextEditor import AppTextEditor
 from appEditors.appGCodeEditor import AppGCodeEditor
 
 # App Workers
-from appProcess import *
-from appWorkerStack import WorkerStack
+from flatcam_plus.appProcess import *
+from flatcam_plus.appWorkerStack import WorkerStack
 
 # App Plugins
 from appPlugins import *

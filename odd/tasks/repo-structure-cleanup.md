@@ -56,6 +56,11 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
     `--collect-submodules` list. Status: done in the commit that adds
     `tests/test_version_module.py`. The remaining low-fanout modules (`defaults`,
     `appDatabase`, `appProcess`, `appWorker`, `appWorkerStack`, dead `appPool`) move in T4.2b.
+  - **T4.2b** — The five remaining low-fanout modules moved under `flatcam_plus/` keeping their
+    basenames, the wildcard `from appProcess import *` preserved, `appWorkerStack` switched to a
+    relative import of `appWorker`, and the dead `appPool` deleted. Status: done in the commit
+    that adds `tests/test_package_layout.py`, which also fails if any file outside the package
+    still imports a moved name.
   - **T4.3** — Move `camlib` (35 statements across 35 files).
   - **T4.4** — Move `appTool` (53 statements) or `appPreProcessor` (29) and the preprocessor
     discovery with it.

@@ -4,7 +4,7 @@ from PyQt6.QtCore import QSettings
 
 import os
 
-from defaults import AppDefaults, FIXED_LIGHT_UI_DEFAULTS
+from flatcam_plus.defaults import AppDefaults, FIXED_LIGHT_UI_DEFAULTS
 from appGUI.PanelStyles import apply_modern_preferences_style
 from appGUI.GUIElements import FCMessageBox
 
