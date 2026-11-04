@@ -78,6 +78,8 @@ $configPath = Join-Path $RootDir "config"
 $localePath = Join-Path $RootDir "locale"
 $preprocessorsPath = Join-Path $RootDir "preprocessors"
 
+# "libs" is not shipped as data: it is a subpackage of "flatcam_plus", so the
+# --collect-submodules entries below already collect it as code.
 $pyInstallerArgs = @(
     "-m", "PyInstaller", "flatcam.py",
     "--name", "FlatCAMPlus",
@@ -91,8 +93,6 @@ $pyInstallerArgs = @(
     "--add-data", "${configPath};config",
     "--add-data", "${localePath};locale",
     "--add-data", "${preprocessorsPath};preprocessors",
-    # "libs" is not shipped as data: it is a subpackage of "flatcam_plus", so
-    # "--collect-submodules flatcam_plus" below already collects it as code.
     "--collect-submodules", "appCommon",
     "--collect-submodules", "appEditors",
     "--collect-submodules", "appGUI",

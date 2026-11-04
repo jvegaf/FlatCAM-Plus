@@ -192,13 +192,6 @@ to be sliced per phase. `dev` itself is pushed: it is level with `origin/dev` (L
 
 ## Known follow-ups
 
-- Nothing has verified a packaged build: no PyInstaller bundle was produced in any T4 slice, and
-  the three `.ps1` build scripts have not been syntax-checked on a machine with PowerShell. The
-  `libs` data-to-code switch in T4.7 (L43) is argued from source and from `PACKAGING.md`, not from
-  a bundle. A local Linux portable build is the cheapest way to close it.
-- `flatcam_plus/libs/qdarktheme` is vendored and unversioned; that predates this work and no slice
-  touched its content.
-
 - `packaging/windows/build_windows_installer.ps1` does not collect `certifi` or
   `google.protobuf`; only the legacy `build_standalone.ps1` does. Verify whether the canonical
   Windows build needs them.
@@ -210,6 +203,12 @@ to be sliced per phase. `dev` itself is pushed: it is level with `origin/dev` (L
 - The latent defects recorded in L12 (`generate_from_multitool_geometry` reading four missing
   `geometry_*` options, and `preprocessors/default.py` crashing on the default empty `xy_end`)
   still need a decision; neither is covered by a test that would fail on purpose.
+- Nothing has verified a packaged build: no PyInstaller bundle was produced in any T4 slice, and
+  the three `.ps1` build scripts have not been syntax-checked on a machine with PowerShell. The
+  `libs` data-to-code switch in T4.7 (L43) is argued from source and from `PACKAGING.md`, not from
+  a bundle. A local Linux portable build is the cheapest way to close it.
+- `flatcam_plus/libs/qdarktheme` is vendored and unversioned; that predates this work and no slice
+  touched its content.
 
 ## Next step
 
@@ -594,3 +593,21 @@ is the only remaining verification gap (see Known follow-ups).
   and no Windows run for the `_APP_ROOT` substitutions from L41. With L43 the ODD feature that L1
   opened is complete: every module and both vendored trees live in `flatcam_plus/`, and what
   remains is delivery plus the two L12 defects that still need a decision.
+- **L45 — Native review of the T4.7 slice (lineage `review-cce224ac06aba6eb`)**: tier `high` (the
+  change reaches the three PyInstaller build scripts, so the frozen risk reasons are
+  `process_boundary` and `shell_source` on `packaging/linux/build_linux_portable.sh`), lenses
+  `readability` and `reliability`, 97 changed paths, both captured on the first attempt at 124 KB
+  per prompt. Approved with no severe finding, so no refuter and no correction; the
+  acknowledgement burned the authority (consumed revision `sha256:261a6e2a...`, target
+  `sha256:e7732c07...`). Two advisories, both unambiguous from their location and fixed in the
+  commit that records this entry: **R2-001** (readability,
+  `odd/tasks/repo-structure-cleanup.md:199-200`) was this document's Known follow-ups list split in
+  two by the two bullets T4.7 added, now one list; **R3-001** (reliability,
+  `build_standalone.ps1:94-95`) was the retired `--add-data "libs:libs"` rationale written as a
+  comment *inside* the `$pyInstallerArgs` array literal, now above the literal where no argument
+  list can be disturbed by it. 96 tests pass.
+- **L46 — Deliberate stop before START**: the first two START attempts for this slice were rejected
+  by the facade (`graph-v1 START requires lineageId` when the inspect route's lineage was not
+  repeated, then `Review controller START supports only "ordinary" or "judgment-day" mode` with
+  `input` sent as an object). The third, with `mode: "ordinary"` and `input` as the serialized
+  object, created the lineage. Neither rejection performed a mutation, so nothing was left behind.
