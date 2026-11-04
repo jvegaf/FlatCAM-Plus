@@ -28,7 +28,7 @@ from shapely import LineString, MultiLineString, Point
 from shapely.affinity import skew, affine_transform, rotate
 import numpy as np
 
-from appParsers.ParseFont import *
+from flatcam_plus.appParsers.ParseFont import *
 
 log = logging.getLogger('base2')
 

@@ -33,7 +33,7 @@ Load for any non-trivial change, code-location question, architecture decision, 
 | Shared helpers, logging, updater, recent projects | `flatcam_plus/appCommon/` |
 | G-code post-processing | `preprocessors/` |
 | Scripting command | `tclCommands/` |
-| Parser (Gerber, Excellon, DXF, SVG, HPGL2) | `appParsers/` |
+| Parser (Gerber, Excellon, DXF, SVG, HPGL2) | `flatcam_plus/appParsers/` |
 | Widgets, canvas, themes, preferences UI | `appGUI/` |
 | Persisted defaults | `flatcam_plus/defaults.py` |
 | App wiring, menus, tool registration | `appMain.py` |

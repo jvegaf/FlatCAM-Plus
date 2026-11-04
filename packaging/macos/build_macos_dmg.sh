@@ -225,7 +225,6 @@ build_app() {
         --collect-submodules appEditors
         --collect-submodules appGUI
         --collect-submodules appObjects
-        --collect-submodules appParsers
         --collect-submodules appPlugins
         --collect-submodules tclCommands
         --collect-submodules flatcam_plus

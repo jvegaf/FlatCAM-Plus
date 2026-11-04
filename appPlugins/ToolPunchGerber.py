@@ -23,7 +23,7 @@ import gettext
 from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
-from appParsers.ParseGerber import Gerber
+from flatcam_plus.appParsers.ParseGerber import Gerber
 from flatcam_plus.camlib import Geometry
 
 fcTranslate.apply_language('strings')

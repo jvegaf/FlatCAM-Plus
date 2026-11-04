@@ -13,7 +13,7 @@ units of 1/40 mm, so ``PA1000,1000`` is (25.0, 25.0) mm.
 import pytest
 import shapely
 
-from appParsers.ParseHPGL2 import HPGL2
+from flatcam_plus.appParsers.ParseHPGL2 import HPGL2
 
 # The options the parser copies into ``default_data``; each ``default_data`` key is the option
 # name without its ``geometry_`` prefix.

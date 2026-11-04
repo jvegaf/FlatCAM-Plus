@@ -26,7 +26,7 @@ import gettext
 from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
-from appParsers.ParseGerber import Gerber
+from flatcam_plus.appParsers.ParseGerber import Gerber
 from flatcam_plus.camlib import grace, flatten_shapely_geometry
 from matplotlib.backend_bases import KeyEvent as mpl_key_event
 

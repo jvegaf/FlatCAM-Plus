@@ -91,8 +91,8 @@ from appObjects.AppObjectTemplate import FlatCAMObj
 from appObjects.AppObject import AppObject
 
 # App Parsing files
-from appParsers.ParseExcellon import Excellon
-from appParsers.ParseGerber import Gerber
+from flatcam_plus.appParsers.ParseExcellon import Excellon
+from flatcam_plus.appParsers.ParseGerber import Gerber
 from flatcam_plus.camlib import to_dict, Geometry, CNCjob
 
 # App Pre-processors

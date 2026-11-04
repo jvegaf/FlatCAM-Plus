@@ -13,8 +13,8 @@ from flatcam_plus.appCommon.Common import GracefulException as grace
 # from scipy.spatial import KDTree, Delaunay
 # from scipy.spatial import Delaunay
 
-from appParsers.ParseSVG import svgparselength, svgparse_viewbox, getsvggeo, getsvgtext
-from appParsers.ParseDXF import getdxfgeo
+from flatcam_plus.appParsers.ParseSVG import svgparselength, svgparse_viewbox, getsvggeo, getsvgtext
+from flatcam_plus.appParsers.ParseDXF import getdxfgeo
 
 from numpy.linalg import solve
 

@@ -2,7 +2,7 @@
 from PyQt6 import QtWidgets, QtGui
 from flatcam_plus.appTool import AppToolEditor
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCTextAreaRich, FCComboBox
-from appParsers.ParseFont import ParseFont
+from flatcam_plus.appParsers.ParseFont import ParseFont
 
 import sys
 

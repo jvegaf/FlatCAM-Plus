@@ -32,8 +32,8 @@ import gettext
 from . import appTranslation as fcTranslate
 import builtins
 
-from appParsers.ParseExcellon import Excellon
-from appParsers.ParseGerber import Gerber
+from flatcam_plus.appParsers.ParseExcellon import Excellon
+from flatcam_plus.appParsers.ParseGerber import Gerber
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

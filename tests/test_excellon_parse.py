@@ -6,7 +6,7 @@ the coordinates of every hit. The sample source lives in ``tests/data/two_drills
 
 import pytest
 
-from appParsers.ParseExcellon import Excellon
+from flatcam_plus.appParsers.ParseExcellon import Excellon
 
 
 @pytest.fixture(scope="module")

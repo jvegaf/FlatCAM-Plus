@@ -9,7 +9,7 @@ from collections import namedtuple
 import pytest
 from shapely.ops import unary_union
 
-from appParsers.ParseGerber import Gerber
+from flatcam_plus.appParsers.ParseGerber import Gerber
 
 ParsedGerber = namedtuple("ParsedGerber", "gerber warning")
 

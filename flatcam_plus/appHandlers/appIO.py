@@ -8,7 +8,7 @@ from appEditors.appGerberEditor import AppGerberEditor
 
 from appGUI.GUIElements import FCFileSaveDialog, FCMessageBox
 from flatcam_plus.camlib import to_dict, dict2obj, ET, ParseError
-from appParsers.ParseHPGL2 import HPGL2
+from flatcam_plus.appParsers.ParseHPGL2 import HPGL2
 
 from appObjects.ObjectCollection import GerberObject, ExcellonObject, GeometryObject, ScriptObject, CNCJobObject
 

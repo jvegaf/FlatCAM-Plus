@@ -78,7 +78,7 @@ follow its native lifecycle without treating it as delivery approval.
 | Shared helpers (logging, `LoudDict`, updater, recent projects) | `flatcam_plus/appCommon/` |
 | Tool plugins (Cutout, Isolation, Drilling, …) | `appPlugins/Tool*.py` |
 | Document objects (Gerber, Excellon, Geometry, CNCJob) | `appObjects/` |
-| Parsers (Gerber, Excellon, DXF, SVG, HPGL2) | `appParsers/` |
+| Parsers (Gerber, Excellon, DXF, SVG, HPGL2) | `flatcam_plus/appParsers/` |
 | GUI, plot canvases, themes, preferences | `appGUI/` |
 | Object editors and their plugins | `appEditors/` |
 | G-code preprocessors | `preprocessors/` |

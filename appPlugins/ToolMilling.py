@@ -26,7 +26,7 @@ import gettext
 from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
-from appParsers.ParseExcellon import Excellon
+from flatcam_plus.appParsers.ParseExcellon import Excellon
 from matplotlib.backend_bases import KeyEvent as mpl_key_event
 from flatcam_plus.camlib import grace, is_isolation_job_type
 

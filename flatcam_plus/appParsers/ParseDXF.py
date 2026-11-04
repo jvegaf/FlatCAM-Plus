@@ -6,8 +6,8 @@
 # MIT Licence                                              #
 # ##########################################################
 
-from appParsers.ParseDXF_Spline import spline2Polyline, normalize_2
-from appParsers.ParseDXF_Spline import Vector as DxfVector
+from flatcam_plus.appParsers.ParseDXF_Spline import spline2Polyline, normalize_2
+from flatcam_plus.appParsers.ParseDXF_Spline import Vector as DxfVector
 
 from shapely import LineString, Point, Polygon
 from shapely.affinity import rotate, translate, scale

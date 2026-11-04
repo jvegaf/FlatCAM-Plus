@@ -52,7 +52,8 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
   `__init__.py`, so unlike `libs` it needed no new one.
 - **T2 (S1, S2)** — `appHandlers` (3 files, 2 importers). Status: done in the commit that adds
   it to `APP_PACKAGES`/`APP_MODULES`; its only importers were the two `appMain` lines.
-- **T3 (S1, S2)** — `appParsers` (8 files, 51 importers).
+- **T3 (S1, S2)** — `appParsers` (8 files, 26 importers). Status: done in the commit that adds it
+  to `APP_PACKAGES`/`APP_MODULES`; 26 import statements rewritten, no preprocessor imports it.
 - **T4 (S1, S2)** — `appObjects` (10 files, 63 importers).
 - **T5 (S1, S2)** — `appEditors` (31 files, 82 importers).
 - **T6 (S1, S2)** — `appPlugins` (47 files, 96 importers).
@@ -100,3 +101,14 @@ green at every commit.
   cases failed. Mutation check: pointing `appMain`'s `appIO` import back at `appHandlers` fails the
   guard by path and makes `flatcam_plus.appMain` unimportable, which is the intended loud failure.
   132 tests before, 137 after.
+- **L7 — T3 done**: `git mv appParsers flatcam_plus/appParsers` (seven modules plus the empty
+  `__init__.py` it already had), 26 import statements rewritten across 22 files, the
+  `--collect-submodules appParsers` entry retired in the four build scripts and both `PACKAGING.md`
+  snippets, and `AGENTS.md` plus the repo-map skill repointed. RED: ten guard cases failed, naming
+  `tests/test_excellon_parse.py` as a root-name importer; GREEN: 68 in that file, and the boot,
+  Gerber, Excellon and HPGL2 tests together. Mutation check: pointing `ToolIsolation.py` back at
+  `from appParsers.ParseGerber import Gerber` fails the guard by path and makes `appMain`
+  unimportable. 137 tests before, 147 after. Two honest leftovers, both pre-existing and out of
+  this slice's surfaces: the modules still log their old dotted names (`appParsers.ParseExcellon`,
+  four in `ParseGerber`), and `pyproject.toml`'s comment plus the `locale/*.po` source references
+  still name the root path.

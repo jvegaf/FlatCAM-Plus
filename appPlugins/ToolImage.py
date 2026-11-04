@@ -29,7 +29,7 @@ from svgtrace import trace
 from pyppeteer.chromium_downloader import check_chromium
 from lxml import etree as ET
 
-from appParsers.ParseSVG import svgparselength, svgparse_viewbox, getsvggeo, getsvgtext
+from flatcam_plus.appParsers.ParseSVG import svgparselength, svgparse_viewbox, getsvggeo, getsvgtext
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

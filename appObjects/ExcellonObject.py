@@ -12,7 +12,7 @@
 
 from PyQt6 import QtWidgets, QtCore, QtGui
 
-from appParsers.ParseExcellon import Excellon
+from flatcam_plus.appParsers.ParseExcellon import Excellon
 from appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted
 from appGUI.GUIElements import FCCheckBox
 from appGUI.ObjectUI import ExcellonObjectUI

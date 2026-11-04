@@ -11,7 +11,7 @@ from flatcam_plus.appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, FCCheckBox, \
     FCComboBox2, RadioSet, FCDoubleSpinner, FCSpinner, NumericalEvalTupleEntry, NumericalEvalEntry, FCTable, \
     OptionalInputSection, OptionalHideInputSection
-from appParsers.ParseExcellon import Excellon
+from flatcam_plus.appParsers.ParseExcellon import Excellon
 
 from matplotlib.backend_bases import KeyEvent as mpl_key_event
 
