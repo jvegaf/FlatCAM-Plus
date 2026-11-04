@@ -22,9 +22,11 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
   arranque de la app y los dominios críticos, como prerequisito de cualquier reorganización de
   ficheros." The critical domains, fixed here so the net is defensible: (a) application startup
   wiring, (b) Gerber input, (c) Excellon input, (d) G-code output through a preprocessor.
-- **S4 — Phase 3: migrar el layout plano (proposed, not yet authorized, blocked on S3).** Move
-  the root modules into a package. 210 files import root-level modules today, so every one is
-  a call site.
+- **S4 — Phase 3: migrar el layout plano (authorized in L27).** Scope, verbatim from the option
+  the user selected: "Mover los módulos de la raíz a un paquete. 210 import sites, riesgo alto,
+  requiere tracking ODD completo." Measured surface (L28): 13 root modules, 299 module-to-file
+  import edges across ~178 files, plus path-, name- and CWD-based loading that no import rewrite
+  reaches. Large: multi-session, sliced in T4.1 to T4.7.
 
 ### Deviations from the literal authorized text
 
@@ -42,8 +44,47 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
 - **T3 (S3)** — Add a startup smoke test, one test per critical domain, and a CI workflow.
   Route: inline. Status: done in `dbf3c1a` (tests) and `1e890ea` (CI and `AGENTS.md`).
   Covers S3 in full.
-- **T4 (S4)** — Move the root modules into a package. Route: pending, unblocked now that T3
-  landed.
+- **T4 (S4)** — Move the root modules into a package. Route: inline for the small slices, worker
+  for the mechanical import sweeps. Phases:
+  - **T4.1** — Anchor the CWD-dependent paths to one module constant, with a test that chdirs
+    away. No module moves. Covers S4's prerequisite and the riskiest coupling (L28 #1).
+  - **T4.2** — `flatcam_plus/` skeleton; move `appVersion`, `defaults`, `appDatabase`,
+    `appProcess`, `appWorker`, `appWorkerStack` (9 import statements) and delete the dead
+    `appPool`. Update the four packaging scripts that read `appVersion.py` by path.
+  - **T4.3** — Move `camlib` (35 statements across 35 files).
+  - **T4.4** — Move `appTool` (53 statements) or `appPreProcessor` (29) and the preprocessor
+    discovery with it.
+  - **T4.5** — Move `appTranslation` (172 statements across 173 files) in two or three slices of
+    about 400 authored lines.
+  - **T4.6** — Move `appMain` and turn `flatcam.py` into a root launcher that keeps
+    `.venv/bin/python flatcam.py` working; update the PyInstaller entrypoints.
+  - **T4.7** — Bring the vendored `descartes/` and the `libs/` namespace package inside, and
+    retire the `tests/conftest.py` `sys.path` insert.
+  Every phase keeps the tree consistent on its own: no shim layer, so nothing is left to remove
+  later, and each phase commits its tests, docs and packaging changes together.
+
+## Migration risk register (T4)
+
+From L28, ordered by how likely it is to break silently rather than loudly:
+
+1. **`os.chdir` to the module directory** (`appMain.py:569,578`) makes every `assets/resources`,
+   locale and `preprocessors/*.py` lookup CWD-relative. Moving `appMain.py` one level deeper
+   repoints the whole app at the package directory, and the preprocessor failure is only logged
+   (`appPreProcessor.py:157-159`). T4.1 exists to remove this dependency before any move.
+2. **Preprocessor discovery** (`appPreProcessor.py:10,149-160`): `SourceFileLoader` with the fixed
+   module name `FlatCAMPostProcessor` plus metaclass registration; a name collision silently
+   replaces a preprocessor.
+3. **Locale resolution from module location** (`appTranslation.py:60,82`) with a swallowed
+   `StopIteration`: a wrong depth means an empty language list and an English-only UI, no error.
+4. **`descartes` and `libs` as top-level importables** (`appGUI/PlotCanvasLegacy.py:15`,
+   `appMain.py:49-51`, no `libs/__init__.py`): a real PyPI `descartes` shadows the vendored one
+   and theme loading changes without an `ImportError`.
+5. **Tcl discovery keyed on the module-name prefix** (`tclCommands/__init__.py:88-89`, filter
+   `:105`): a renamed package path yields an empty command storage with no error; plus the
+   build-time hardcodes of `appVersion.py` (`packaging/linux:84`, `packaging/macos:92`,
+   `packaging/windows/update_version.ps1:19`) and of `flatcam.py` as entrypoint
+   (`packaging/linux:184`, `packaging/macos:209`, `packaging/windows:333`,
+   `build_standalone.ps1:83`).
 
 ## Decisions
 
@@ -237,3 +278,21 @@ import sites and needs an explicit go-ahead first.
   consumed. That is a limitation of the review integration surface, not of this repository, and
   it is why L24 closed the work instead of guessing at the wording. The two warnings sit on the
   Gerber comment and tolerance that the M-A mutation check already validated by hand.
+- **L27 — User authorizations (verbatim option texts)**: "Autorizo device flow con gh" for the
+  push attempt, then "Pusheás vos y yo sigo" was not taken: the user pushed `dev` themselves
+  ("ya esta pusheado", verified: `origin/dev` at `7a9269f`, 21 commits ahead of `origin/main`).
+  T4 was authorized with the option text quoted in S4.
+- **L28 — T4 surface, measured before any write** (read-only explorer, evidence per path):
+  13 root modules and 299 module-to-file import edges across ~178 files — `appTranslation` 172,
+  `appTool` 53, `camlib` 35, `appPreProcessor` 29, `appVersion` 3, `defaults` 2,
+  `appDatabase`/`appProcess`/`appWorker`/`appWorkerStack`/`descartes` 1 each, and `appPool` 0
+  (dead). Non-static loading: `tclCommands/__init__.py` walks packages and filters module names
+  by prefix, `appPlugins/__init__.py` imports explicitly with an optional `ToolImage`,
+  `appPreProcessor.load_preprocessors` globs `preprocessors/*.py` from `app.data_path` and from
+  the CWD. Path assumptions: `appMain.py:569,578` chdirs to the module directory and the rest of
+  the app then reads `assets/`, `locale/` and `preprocessors/` relative to it; `appTranslation`
+  derives `locale/` from its own file with a `parents[1]` fallback. Packaging hardcodes
+  `appVersion.py` (4 scripts) and `flatcam.py` as the PyInstaller entrypoint (4 scripts).
+  7 of the 8 test modules depend on the root being on `sys.path`.
+- **L29 — Unavailable check for T4**: no package-layout design was reviewed with anyone but the
+  evidence above; the phase order below is the parent's judgement, not a peer-reviewed plan.
