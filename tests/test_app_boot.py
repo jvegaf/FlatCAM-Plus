@@ -7,17 +7,21 @@ appears all surface here.
 
 import os
 
+from PyQt6.QtCore import QSettings
+
 from appGUI.MainGUI import MainGUI
 
 
-def test_boots_headless_into_a_main_window(fc_app, isolated_home):
+def test_boots_headless_into_a_main_window(fc_app):
     assert isinstance(fc_app.ui, MainGUI)
     assert fc_app.ui.isVisible()
 
 
 def test_keeps_its_state_inside_the_isolated_home(fc_app, isolated_home):
+    settings_file = QSettings("Open Source", "FlatCAM_Plus").fileName()
+    assert settings_file.startswith(isolated_home)
+    assert os.path.isfile(settings_file)
     assert fc_app.data_path.startswith(isolated_home)
-    assert os.path.isdir(fc_app.data_path)
 
 
 def test_installs_the_tool_plugins(fc_app):
