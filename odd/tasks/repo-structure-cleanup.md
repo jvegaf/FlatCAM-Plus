@@ -97,13 +97,12 @@ decisions and must account for it.
 
 ## Next step
 
-T3 is done: the suite boots the real application headless, covers the four critical domains, runs
-in CI, and its advisory review findings are addressed. T4 (moving the root modules into a package)
-is unblocked but not authorized; it still touches 210 import sites and needs an explicit go-ahead
-first.
+T3 is done and reviewed twice: the suite boots the real application headless, covers the four
+critical domains, runs in CI, and its advisory findings from the first review were addressed. The
+five findings of the second review stay deferred by decision L24 (L26).
 
-`dev` now carries a new unreviewed candidate on top of the approved slice (the finding fixes),
-which is expected: review is per candidate, not per session.
+T4 (moving the root modules into a package) is unblocked but not authorized; it still touches 210
+import sites and needs an explicit go-ahead first.
 
 ## Log
 
@@ -218,3 +217,23 @@ which is expected: review is per candidate, not per session.
   and fails `test_header_reports_the_source_extent_and_tool`; M-C appends a garbage drill line
   and fails `test_reads_every_drill_hit`. The isolation assertion was observed failing before the
   conftest move, which is the only reason it is trusted now.
+- **L24 — User (verbatim)**: "1", answering the choice between closing after the second review
+  and hardening the new findings blind. This closes the finding work: the second batch stays
+  recorded and unfixed.
+- **L25 — Native review of the finding fixes (L17-L23)**: offered `main..HEAD` again, reduced to
+  `6df9e1b..HEAD` (8 files, 206 lines, tier `medium`, correction budget 103, lenses `readability`
+  and `reliability`) as lineage `review-17f2de890ac3f96e`. Both lenses were captured on the first
+  attempt, the review closed `approved`, and the acknowledgement burned the authority
+  (consumed revision `sha256:ecd80599d84c6a93f3266ac5c67d80b0cf22887ce2f79d350ad21e9998f7a41c`).
+- **L26 — Deferred advisory findings from L25** (all `informational`, none opened a correction, so
+  the correction budget was never touched):
+  - R2-001, readability, `tests/test_gcode_output.py:42-44`, SUGGESTION
+  - R2-002, readability, `tests/test_gerber_parse.py:39-41`, WARNING
+  - R2-003, readability, `tests/test_app_boot.py:21`, SUGGESTION
+  - R3-001, reliability, `tests/test_gcode_output.py:43-44`, WARNING
+  - R3-002, reliability, `tests/test_gerber_parse.py:40`, WARNING
+  Their text is not recoverable: like L19, the closure reports id, lens, location and severity
+  only, and the reviewer artifacts (`rart1_39b13aac...`) are pruned when the authority is
+  consumed. That is a limitation of the review integration surface, not of this repository, and
+  it is why L24 closed the work instead of guessing at the wording. The two warnings sit on the
+  Gerber comment and tolerance that the M-A mutation check already validated by hand.
