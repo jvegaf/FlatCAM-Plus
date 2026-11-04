@@ -17,7 +17,7 @@ from copy import deepcopy
 from shapely import Polygon, MultiPolygon, Point, box
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

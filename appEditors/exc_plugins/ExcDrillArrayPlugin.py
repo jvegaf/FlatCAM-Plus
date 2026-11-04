@@ -5,7 +5,7 @@ from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, GLay, FCFr
     FCDoubleSpinner, RadioSet
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

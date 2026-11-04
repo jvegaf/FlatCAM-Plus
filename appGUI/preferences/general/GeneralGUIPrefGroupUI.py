@@ -5,10 +5,10 @@ from PyQt6.QtCore import QSettings
 from appGUI.GUIElements import RadioSet, FCCheckBox, FCComboBox, FCSliderWithSpinner, FCColorEntry, FCLabel, \
     GLay, FCFrame, FCComboBox2, FCButton, FCSpinner
 from appGUI.preferences.OptionsGroupUI import OptionsGroupUI
-from appTranslation import restart_program
+from flatcam_plus.appTranslation import restart_program
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

@@ -21,7 +21,7 @@ from shapely.ops import unary_union, linemerge, snap
 from shapely.affinity import translate
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

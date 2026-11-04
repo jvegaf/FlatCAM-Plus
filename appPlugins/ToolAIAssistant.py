@@ -18,7 +18,7 @@ from appPlugins.ai_assistant.dialogs import AIAssistantSettingsDialog
 from appPlugins.ai_assistant.providers import default_settings, provider_spec, request_completion, test_connection
 from appPlugins.ai_assistant.ui import AIAssistantUI
 
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

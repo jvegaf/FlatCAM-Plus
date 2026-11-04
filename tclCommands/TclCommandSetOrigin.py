@@ -14,7 +14,7 @@ from flatcam_plus.camlib import get_bounds
 
 import logging
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

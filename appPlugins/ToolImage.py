@@ -19,7 +19,7 @@ from shapely import LineString, MultiLineString, Polygon, MultiPolygon
 from shapely.geometry import shape
 from shapely.affinity import scale, translate
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 from rasterio import open as rasterio_open

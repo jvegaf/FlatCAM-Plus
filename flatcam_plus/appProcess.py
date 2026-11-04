@@ -11,7 +11,7 @@ from PyQt6 import QtCore
 import weakref
 
 import gettext
-import appTranslation as fcTranslate
+from . import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

@@ -7,7 +7,7 @@ from shapely.ops import unary_union
 from shapely import Polygon, LineString, LinearRing, MultiPolygon, MultiLineString
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 log = logging.getLogger('base')

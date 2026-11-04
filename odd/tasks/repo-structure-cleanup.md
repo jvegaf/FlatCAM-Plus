@@ -81,8 +81,17 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
     ...`; the discovery itself needed no change because `load_preprocessors` globs
     `app.app_home/preprocessors` and `app.data_path/preprocessors`, never the module's own
     location. The registry was verified by a mutation check, not only by a green suite.
-  - **T4.5** — Move `appTranslation` (172 statements across 173 files) in two or three slices of
-    about 400 authored lines.
+  - **T4.5** — Anchor `locale/` to the application directory and move `appTranslation` (172
+    import statements across 173 files). Status: done in the commit that adds
+    `tests/test_locale_resolution.py` and `appTranslation` to `tests/test_package_layout.py`.
+    `load_languages`, `languages_dir` and the frozen-build candidate now resolve `locale/` from a
+    single `_application_dir()` anchored one level above the module, and the silent `parents[1]`
+    fallback is gone. All 172 sites became `from flatcam_plus import appTranslation as
+    fcTranslate` (167 outside the package) or `from . import appTranslation as fcTranslate` (5
+    inside it), and the one `from appTranslation import restart_program` follows the new path.
+    One commit, not the two or three the plan predicted: see L37. As with T4.4b, the moved module
+    keeps the pre-move name resolvable in `sys.modules` for the out-of-tree user preprocessors,
+    and `tests/test_package_layout.py` pins it.
   - **T4.6** — Move `appMain` and turn `flatcam.py` into a root launcher that keeps
     `.venv/bin/python flatcam.py` working; update the PyInstaller entrypoints.
   - **T4.7** — Bring the vendored `descartes/` and the `libs/` namespace package inside, and
@@ -103,8 +112,9 @@ From L28, ordered by how likely it is to break silently rather than loudly:
    `SourceFileLoader` with the fixed module name `FlatCAMPostProcessor` plus metaclass
    registration; a name collision silently
    replaces a preprocessor.
-3. **Locale resolution from module location** (`appTranslation.py:60,82`) with a swallowed
-   `StopIteration`: a wrong depth means an empty language list and an English-only UI, no error.
+3. **Locale resolution from module location** (`flatcam_plus/appTranslation.py:_application_dir`)
+   with a swallowed `StopIteration`: a wrong depth meant an empty language list and an
+   English-only UI, no error. Handled in T4.5 (L38).
 4. **`descartes` and `libs` as top-level importables** (`appGUI/PlotCanvasLegacy.py:15`,
    `appMain.py:49-51`, no `libs/__init__.py`): a real PyPI `descartes` shadows the vendored one
    and theme loading changes without an `ImportError`.
@@ -147,15 +157,20 @@ This feature's slices are T1+T2 (14 files, 84 insertions, 137 deletions, `aedf5e
 (7 files, 214 insertions in `dbf3c1a` plus 49 insertions and 3 deletions in `1e890ea`), and the
 T4 phase slices: T4.1 `420318b` (paths), T4.2 `c3fccc4` (version pilot), T4.2b `60f72bb`
 (low-fanout modules), T4.3 `0424299` (camlib, 43 files, 55 insertions, 49 deletions), T4.4
-`367862b` (appTool, 58 files, 99 insertions, 65 deletions) and T4.4b (this commit;
-`appPreProcessor`, 30 files). Each T4 slice stays under one review slice on its own.
+`367862b` (appTool, 58 files, 99 insertions, 65 deletions), T4.4b `650e83c`
+(`appPreProcessor`, 33 files, 64 insertions, 42 deletions) plus its R3-001 shim correction
+`91f3165` (3 files, 20 insertions), and T4.5 (this commit; `appTranslation`, 176 code and test
+files with 235 insertions and 186 deletions, where 172 are the same one-line import rewrite
+repeated and the moved module is detected as a rename, plus this document's 68/21). That diff is mechanical and reviewable as a unit:
+splitting it would leave the tree unimportable between commits because no shim exists (L37).
+Each T4 slice stays under one review slice on its own.
 
-After this commit `dev` is 28 commits ahead of `origin/main` with about 3.9k added and 0.5k
+After this commit `dev` is 33 commits ahead of `origin/main` with about 3.9k added and 0.6k
 deleted lines (`git diff --numstat origin/main..dev`, lock files and `requirements.txt`
 excluded), which is well past one review slice. That backlog predates this work and grows by
 one commit per T4 phase. Push, pull request creation and merge remain human decisions and must
 account for it: the accumulated branch is not reviewable as a single candidate, so delivery has
-to be sliced per phase.
+to be sliced per phase. `dev` itself is pushed: it is level with `origin/dev` (L37).
 
 ## Known follow-ups
 
@@ -173,22 +188,22 @@ to be sliced per phase.
 
 ## Next step
 
-T4 is authorized (L27) and six of its phases are done: T4.1 anchored the CWD-dependent paths,
-T4.2 and T4.2b moved the six low-fanout modules, T4.3 moved `camlib`, T4.4 moved `appTool` and
-T4.4b moved `appPreProcessor`. The tree is consistent at every commit: `dev` is 10 commits ahead
-of `origin/dev`, 69 tests pass, and every phase keeps its tests, docs and skills in the same
-commit.
+T4 is authorized (L27) and seven of its phases are done: T4.1 anchored the CWD-dependent paths,
+T4.2 and T4.2b moved the six low-fanout modules, T4.3 moved `camlib`, T4.4 moved `appTool`,
+T4.4b moved `appPreProcessor` and T4.5 moved `appTranslation` together with the `locale/`
+anchoring that made the move safe. The tree is consistent at every commit: `dev` is level with `origin/dev`, 76 tests pass, and
+every phase keeps its tests, docs and skills in the same commit.
 
-T4.5 (moving `appTranslation`, 172 statements across 173 files) is the next phase and it has a
-prerequisite that the other phases did not: `load_languages()` and `languages_dir()` both derive
-`locale/` from `os.path.dirname(os.path.abspath(__file__))` with a silent `parents[1]` fallback
-for cx_Freeze. One level deeper, `languages_dir()` points at `flatcam_plus/locale`, which does not
-exist, so gettext loading would fail without an error and the UI would stay English. The slice has
-to anchor `locale/` to the application directory explicitly — the same fix T4.1 applied to the
-resources — and prove it with a test that asserts the language list is non-empty from the moved
-module. Then the 172 import sites go in two or three commits of about 400 authored lines.
-T4.6 (`appMain` plus the `flatcam.py` launcher) and T4.7 (`descartes`, `libs`) stay after it.
-Push and merge of the 10 unpushed commits remain human decisions.
+T4.6 (moving `appMain` and turning `flatcam.py` into a root launcher while keeping
+`.venv/bin/python flatcam.py` working, plus the four PyInstaller entrypoint hardcodes) is the
+next phase. It carries risk register items 1 and 5: `App.__init__` chdirs to
+`os.path.dirname(os.path.realpath(__file__))` and owns `app_home`, so the move repoints
+`assets/`, `locale/` and `preprocessors/` at `flatcam_plus/` unless `app_home` is anchored to
+the repository root the way T4.1 anchored `resource_location`; `packaging/linux:184`,
+`packaging/macos:209`, `packaging/windows:333` and `build_standalone.ps1:83` also name
+`flatcam.py` as the entrypoint. T4.7 (`descartes`, `libs` and the `tests/conftest.py`
+`sys.path` insert) stays after it. Push and merge of the accumulated `dev` branch remain human
+decisions.
 
 ## Log
 
@@ -398,3 +413,76 @@ Push and merge of the 10 unpushed commits remain human decisions.
   and L26 their text is not recoverable; the two SUGGESTIONS were unambiguous from location and
   are fixed in the commit that records this entry, the two WARNINGs stay deferred with only their
   location.
+- **L37 — T4.5 executed (`appTranslation` plus the `locale/` anchoring)**: this session started
+  from the task document, not from Engram: the store this session's tools see
+  (`…/install/home/.engram/engram.db`) still holds 0 observations (L31), and the real store at
+  `~/.engram/engram.db` has the `flatcam-plus` observations only up to 16:01, older than this
+  document, so its mirror is stale and the document stayed authoritative. RED first: adding
+  `appTranslation` to `PACKAGE_MODULES` failed all three guards, naming
+  `appGUI/preferences/general/GeneralGUIPrefGroupUI.py`, and the new
+  `tests/test_locale_resolution.py` could not even import (`ModuleNotFoundError:
+  flatcam_plus.appTranslation`). Then `git mv appTranslation.py flatcam_plus/appTranslation.py`
+  and 172 files rewritten: 167 outside the package to `from flatcam_plus import appTranslation
+  as fcTranslate`, the 5 inside it (`defaults`, `appDatabase`, `appProcess`, `appTool`, `camlib`)
+  to `from . import appTranslation as fcTranslate`, and the one
+  `from appTranslation import restart_program` in `GeneralGUIPrefGroupUI.py` to the package path.
+  No other form existed, so the rewrite was exact. Second RED after the move: `languages_dir()`
+  returned `flatcam_plus/locale`, which does not exist, and two of the three locale tests failed —
+  `load_languages()` still passed, which is precisely why the defect was invisible before: the
+  silent `parents[1]` fallback happened to rescue it. Fix: a single `_application_dir()` anchored
+  one level above the module now backs `languages_dir()` and the frozen-build candidate, the
+  silent fallback is replaced by a `log.error` that names the missing directory, and the now
+  unused `pathlib.Path` import is gone. Mutation check: re-anchoring `_application_dir()` to the
+  module's own directory fails all three locale tests; restored afterwards. One thing the phase
+  did inherit from T4.4b is a `sys.modules` alias for the pre-move name, but the rationale is
+  weaker here and the independent verifier refuted the first version of it (L39): nothing in this
+  tree imported `appTranslation` from a path-loaded file, so the alias is a compatibility
+  allowance for out-of-tree code, not a requirement the tree itself proves. Red observed as
+  `ModuleNotFoundError: No module named 'appTranslation'` before the alias, and
+  `tests/test_package_layout.py` pins it. `uv run --with pytest pytest tests -q` reports
+  76 passed (69 before, plus 3 locale tests, 3 parametrized layout cases and the alias test).
+  One commit instead of the two or three the plan predicted: keeping the tree importable at every
+  commit means the move and its 172 sites travel together, and the authored diff is one repeated
+  one-line rewrite plus a 16/10 rename, so it reviews as a single mechanical unit. The 172
+  statements and 173 files quoted in the plan were accurate; what changed is only the commit
+  count. `dev` is level with `origin/dev` at the start of the slice, so every earlier T4 commit
+  is already pushed; push of this one stays a human decision.
+- **L38 — Native review of the T4.5 slice (lineage `review-30a653f091737138`) and its correction**:
+  tier `high` (the process-spawn scan in `appGUI/GUIElements.py`), lenses `readability` and
+  `reliability`, both captured on the first attempt (191 KB prompts each). The refuter confirmed
+  one CRITICAL, inferential, `introduced` finding: **R3-001** — anchoring `locale/` to the parent
+  of the package fixed the repository layout and silently dropped the frozen layout, where the
+  package is unpacked inside `<app>/lib` and `locale/` stays at `<app>/`; the old
+  `Path(__file__).parents[1]` reached it precisely because the module then sat one level higher.
+  The finding is real and reproducible: `tests/test_locale_resolution.py` now simulates that layout
+  by pointing `__file__` at `<app>/lib/flatcam_plus/appTranslation.py` with `locale/` only under
+  `<app>`, and it returned 0 languages before the fix. Correction, inside the frozen budget and
+  declared as a 60-line plan: `_locale_candidates()` returns the anchored directory first and the
+  frozen-library parent second, `load_languages()` walks them and logs an error only when both are
+  empty, and `languages_dir()`/`languages_dir_cx_freeze()` expose the two candidates so
+  `apply_language`'s existing two-step `FileNotFoundError` chain is meaningful again. 77 tests
+  pass. Risk register item 3 is now handled rather than merely annotated: the silent path is
+  covered by two candidates, a logged error and four tests, and the remaining exposure is that no
+  frozen build was actually executed in this slice.
+- **L39 — Independent verification of the T4.5 slice (`gentle-ai-verify`)**: verdict correct, no
+  blocker, with five advisories. It confirmed the importer set is identical to the baseline
+  (172 files, both directions of `comm` empty), the relative form is exactly in the five package
+  modules, the anchored locale path is used by `languages_dir()` and the frozen candidate, the
+  alias resolves and the tests for it discriminate, and 76 tests passed on its own copy. It also
+  refuted one claim and one number of mine: **(A1)** the alias rationale was false — no in-tree
+  `preprocessors/*.py` ever imported `appTranslation` (`git grep` returns 0 at both `d5282be` and
+  HEAD); they import `appPreProcessor` only. The comment and L37 now say that the alias is a
+  compatibility allowance for out-of-tree code rather than something this tree requires.
+  **(A5)** the slice boundary said 150 repeated import rewrites where the diff has 172; corrected.
+  **(A2)** the alias only exists once `flatcam_plus.appTranslation` has been imported, which the
+  boot order guarantees (`appMain.py` imports it before `load_preprocessors` runs) but a fresh
+  interpreter importing the old name first would still fail. **(A4)** the old-name guard in
+  `tests/test_package_layout.py` is a substring search for `from <name> import`, so it cannot see
+  the bare `import appTranslation as fcTranslate` form that 168 of the 172 baseline sites used;
+  that is the pre-existing `R2-import-guard-syntax` advisory from L36, it is load-bearing for the
+  T4.6 and T4.7 sweeps, and it is now a tracked follow-up with a proposed `re`-based matcher rather
+  than an unrecorded gap. **(A3)** pid not a defect: the verifier read `848ae36`, before the R3-001
+  correction below made `languages_dir_cx_freeze()` the frozen-library candidate instead of a
+  duplicate; the frozen layout it could not verify is what that correction now covers with a test.
+  Defers honestly: no frozen build was executed, and its scratch directory in `/tmp` was left
+  behind (`/tmp/fcverify.ehI1f8`) after tmpfs filled.

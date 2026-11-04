@@ -10,7 +10,7 @@ from appPlugins.cnc_control.machine_profile_editor import MachineProfilesEditor
 from appPlugins.cnc_control.machine_profiles import normalize_machine_profiles
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 import json
 

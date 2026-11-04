@@ -11,7 +11,7 @@ from appGUI.PanelStyles import apply_modern_panel_style
 from appPlugins.ai_assistant.providers import provider_ids, provider_spec
 from appPlugins.cnc_control.widgets import FluidStyleButton
 
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

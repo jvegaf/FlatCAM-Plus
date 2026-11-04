@@ -13,7 +13,7 @@ from appGUI.VisPyVisuals import ShapeGroup, ShapeCollection, TextCollection, Tex
 from vispy.scene.visuals import InfiniteLine, Line, Rectangle, Text
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 import numpy as np

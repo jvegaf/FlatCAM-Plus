@@ -8,7 +8,7 @@ from appGUI.GUIElements import VerticalScrollArea, GLay, FCLabel, FCButton, FCFr
 from copy import deepcopy
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

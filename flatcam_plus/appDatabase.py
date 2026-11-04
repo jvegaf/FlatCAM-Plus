@@ -13,7 +13,7 @@ from datetime import datetime
 import math
 
 import gettext
-import appTranslation as fcTranslate
+from . import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

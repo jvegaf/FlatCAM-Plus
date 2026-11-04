@@ -30,7 +30,7 @@ from collections import defaultdict
 from functools import reduce
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

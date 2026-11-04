@@ -12,7 +12,7 @@ from appGUI.GUIElements import FCCheckBox, FCComboBox, FCDoubleSpinner, FCLabel,
 
 from .widgets import DashboardGauge, FluidStyleButton
 
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

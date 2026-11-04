@@ -8,7 +8,7 @@ from shapely import box
 from shapely.geometry import base
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

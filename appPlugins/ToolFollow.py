@@ -19,7 +19,7 @@ from shapely import Polygon, line_merge, MultiLineString, Point, simplify
 from shapely.ops import unary_union
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 from appParsers.ParseGerber import Gerber

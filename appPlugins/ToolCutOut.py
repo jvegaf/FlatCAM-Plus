@@ -29,7 +29,7 @@ from shapely.affinity import rotate
 from matplotlib.backend_bases import KeyEvent as mpl_key_event
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

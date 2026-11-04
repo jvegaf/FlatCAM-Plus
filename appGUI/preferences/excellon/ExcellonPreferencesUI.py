@@ -10,7 +10,7 @@ from appGUI.preferences.excellon.ExcellonGenPrefGroupUI import ExcellonGenPrefGr
 from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

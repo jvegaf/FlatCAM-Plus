@@ -17,7 +17,7 @@ import gettext
 import simplejson as json
 import os
 import builtins
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 from shapely import LineString, MultiLineString, Polygon, MultiPolygon, GeometryCollection
 from shapely.ops import unary_union
 

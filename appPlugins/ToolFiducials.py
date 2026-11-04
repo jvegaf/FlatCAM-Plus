@@ -21,7 +21,7 @@ from shapely.geometry import base
 from shapely.ops import unary_union
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 from flatcam_plus.camlib import flatten_shapely_geometry

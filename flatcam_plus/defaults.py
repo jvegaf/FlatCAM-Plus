@@ -29,7 +29,7 @@ from .camlib import to_dict, Geometry
 import simplejson
 import logging
 import gettext
-import appTranslation as fcTranslate
+from . import appTranslation as fcTranslate
 import builtins
 
 from appParsers.ParseExcellon import Excellon

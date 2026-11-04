@@ -7,7 +7,7 @@ from appGUI.GUIElements import RadioSet, FCCheckBox, FCButton, FCComboBox, FCEnt
     FCSliderWithSpinner, FCDoubleSpinner, FloatEntry, FCTextArea, FCLabel, GLay
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

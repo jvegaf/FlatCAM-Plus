@@ -21,6 +21,7 @@ PACKAGE_MODULES = (
     "camlib",
     "appTool",
     "appPreProcessor",
+    "appTranslation",
 )
 DELETED_MODULES = ("appPool",)
 
@@ -56,3 +57,8 @@ def test_no_module_outside_the_package_imports_the_root_name(name):
 def test_the_pre_t44b_module_name_still_resolves():
     moved = importlib.import_module("flatcam_plus.appPreProcessor")
     assert importlib.import_module("appPreProcessor") is moved
+
+
+def test_the_pre_t45_module_name_still_resolves():
+    moved = importlib.import_module("flatcam_plus.appTranslation")
+    assert importlib.import_module("appTranslation") is moved

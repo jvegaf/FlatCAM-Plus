@@ -55,7 +55,7 @@ import re
 import numpy as np
 
 import gettext
-import appTranslation as fcTranslate
+from . import appTranslation as fcTranslate
 import builtins
 
 HAS_ORTOOLS = True

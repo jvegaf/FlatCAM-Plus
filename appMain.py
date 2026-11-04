@@ -119,7 +119,7 @@ except ImportError:
 
 # App Translation
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 

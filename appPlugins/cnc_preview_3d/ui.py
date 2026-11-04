@@ -14,7 +14,7 @@ from appPlugins.cnc_control.widgets import FluidStyleButton
 from .renderer import CNCPreview3DCanvas
 from .sections import DEFAULT_PREVIEW_SECTIONS
 
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

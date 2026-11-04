@@ -19,7 +19,7 @@ from shapely import Polygon, MultiPolygon
 from shapely.ops import nearest_points
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

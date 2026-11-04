@@ -56,7 +56,7 @@ except ImportError as exc:
             "python -m pip install --upgrade --force-reinstall -r requirements.txt"
         )
     raise
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 from appMain import App
 from appGUI import VisPyPatches
 from flatcam_plus.version import APP_NAME, APP_VERSION

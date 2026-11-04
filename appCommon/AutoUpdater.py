@@ -16,7 +16,7 @@ import simplejson as json
 from PyQt6 import QtCore, QtWidgets
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

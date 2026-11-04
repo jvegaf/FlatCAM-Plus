@@ -25,7 +25,7 @@ from shapely import LineString, MultiLineString, Polygon, MultiPolygon, Point, L
 from shapely.ops import unary_union, nearest_points
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 from appParsers.ParseGerber import Gerber

@@ -26,7 +26,7 @@ import numpy as np
 from copy import deepcopy
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

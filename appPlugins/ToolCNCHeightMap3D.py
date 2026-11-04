@@ -20,7 +20,7 @@ from appGUI.GUIElements import FCLabel
 from appPlugins.cnc_control.widgets import FluidStyleButton
 from flatcam_plus.appTool import AppTool
 
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

@@ -8,7 +8,7 @@ from appGUI.preferences.OptionUI import OptionUI, HeadingOptionUI, SeparatorOpti
 from appGUI.preferences.OptionsGroupUI import OptionsGroupUI2
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

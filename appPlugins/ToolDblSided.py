@@ -15,7 +15,7 @@ from shapely import Point
 from shapely.affinity import scale
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

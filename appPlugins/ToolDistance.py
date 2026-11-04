@@ -22,7 +22,7 @@ from shapely import Polygon, Point, LineString, MultiLineString
 from shapely.strtree import STRtree
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

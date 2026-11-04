@@ -18,7 +18,7 @@ from appGUI.GUIElements import FCTextArea, FCEntry, FCButton, FCTable, GLay, FCL
 import logging
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

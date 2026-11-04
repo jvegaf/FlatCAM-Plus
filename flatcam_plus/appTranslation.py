@@ -10,7 +10,6 @@ import os
 import ctypes
 import sys
 import logging
-from pathlib import Path
 
 from PyQt6 import QtWidgets, QtGui
 from PyQt6.QtCore import Qt
@@ -20,6 +19,12 @@ import gettext
 import builtins
 
 log = logging.getLogger('base')
+
+# Modules loaded from the user data directory are written against the pre-T4.5 module name.
+# Nothing inside this tree imports this module by the old name any more, so this alias is a
+# compatibility allowance for out-of-tree code rather than a requirement: keep the name resolvable
+# so such a file imports instead of failing and being skipped without an error.
+sys.modules.setdefault('appTranslation', sys.modules[__name__])
 
 if '_' not in builtins.__dict__:
     _ = gettext.gettext
@@ -55,19 +60,47 @@ def isAdmin():
     return is_admin
 
 
+def _application_dir():
+    """The directory that holds the application's data directories (``locale``, ``assets``).
+
+    Anchored to the file location instead of the process CWD, and one level above this module
+    because the module lives inside the ``flatcam_plus`` package. In a build that unpacks the
+    package beside ``locale/`` (PyInstaller onefile), the same depth holds.
+    """
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _locale_candidates():
+    """Directories that may hold the shipped ``locale/`` tree, most likely first.
+
+    The second candidate covers frozen builds that unpack the package inside a library directory
+    (``<app>/lib/flatcam_plus/...``) and keep ``locale/`` at the application root: while this
+    module lived at the repository root, ``Path(__file__).parents[1]`` reached that directory, and
+    after the move the same place is one level further up.
+    """
+    application_dir = _application_dir()
+    return [
+        os.path.join(application_dir, 'locale'),
+        os.path.join(os.path.dirname(application_dir), 'locale'),
+    ]
+
+
 def load_languages():
     available_translations = []
-    languages_path_search = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale')
+    languages_path_search = ''
 
-    try:
-        available_translations = next(os.walk(languages_path_search))[1]
-    except StopIteration:
-        if not available_translations:
-            languages_path_search = os.path.join(str(Path(__file__).parents[1]), 'locale')
-            try:
-                available_translations = next(os.walk(languages_path_search))[1]
-            except StopIteration:
-                pass
+    for candidate in _locale_candidates():
+        try:
+            available_translations = next(os.walk(candidate))[1]
+        except StopIteration:
+            available_translations = []
+            continue
+        languages_path_search = candidate
+        break
+
+    if not languages_path_search:
+        log.error("FlatCAMTranslation.load_languages() --> no locale directory in %s" %
+                  ', '.join(_locale_candidates()))
 
     for lang in available_translations:
         try:
@@ -79,11 +112,11 @@ def load_languages():
 
 
 def languages_dir():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale')
+    return _locale_candidates()[0]
 
 
 def languages_dir_cx_freeze():
-    return os.path.join(Path(__file__).parents[1], 'locale')
+    return _locale_candidates()[1]
 
 
 def on_language_apply_click(app, restart=False):

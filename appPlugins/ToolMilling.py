@@ -23,7 +23,7 @@ import traceback
 from shapely import LineString, box
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 from appParsers.ParseExcellon import Excellon

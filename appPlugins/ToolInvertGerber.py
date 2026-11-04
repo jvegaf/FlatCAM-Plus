@@ -17,7 +17,7 @@ from copy import deepcopy
 from shapely import box
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 from flatcam_plus.camlib import flatten_shapely_geometry

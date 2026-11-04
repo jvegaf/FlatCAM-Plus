@@ -11,7 +11,7 @@ from shapely import Polygon, LineString
 from appGUI.PanelStyles import apply_modern_panel_style, apply_modern_sidebar_style
 
 import gettext
-import appTranslation as fcTranslate
+from . import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

@@ -11,7 +11,7 @@ from typing import Dict
 from PyQt6 import QtWidgets
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 from appGUI.preferences.OptionUI import OptionUI

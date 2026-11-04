@@ -21,7 +21,7 @@ from copy import deepcopy
 import numpy as np
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 MATPLOTLIB_AVAILABLE = True

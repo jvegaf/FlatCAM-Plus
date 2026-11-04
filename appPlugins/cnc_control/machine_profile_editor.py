@@ -11,7 +11,7 @@ from PyQt6.QtCore import pyqtSignal
 from .machine_profiles import normalize_machine_profile, normalize_machine_profiles
 from .widgets import FluidStyleButton
 
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

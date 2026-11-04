@@ -9,7 +9,7 @@ from appGUI.PanelStyles import apply_modern_preferences_style
 from appGUI.GUIElements import FCMessageBox
 
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

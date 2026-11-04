@@ -9,7 +9,7 @@ from shapely import MultiPolygon, Polygon, LinearRing, LineString, Point, unary_
 
 # App Translation
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')

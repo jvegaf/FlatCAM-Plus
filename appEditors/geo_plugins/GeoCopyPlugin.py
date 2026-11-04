@@ -4,7 +4,7 @@ from flatcam_plus.appTool import AppToolEditor
 from appGUI.GUIElements import VerticalScrollArea, GLay, FCLabel, FCButton, FCFrame, NumericalEvalEntry, RadioSet, \
     FCSpinner, FCDoubleSpinner
 import gettext
-import appTranslation as fcTranslate
+from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 fcTranslate.apply_language('strings')
