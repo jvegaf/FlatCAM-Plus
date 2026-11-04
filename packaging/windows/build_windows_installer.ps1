@@ -348,7 +348,6 @@ function Build-PyInstallerTarget {
         # "appCommon" is a "flatcam_plus" subpackage now; the entry below collects it.
         "--collect-submodules", "appEditors",
         "--collect-submodules", "appGUI",
-        "--collect-submodules", "appObjects",
         "--collect-submodules", "appPlugins",
         "--collect-submodules", "tclCommands",
         "--collect-submodules", "flatcam_plus",

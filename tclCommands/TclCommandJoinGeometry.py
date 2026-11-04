@@ -1,5 +1,5 @@
 from tclCommands.TclCommand import TclCommand
-from appObjects.GeometryObject import GeometryObject
+from flatcam_plus.appObjects.GeometryObject import GeometryObject
 
 import collections
 

@@ -1,7 +1,7 @@
 
 from PyQt6 import QtCore, QtGui
 
-from appObjects.ObjectCollection import GeometryObject, GerberObject, ExcellonObject
+from flatcam_plus.appObjects.ObjectCollection import GeometryObject, GerberObject, ExcellonObject
 from appGUI.GUIElements import DialogBoxChoice
 
 from copy import deepcopy

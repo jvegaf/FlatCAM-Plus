@@ -13,7 +13,7 @@
 from PyQt6.QtCore import Qt
 
 from appEditors.appTextEditor import AppTextEditor
-from appObjects.AppObjectTemplate import *
+from flatcam_plus.appObjects.AppObjectTemplate import *
 from appGUI.ObjectUI import DocumentObjectUI
 
 import gettext

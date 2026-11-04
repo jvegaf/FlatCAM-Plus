@@ -10,7 +10,7 @@ from PyQt6 import QtWidgets, QtCore, QtGui
 from flatcam_plus.appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, FCCheckBox, \
     FCDoubleSpinner, OptionalInputSection
-from appObjects import GerberObject
+from flatcam_plus.appObjects import GerberObject
 
 import logging
 from copy import deepcopy

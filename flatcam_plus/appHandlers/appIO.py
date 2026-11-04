@@ -10,7 +10,7 @@ from appGUI.GUIElements import FCFileSaveDialog, FCMessageBox
 from flatcam_plus.camlib import to_dict, dict2obj, ET, ParseError
 from flatcam_plus.appParsers.ParseHPGL2 import HPGL2
 
-from appObjects.ObjectCollection import GerberObject, ExcellonObject, GeometryObject, ScriptObject, CNCJobObject
+from flatcam_plus.appObjects.ObjectCollection import GerberObject, ExcellonObject, GeometryObject, ScriptObject, CNCJobObject
 
 from reportlab.graphics import renderPDF
 from reportlab.pdfgen import canvas

@@ -28,7 +28,7 @@ Load for any non-trivial change, code-location question, architecture decision, 
 | Change | Layer |
 | --- | --- |
 | Menu tool, wizard, tool panel | `appPlugins/Tool*.py` |
-| Document type, serialization, plotting | `appObjects/` |
+| Document type, serialization, plotting | `flatcam_plus/appObjects/` |
 | Geometry / CNC algorithms | `flatcam_plus/camlib.py` |
 | Shared helpers, logging, updater, recent projects | `flatcam_plus/appCommon/` |
 | G-code post-processing | `preprocessors/` |

@@ -6,7 +6,7 @@ job settings it reads and the emitted G-code text.
 
 import pytest
 
-from appObjects.CNCJobObject import CNCJobObject
+from flatcam_plus.appObjects.CNCJobObject import CNCJobObject
 
 SOURCE_BOUNDS = {"xmin": 0.0, "ymin": 0.0, "xmax": 20.0, "ymax": 10.0}
 TOOL_DIAMETER = 0.2

@@ -9,12 +9,12 @@
 
 from PyQt6 import QtCore
 
-from appObjects.CNCJobObject import CNCJobObject
-from appObjects.DocumentObject import DocumentObject
-from appObjects.ExcellonObject import ExcellonObject
-from appObjects.GeometryObject import GeometryObject
-from appObjects.GerberObject import GerberObject
-from appObjects.ScriptObject import ScriptObject
+from flatcam_plus.appObjects.CNCJobObject import CNCJobObject
+from flatcam_plus.appObjects.DocumentObject import DocumentObject
+from flatcam_plus.appObjects.ExcellonObject import ExcellonObject
+from flatcam_plus.appObjects.GeometryObject import GeometryObject
+from flatcam_plus.appObjects.GerberObject import GerberObject
+from flatcam_plus.appObjects.ScriptObject import ScriptObject
 
 import time
 import traceback

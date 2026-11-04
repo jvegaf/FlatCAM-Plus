@@ -54,7 +54,8 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
   it to `APP_PACKAGES`/`APP_MODULES`; its only importers were the two `appMain` lines.
 - **T3 (S1, S2)** — `appParsers` (8 files, 26 importers). Status: done in the commit that adds it
   to `APP_PACKAGES`/`APP_MODULES`; 26 import statements rewritten, no preprocessor imports it.
-- **T4 (S1, S2)** — `appObjects` (10 files, 63 importers).
+- **T4 (S1, S2)** — `appObjects` (10 files, 32 importers). Status: done in the commit that adds
+  it to `APP_PACKAGES`/`APP_MODULES`; 19 of the rewrites are inside the moved package.
 - **T5 (S1, S2)** — `appEditors` (31 files, 82 importers).
 - **T6 (S1, S2)** — `appPlugins` (47 files, 96 importers).
 - **T7 (S1, S2, S3)** — `tclCommands` (76 files, 298 importers) with the discovery prefix derived
@@ -112,3 +113,13 @@ green at every commit.
   this slice's surfaces: the modules still log their old dotted names (`appParsers.ParseExcellon`,
   four in `ParseGerber`), and `pyproject.toml`'s comment plus the `locale/*.po` source references
   still name the root path.
+- **L8 — T4 done, no cycle**: `appObjects` moved with its existing empty `__init__.py`; 32 import
+  statements rewritten (19 of them inside the package itself), the build-script entry retired in
+  the four scripts and both `PACKAGING.md` snippets, and four skill files plus the `AGENTS.md` row
+  repointed. The cycle risk the spec warned about did not materialise: `camlib` imports no
+  `appObjects` module, and each of the nine modules imports cleanly in a fresh interpreter. RED:
+  twelve guard cases; GREEN: 80 in that file. Mutation check: reverting one intra-package import in
+  `ObjectCollection.py` fails five guard cases by path and makes the boot test fail collection with
+  `ModuleNotFoundError`. 147 tests before, 159 after. Leftovers recorded, not fixed: two prose
+  references to the old path (`ToolNCC.py` docstring, a `test_gcode_output.py` comment) and the
+  pre-existing `.po` source references and one log string.

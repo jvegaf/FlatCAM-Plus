@@ -11,18 +11,18 @@ metadata:
 
 ## Activation Contract
 
-Load when adding a document type, changing persisted object state, touching `appObjects/`, or debugging project save/load, object creation, selection, or plotting.
+Load when adding a document type, changing persisted object state, touching `flatcam_plus/appObjects/`, or debugging project save/load, object creation, selection, or plotting.
 
 ## Hard Rules
 
-- Base class is `FlatCAMObj` in `appObjects/AppObjectTemplate.py`. Subclasses set `kind`, `ui_type`, and the exact `ser_attrs` list that defines persisted state.
+- Base class is `FlatCAMObj` in `flatcam_plus/appObjects/AppObjectTemplate.py`. Subclasses set `kind`, `ui_type`, and the exact `ser_attrs` list that defines persisted state.
 - `AppObject.new_object(kind, name, initialize, plot=..., callback=...)` is the only supported creation path. It copies app defaults whose keys start with `<kind>_`, stripping the prefix into `obj_options`.
 - `obj_options` is a `LoudDict` with a change callback. Mutate it through the documented API; do not replace it.
 - `from_dict()` updates `obj_options` in place for the `'options'` key and sets the other `ser_attrs` attributes. Missing keys from old projects are tolerated; never assume every attribute exists.
 - Shapely geometry and `ApertureMacro` are serialized through `camlib.to_dict()`; any new non-JSON state must be added to `ser_attrs` and made serializable.
 - `set_ui(ui)` asserts the declared `ui_type`. Keep the UI class and the object's `ui_type` in sync.
 - Object signals (`object_created`, `object_changed`, `object_plotted`) drive collection updates and plotting; emit them through the existing `AppObject` flow.
-- Collection operations live in `appObjects/ObjectCollection.py` (`append`, `get_active`, `get_selected`, `get_by_name`, `get_list`). Do not maintain a parallel object list.
+- Collection operations live in `flatcam_plus/appObjects/ObjectCollection.py` (`append`, `get_active`, `get_selected`, `get_by_name`, `get_list`). Do not maintain a parallel object list.
 
 ## Decision Gates
 
@@ -47,7 +47,7 @@ Report: object class and `kind`, `ser_attrs` changes, defaults added, creation p
 
 ## References
 
-- `appObjects/AppObjectTemplate.py` — `FlatCAMObj` lifecycle and serialization.
-- `appObjects/AppObject.py` — `new_object` and collection signals.
-- `appObjects/ObjectCollection.py` — collection queries.
+- `flatcam_plus/appObjects/AppObjectTemplate.py` — `FlatCAMObj` lifecycle and serialization.
+- `flatcam_plus/appObjects/AppObject.py` — `new_object` and collection signals.
+- `flatcam_plus/appObjects/ObjectCollection.py` — collection queries.
 - `flatcam_plus/camlib.py` — `to_dict` / `dict2obj` serializers.

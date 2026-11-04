@@ -11,7 +11,7 @@
 # ##########################################################
 
 from PyQt6 import QtWidgets, QtCore
-from appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted
+from flatcam_plus.appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted
 from appGUI.GUIElements import FCCheckBox
 from appGUI.ObjectUI import GeometryObjectUI
 

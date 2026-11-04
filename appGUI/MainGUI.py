@@ -37,7 +37,7 @@ from appGUI.preferences.tools.Plugins2PreferencesUI import Plugins2PreferencesUI
 from appGUI.preferences.tools.PluginsEngravingPreferencesUI import PluginsEngravingPreferencesUI
 
 from appGUI.preferences.utilities.UtilPreferencesUI import UtilPreferencesUI
-from appObjects.ObjectCollection import EventSensitiveListView
+from flatcam_plus.appObjects.ObjectCollection import EventSensitiveListView
 
 import subprocess
 import os

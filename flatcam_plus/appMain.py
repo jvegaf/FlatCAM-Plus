@@ -85,10 +85,10 @@ from flatcam_plus.defaults import AppOptions
 # App Objects
 from appGUI.preferences.OptionsGroupUI import OptionsGroupUI
 from appGUI.preferences.PreferencesUIManager import PreferencesUIManager
-from appObjects.ObjectCollection import ObjectCollection, GerberObject, ExcellonObject, GeometryObject, \
+from flatcam_plus.appObjects.ObjectCollection import ObjectCollection, GerberObject, ExcellonObject, GeometryObject, \
     CNCJobObject, ScriptObject, DocumentObject
-from appObjects.AppObjectTemplate import FlatCAMObj
-from appObjects.AppObject import AppObject
+from flatcam_plus.appObjects.AppObjectTemplate import FlatCAMObj
+from flatcam_plus.appObjects.AppObject import AppObject
 
 # App Parsing files
 from flatcam_plus.appParsers.ParseExcellon import Excellon
