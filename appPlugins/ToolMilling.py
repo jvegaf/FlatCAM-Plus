@@ -282,6 +282,9 @@ class ToolMilling(Excellon, AppTool):
         self.launch_job.connect(self.generate_cnc_job_handler)
         self.ui.generate_cnc_button.clicked.connect(self.on_generate_cncjob_click)
 
+        # Generate Geometry
+        self.ui.generate_geometry_button.clicked.connect(self.on_generate_geometry_click)
+
         # Reset Tool
         self.ui.reset_button.clicked.connect(self.set_tool_ui)
         # Cleanup on Graceful exit (CTRL+ALT+X combo key)
@@ -399,6 +402,10 @@ class ToolMilling(Excellon, AppTool):
             pass
         try:
             self.ui.generate_cnc_button.clicked.disconnect()
+        except (TypeError, AttributeError):
+            pass
+        try:
+            self.ui.generate_geometry_button.clicked.disconnect()
         except (TypeError, AttributeError):
             pass
 
@@ -765,6 +772,7 @@ class ToolMilling(Excellon, AppTool):
                 self.ui.spindlespeed_entry.show()
                 self.ui.dwell_cb.show()
                 self.ui.dwelltime_entry.show()
+            self._apply_target_ui_state()
             return
 
         if self.ui.target_radio.get_value() != 'geo':
@@ -792,6 +800,22 @@ class ToolMilling(Excellon, AppTool):
             self.ui.pp_geo_name_cb.set_value(PLOTTER_PP)
         except Exception:
             pass
+
+        self._apply_target_ui_state()
+
+    def _apply_target_ui_state(self):
+        if self.ui is None:
+            return
+
+        is_exc = self.ui.target_radio.get_value() == 'exc' and not self.plotter_mode
+
+        # Generate Geometry is only meaningful for Excellon sources.
+        self.ui.generate_geometry_button.setVisible(is_exc)
+
+        # CNCJob generation and its Common Parameters only apply to Geometry sources.
+        self.ui.generate_cnc_button.setVisible(not is_exc)
+        self.ui.gen_param_label.setVisible(not is_exc and not self.plotter_mode)
+        self.ui.gp_frame.setVisible(not is_exc and not self.plotter_mode)
 
     def change_level(self, level):
         """
@@ -1506,11 +1530,13 @@ class ToolMilling(Excellon, AppTool):
             if self.target_obj.tools:
                 self.ui.param_frame.setDisabled(False)
                 self.ui.generate_cnc_button.setDisabled(False)
+                self.ui.generate_geometry_button.setDisabled(False)
                 last_key = list(self.target_obj.tools.keys())[-1]
                 self.to_form(storage=self.target_obj.tools[last_key]['data'])
             else:
                 self.ui.param_frame.setDisabled(True)
                 self.ui.generate_cnc_button.setDisabled(True)
+                self.ui.generate_geometry_button.setDisabled(True)
         self._apply_plotter_ui_state()
 
     def on_object_selection_changed(self, current, previous):
@@ -1799,9 +1825,11 @@ class ToolMilling(Excellon, AppTool):
         if sel_rows and len(sel_rows) > 0:
             self.ui.param_frame.setDisabled(False)
             self.ui.generate_cnc_button.setDisabled(False)
+            self.ui.generate_geometry_button.setDisabled(False)
         else:
             self.ui.param_frame.setDisabled(True)
             self.ui.generate_cnc_button.setDisabled(True)
+            self.ui.generate_geometry_button.setDisabled(True)
 
         self._apply_plotter_ui_state()
         self.ui_connect()
@@ -1821,9 +1849,11 @@ class ToolMilling(Excellon, AppTool):
         if sel_rows and len(sel_rows) > 0:
             self.ui.param_frame.setDisabled(False)
             self.ui.generate_cnc_button.setDisabled(False)
+            self.ui.generate_geometry_button.setDisabled(False)
         else:
             self.ui.param_frame.setDisabled(True)
             self.ui.generate_cnc_button.setDisabled(True)
+            self.ui.generate_geometry_button.setDisabled(True)
         self._apply_plotter_ui_state()
 
     def update_ui(self):
@@ -1849,6 +1879,7 @@ class ToolMilling(Excellon, AppTool):
 
         if not sel_rows or len(sel_rows) == 0:
             self.ui.generate_cnc_button.setDisabled(True)
+            self.ui.generate_geometry_button.setDisabled(True)
             self.ui.tool_data_label.setText(
                 "<b>%s: <font color='#0000FF'>%s</font></b>" % (_('Parameters for'), _("No Tool Selected"))
             )
@@ -1856,6 +1887,7 @@ class ToolMilling(Excellon, AppTool):
             return
         else:
             self.ui.generate_cnc_button.setDisabled(False)
+            self.ui.generate_geometry_button.setDisabled(False)
             self.ui.param_frame.setDisabled(False)
 
         if len(sel_rows) == 1:
@@ -2941,6 +2973,27 @@ class ToolMilling(Excellon, AppTool):
                 oname = option[len(kind) + 1:]
                 new_obj.obj_options[oname] = self.app.options[option]
 
+        new_obj.tools = self._build_milled_tools(tools_dict)
+
+        # I need to prepare a dictionary like cnc_dict for a CNCJob object, each key a tool and each tool a data and
+        # a milled geometry (either drills or slots or both) not a total sum.
+        self.generate_cnc_job_handler(geo_obj=new_obj, tools_dict=new_obj.tools, disable_offset=True)
+
+    def _build_milled_tools(self, tools_dict):
+        """
+        Build the milled geometry for every selected Excellon tool.
+
+        The geometry is produced with the same parameters used by the CNCJob path
+        (Milling Type, Milling Diameter, offset, overlap and connect), so it can be
+        reused both to create a CNCJob and to create a plain Geometry object.
+
+        :param tools_dict: selected tools, keyed by tool id, with their 'data' and geometry.
+        :type tools_dict: dict
+        :return: a tools dictionary in the shape expected by a Geometry object.
+        :rtype: dict
+        """
+        milled_tools = {}
+
         for tool in tools_dict:
             old_disp_number = 0
             drills_tool_geo = []
@@ -3003,7 +3056,6 @@ class ToolMilling(Excellon, AppTool):
                     cp.append(geo_res)
                 pol_nr += 1
                 disp_number = int(np.interp(pol_nr, [0, geo_len], [0, 100]))
-                # log.debug("Polygons cleared: %d" % pol_nr)
 
                 if old_disp_number < disp_number <= 100:
                     self.app.proc_container.update_view_text(' %d%%' % disp_number)
@@ -3023,24 +3075,88 @@ class ToolMilling(Excellon, AppTool):
             tools_dict[tool]['data']['tools_mill_tooldia'] = mill_dia
             tools_dict[tool]['tooldia'] = mill_dia
 
-            new_obj.tools[tool] = {
+            milled_tools[tool] = {
                 'tooldia':          mill_dia,
-                'data':             deepcopy(self.target_obj.tools[tool]['data']),
+                'data':             deepcopy(tools_dict[tool]['data']),
                 'solid_geometry':   deepcopy(total_geometry)
             }
-            new_obj.tools[tool]['data']['tools_mill_tooldia'] = mill_dia
-            new_obj.tools[tool]['data']['seg_x'] = self.app.options['geometry_seg_x']
-            new_obj.tools[tool]['data']['seg_y'] = self.app.options['geometry_seg_y']
+            milled_tools[tool]['data']['tools_mill_tooldia'] = mill_dia
+            milled_tools[tool]['data']['seg_x'] = self.app.options['geometry_seg_x']
+            milled_tools[tool]['data']['seg_y'] = self.app.options['geometry_seg_y']
 
-        # if not total_tool_geo:
-        #     self.app.inform.emit('[ERROR_NOTCL] %s' % _("Failed. Nothing to mill ..."))
-        #     return
+        return milled_tools
 
-        # I need to prepare a dictionary like cnc_dict for a CNCJob object, each key a tool and each tool a data and
-        # a milled geometry (either drills or slots or both) not a total sum.
-        # painting the polygons
+    def _get_selected_excellon_tools(self):
+        sel_tools = {}
 
-        self.generate_cnc_job_handler(geo_obj=new_obj, tools_dict=new_obj.tools, disable_offset=True)
+        table = self.ui.tools_table_mill_exc
+        if table.selectedItems():
+            for item in table.selectedItems():
+                tooluid = int(table.item(item.row(), 3).text())
+                for tooluid_key, tooluid_value in self.target_obj.tools.items():
+                    if int(tooluid_key) == tooluid:
+                        sel_tools[tooluid] = deepcopy(tooluid_value)
+        elif table.rowCount() == 1:
+            tooluid = int(table.item(0, 3).text())
+            for tooluid_key, tooluid_value in self.target_obj.tools.items():
+                if int(tooluid_key) == tooluid:
+                    sel_tools[tooluid] = deepcopy(tooluid_value)
+
+        return sel_tools
+
+    def on_generate_geometry_click(self):
+        self.app.delete_selection_shape()
+
+        self.obj_name = self.ui.object_combo.currentText()
+
+        # Get source object.
+        try:
+            self.target_obj = self.app.collection.get_by_name(self.obj_name)
+        except Exception as e:
+            self.app.inform.emit('[ERROR_NOTCL] %s: %s' % (_("Could not retrieve object"), str(self.obj_name)))
+            return "Could not retrieve object: %s with error: %s" % (self.obj_name, str(e))
+
+        if self.target_obj is None:
+            self.app.inform.emit('[ERROR_NOTCL] %s.' % _("Object not found"))
+            return
+
+        if self.target_obj.kind != 'excellon':
+            self.app.inform.emit('[WARNING_NOTCL] %s' %
+                                 _("Generate Geometry is available only for Excellon objects."))
+            return
+
+        self.sel_tools = self._get_selected_excellon_tools()
+        if not self.sel_tools:
+            self.app.inform.emit('[ERROR_NOTCL] %s' % _("Failed. No tool selected in the tool table ..."))
+            return
+
+        self.ensure_milling_tool_defaults(self.target_obj, self.sel_tools)
+
+        outname = "%s_%s" % (self.target_obj.obj_options["name"], 'mill_geo')
+
+        def geo_init(geo_obj, app_obj):
+            assert geo_obj.kind == 'geometry', "Initializer expected a GeometryObject, got %s" % type(geo_obj)
+
+            milled_tools = self._build_milled_tools(self.sel_tools)
+            if not milled_tools:
+                return "fail"
+
+            self.ensure_milling_tool_defaults(geo_obj, milled_tools)
+
+            geo_obj.obj_options['type'] = 'Excellon Geometry'
+            geo_obj.obj_options['tools_mill_tooldia'] = str(milled_tools[list(milled_tools.keys())[0]]['tooldia'])
+            geo_obj.multigeo = True
+            geo_obj.multitool = True
+            geo_obj.tools.clear()
+            geo_obj.tools = dict(milled_tools)
+
+            total_geometry = []
+            for tool_data in milled_tools.values():
+                total_geometry += list(tool_data['solid_geometry'])
+            geo_obj.solid_geometry = total_geometry
+
+        plot = self.ui.plot_cb.isChecked()
+        self.app.app_obj.new_object("geometry", outname, geo_init, plot=plot)
 
     def on_generate_cnc_from_geo(self):
         self.app.log.debug("Generating CNCJob from Geometry ...")
@@ -5037,6 +5153,17 @@ class MillingUI:
               "on all the tools from the Tool Table.")
         )
         self.tool_params_box.addWidget(self.apply_param_to_all)
+
+        # #############################################################################################################
+        # Generate Geometry object (Excellon source only)
+        # #############################################################################################################
+        self.generate_geometry_button = FCButton(_("Generate Geometry"), bold=True)
+        self.generate_geometry_button.setIcon(QtGui.QIcon(self.app.resource_location + '/geometry32.png'))
+        self.generate_geometry_button.setToolTip(
+            _("Generate a Geometry object for milling the selected tools.\n"
+              "Uses the Milling Type, Milling Diameter and offset parameters.")
+        )
+        self.tool_params_box.addWidget(self.generate_geometry_button)
 
         # #############################################################################################################
         # COMMON PARAMETERS
