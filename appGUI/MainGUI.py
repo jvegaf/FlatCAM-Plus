@@ -15,6 +15,7 @@ from PyQt6.QtCore import QSettings
 import platform
 
 from appVersion import APP_NAME
+from appCommon.recent_projects import load_recent_project_paths
 
 from appGUI.GUIElements import *
 from appGUI.PanelStyles import (
@@ -720,6 +721,35 @@ class MainGUI(QtWidgets.QMainWindow):
                 background: {button_hover};
                 border-color: rgba(255, 255, 255, 116);
             }}
+            QLabel#project_start_recent_title {{
+                color: {text};
+                font-size: 12px;
+                font-weight: 700;
+                padding-top: 4px;
+            }}
+            QLabel#project_start_recent_empty {{
+                color: #cbd5e1;
+                font-size: 12px;
+            }}
+            QListWidget#project_start_recent_list {{
+                background: rgba(255, 255, 255, 22);
+                border: 1px solid rgba(255, 255, 255, 54);
+                border-radius: 12px;
+                padding: 6px;
+                color: {text};
+                font-size: 12px;
+                outline: 0;
+            }}
+            QListWidget#project_start_recent_list::item {{
+                padding: 8px 12px;
+                border-radius: 8px;
+            }}
+            QListWidget#project_start_recent_list::item:hover {{
+                background: {button_hover};
+            }}
+            QListWidget#project_start_recent_list::item:selected {{
+                background: rgba(197, 139, 42, 120);
+            }}
         """
 
     def build_project_start_widget(self):
@@ -759,10 +789,10 @@ class MainGUI(QtWidgets.QMainWindow):
 
         action_panel = QtWidgets.QFrame(splash_shell)
         action_panel.setObjectName("project_start_action_panel")
-        action_panel.setMinimumHeight(126)
+        action_panel.setMinimumHeight(300)
         action_layout = QtWidgets.QVBoxLayout(action_panel)
         action_layout.setContentsMargins(24, 24, 24, 24)
-        action_layout.setSpacing(0)
+        action_layout.setSpacing(12)
 
         self.start_new_project_btn = QtWidgets.QPushButton(_("Create New Project"))
         self.start_new_project_btn.setObjectName("project_start_primary")
@@ -793,6 +823,23 @@ class MainGUI(QtWidgets.QMainWindow):
         button_row.addWidget(self.start_open_project_btn, 1)
 
         action_layout.addLayout(button_row)
+
+        self.start_recent_title = QtWidgets.QLabel(_("Recent Projects"), action_panel)
+        self.start_recent_title.setObjectName("project_start_recent_title")
+        action_layout.addWidget(self.start_recent_title)
+
+        self.start_recent_list = QtWidgets.QListWidget(action_panel)
+        self.start_recent_list.setObjectName("project_start_recent_list")
+        self.start_recent_list.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        self.start_recent_list.itemClicked.connect(self.on_start_recent_clicked)
+        action_layout.addWidget(self.start_recent_list)
+
+        self.start_recent_empty = QtWidgets.QLabel(_("No recent projects yet."), action_panel)
+        self.start_recent_empty.setObjectName("project_start_recent_empty")
+        action_layout.addWidget(self.start_recent_empty)
+
+        self.refresh_start_recent_projects()
+
         shell_layout.addWidget(action_panel)
 
         layout.addWidget(
@@ -802,6 +849,45 @@ class MainGUI(QtWidgets.QMainWindow):
         layout.addStretch(3)
 
         return start_widget
+
+    def refresh_start_recent_projects(self):
+        if not hasattr(self, "start_recent_list"):
+            return
+
+        limit = self.app.options.get("global_recent_limit", 10)
+        recent_projects = load_recent_project_paths(self.app.recent_projects_path(), limit=limit)
+
+        self.start_recent_list.clear()
+        if not recent_projects:
+            self.start_recent_list.hide()
+            self.start_recent_empty.show()
+            return
+
+        for project_path in recent_projects:
+            item = QtWidgets.QListWidgetItem(
+                "%s  —  %s" % (os.path.basename(project_path), os.path.dirname(project_path))
+            )
+            item.setToolTip(project_path)
+            item.setData(QtCore.Qt.ItemDataRole.UserRole, project_path)
+            self.start_recent_list.addItem(item)
+
+        self.start_recent_list.setFixedHeight(min(34 * len(recent_projects) + 12, 176))
+        self.start_recent_list.show()
+        self.start_recent_empty.hide()
+
+    def on_start_recent_clicked(self, item):
+        project_path = item.data(QtCore.Qt.ItemDataRole.UserRole)
+        if not project_path:
+            return
+        if not os.path.exists(project_path):
+            QtWidgets.QMessageBox.warning(
+                self,
+                _("Recent Project"),
+                _("File no longer available.")
+            )
+            self.refresh_start_recent_projects()
+            return
+        self.app.f_handlers.open_project(filename=project_path)
 
     def request_new_project_details(self):
         dialog = QtWidgets.QDialog(self)
@@ -904,6 +990,7 @@ class MainGUI(QtWidgets.QMainWindow):
     def show_start_workspace(self):
         self.project_workspace_active = False
         self.current_project_name = None
+        self.refresh_start_recent_projects()
         if hasattr(self, "right_content_stack"):
             self.right_content_stack.setCurrentWidget(self.project_start_widget)
         if hasattr(self, "toolbar_center_host"):

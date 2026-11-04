@@ -2,7 +2,6 @@
 import sys
 import os
 import traceback
-import json
 import gettext
 import builtins
 import importlib.util
@@ -61,6 +60,7 @@ import appTranslation as fcTranslate
 from appMain import App
 from appGUI import VisPyPatches
 from appVersion import APP_NAME, APP_VERSION
+from appCommon.recent_projects import load_recent_project_paths
 
 from appGUI.GUIElements import FCMessageBox
 
@@ -276,22 +276,7 @@ class StartupProjectLauncher(QtWidgets.QDialog):
 
     def load_recent_projects(self):
         recent_path = os.path.join(self.data_path, "recent_projects.json")
-        try:
-            with open(recent_path, "r", encoding="utf-8") as recent_file:
-                records = json.load(recent_file)
-        except (OSError, json.JSONDecodeError):
-            return []
-
-        projects = []
-        for record in records:
-            if not isinstance(record, dict):
-                continue
-            if str(record.get("kind", "")).lower() != "project":
-                continue
-            filename = record.get("filename")
-            if filename and os.path.exists(filename):
-                projects.append(filename)
-        return projects
+        return load_recent_project_paths(recent_path)
 
     def on_new_project(self):
         dialog = QtWidgets.QDialog(self)
