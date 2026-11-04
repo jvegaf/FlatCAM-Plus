@@ -7,7 +7,7 @@
 
 <p align="center">
   <img alt="Version" src="https://img.shields.io/badge/version-1.1.0%20beta-31b0d5" />
-  <img alt="Python" src="https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white" />
+  <img alt="Python" src="https://img.shields.io/badge/python-3.14%2B-3776AB?logo=python&logoColor=white" />
   <img alt="PyQt" src="https://img.shields.io/badge/UI-PyQt6-41cd52" />
   <img alt="Platform" src="https://img.shields.io/badge/platform-Windows-lightgrey?logo=windows" />
   <img alt="CNC" src="https://img.shields.io/badge/CNC-GRBL%20%7C%20FluidNC%20%7C%20Serial%20%7C%20TCP-orange" />
@@ -80,7 +80,7 @@ FlatCAM Plus modernizes the FlatCAM workflow with a stronger Windows runtime, cl
 
 | Feature | Description |
 | --- | --- |
-| Modern runtime | The project targets **Python 3.11+** and **PyQt6** for improved maintainability. |
+| Modern runtime | The project targets **Python 3.14+** and **PyQt6** for improved maintainability. |
 | Windows-focused stability | Core application behavior is tuned for current Windows environments. |
 | Safer UI updates | Background plotting and CNC UI refresh paths are hardened against deleted Qt/C++ wrapper errors. |
 | Resilient plugin startup | Optional dependency and plugin loading failures are handled more gracefully. |
@@ -313,8 +313,8 @@ The AI assistant feature is organized under `appPlugins/ai_assistant/`:
 ## Installation and Setup
 
 ### 1. Prerequisites
-- **Python 3.11** or greater.
-- **[Mamba](https://mamba.readthedocs.io/en/latest/installation.html)** or **[Conda](https://docs.conda.io/en/latest/miniconda.html)** (Recommended for dependency management).
+- **Python 3.14** or greater (pinned in `.python-version`).
+- **[uv](https://docs.astral.sh/uv/)** (recommended). `uv.lock` pins the full resolved dependency set.
 
 ### 2. Running from Sources
 
@@ -326,21 +326,16 @@ The AI assistant feature is organized under `appPlugins/ai_assistant/`:
 
 2. **Create the environment:**
    ```bash
-   mamba env create -f environment.yml
+   uv sync
    ```
 
-3. **Activate the environment:**
+3. **Launch FlatCAM Plus:**
    ```bash
-   mamba activate flatcam
-   ```
-
-4. **Launch FlatCAM Plus:**
-   ```bash
-   python flatcam.py
+   .venv/bin/python flatcam.py     # Windows: .venv\Scripts\python flatcam.py
    ```
 
 ### Manual Installation (pip)
-If you prefer not to use Conda, you can install dependencies via pip:
+If you prefer not to use uv, `requirements.txt` mirrors the pip-installable dependencies:
 ```bash
 pip install -r requirements.txt
 python flatcam.py

@@ -1,9 +1,8 @@
 
 # Install on Ubuntu(-like) systems
-
-# Install dependencies system-wide (including python modules)
-install_dependencies:
-	sudo -H ./setup_ubuntu.sh
+# Dependencies are managed by uv: run `uv sync` from the repository root.
+# The former `install_dependencies` target ran `setup_ubuntu.sh`, which is not part
+# of this repository, so it could never work from a clone.
 
 USER_ID = $(shell id -u)
 
@@ -14,9 +13,8 @@ ASSEST_PATH = assets/linux
 INSTALL_PATH = /usr/share/flatcam-beta
 APPS_PATH = /usr/share/applications
 
-MIN_PY3_MINOR_VERSION := 8
-# required version
-MIN_PY3_MINOR_VERSION := $(shell python3 -c 'import sys; print($(MIN_PY3_MINOR_VERSION))')
+# required version: keep in sync with pyproject.toml requires-python
+MIN_PY3_MINOR_VERSION := 14
 
 # current version minimized to required (to allow ifneq test)
 PY3_MIN_MINOR_VERSION := $(shell python3 -c 'import sys; print(min($(MIN_PY3_MINOR_VERSION),sys.version_info.minor))')

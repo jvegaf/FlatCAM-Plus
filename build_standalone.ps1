@@ -2,6 +2,12 @@
 .SYNOPSIS
     Build FlatCAM Plus standalone .exe using PyInstaller
 .DESCRIPTION
+    LEGACY single-architecture variant. The maintained Windows build path is
+    packaging/windows/build_windows_installer.ps1 (see PACKAGING.md), which also
+    produces the Inno Setup installers. This script pins a hardcoded
+    c:\temp\fcvenv virtualenv created with `py -3.13`, while the project targets
+    Python 3.14. It is kept because it is the only script that collects
+    google.protobuf and certifi for PyInstaller.
     Creates a virtualenv, installs dependencies, and packages with PyInstaller.
     Skips: svgtrace (needs greenlet which fails on Python 3.13), gdal, rasterio.
 #>

@@ -22,8 +22,7 @@ cd FlatCAM-Plus
 Create the runtime environment:
 
 ```bash
-mamba env create -f environment.yml
-mamba activate flatcam
+uv sync
 ```
 
 Verify that the application starts before packaging:

@@ -1,7 +1,7 @@
 [project]
 name = "flatcam-plus"
 version = "0.1.0"
-description = "Add your description here"
+description = "Legacy PyQt6 desktop CAM application for PCB/CNC manufacturing"
 readme = "README.md"
 authors = [
     { name = "Jose Vega", email = "josevega234@gmail.com" }
@@ -43,9 +43,8 @@ dependencies = [
     "vispy>=0.9.0",
 ]
 
-[project.scripts]
-flatcam-plus = "flatcam_plus:main"
-
-[build-system]
-requires = ["uv_build>=0.13.6,<0.14.0"]
-build-backend = "uv_build"
+[tool.uv]
+# The application is the repository root itself (legacy FlatCAM layout) and runs
+# with `.venv/bin/python flatcam.py`. It is not an installable package: `uv sync`
+# installs dependencies only, and there is no wheel or console script to build.
+package = false

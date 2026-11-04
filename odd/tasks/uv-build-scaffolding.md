@@ -34,5 +34,6 @@ Branch: `dev` | Delivery: one direct commit on `dev` | Test runner: `uv run --wi
 - **L4 — Later discovery**: `uv build` and the `flatcam-plus` script package only the stub; the working application is still launched with `python flatcam.py`. Documented in `AGENTS.md`.
 - **L5 — Verification**: no explicit `uv sync`/`uv build` result was recorded in Engram. On 2026-11-04 `uv run --with pytest pytest tests -q` resolved the environment and passed 18 tests.
 - **L6 — Reconstruction note**: this document was generated from Engram observation #138 on 2026-11-04 because no ODD log existed when the work was implemented.
+- **L7 — Retired (structure cleanup)**: `[project.scripts]`, `[build-system]` and `src/flatcam_plus/` were removed in favour of `[tool.uv] package = false`, so `uv sync` installs dependencies only and `uv build` no longer emits a wheel that packages a hello-world stub. S3, S5 and S7 are superseded; the limitation they documented is gone because the fictional package no longer exists. Verified: `uv lock --check` passes (one lock line, `editable` -> `virtual`), `uv sync` uninstalls the stub, `import flatcam, appMain, camlib, appDatabase, defaults` succeeds, and `uv run --with pytest pytest tests -q` reports 22 passed.
 
-Next step: none. If distribution is wanted later, packaging must target the legacy root application, not the stub.
+Next step: none. Distribution still targets the legacy root application, not a package; if a wheel is ever wanted, it needs a real ODD feature, not this scaffolding.

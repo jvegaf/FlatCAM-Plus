@@ -1,7 +1,8 @@
 # FlatCAM Plus — Agent Guide
 
 Legacy PyQt6 desktop CAM application for PCB/CNC manufacturing. The working
-application lives at the repository root (legacy layout), not in `src/`.
+application lives at the repository root (legacy layout); it is not an
+installable package.
 
 ## Run and test
 
@@ -14,11 +15,14 @@ uv run --with pytest pytest tests/test_classify_contours.py -v
 
 - `python flatcam.py` is the real entrypoint; the app is one process-wide
   `App` object created in `flatcam.py`.
-- Do **not** use `flatcam-plus` / `uv run flatcam-plus`: `[project.scripts]`
-  points at `src/flatcam_plus/__init__.py`, which only prints a hello message.
-  `uv build` likewise packages only that stub, not the application.
-- Python is **3.14** (`.python-version`, `pyproject.toml`, `uv.lock`). Version
-  claims in `README.md` (3.11), `requirements.txt`, and `Makefile` (3.8) are stale.
+- There is **no** `flatcam-plus` package or console script. `pyproject.toml`
+  declares `[tool.uv] package = false`, so `uv sync` installs dependencies only:
+  `uv build` has nothing to package and `uv run flatcam-plus` does not exist.
+- Python is **3.14** (`.python-version`, `pyproject.toml`, `uv.lock`, and the
+  `Makefile` guard). `pyproject.toml` is the only authoritative dependency list:
+  `uv.lock` pins the resolved set, and `requirements.txt` mirrors its
+  pip-installable subset for virtualenv remediation. There is no conda
+  environment file.
 - `pytest` is not a project dependency; use the `--with pytest` form above.
   Tests are standalone (currently only contour classification, shapely-only).
 - No CI, lint, formatter, or type-check configuration exists. Do not assume or
@@ -99,8 +103,19 @@ Search targeted symbols instead of reading them whole.
   `find locale -name "strings.po" -exec sh -c 'msgfmt "$1" -o "${1%.po}.mo"' sh {} \;`
 - **Packaging**: follow `PACKAGING.md` and the platform scripts under
   `packaging/`. Build on the target OS; the scripts use `--collect-all` for PyQt6,
-  vispy, shapely, rasterio, OpenGL, and matplotlib (plus ortools in the platform
-  scripts, and `google.protobuf`/`certifi` in `build_standalone.ps1`).
+  vispy, shapely, rasterio, OpenGL, and matplotlib, plus ortools via
+  `$ortoolsBinaryArgs`.
+- **Root build wrappers**: `FlatCAMPlus_linux_portable_generator.sh`,
+  `FlatCAMPlus_macos_dmg_generator.command`, `FlatCAMPlus_x32_installer_generator.bat`,
+  `FlatCAMPlus_x64_installer_generator.bat` and `run_flatcam.bat` are the
+  double-click entry points. They resolve `dirname $0` and delegate into
+  `packaging/`, so they must stay at the repository root. Build logic belongs in
+  `packaging/<os>/`, never in these wrappers.
+- **Legacy packaging**: `build_standalone.ps1` is a superseded single-architecture
+  variant of `packaging/windows/build_windows_installer.ps1`. It pins a
+  `c:\temp\fcvenv` virtualenv created with `py -3.13` against this project's
+  Python 3.14. Keep it only for the `google.protobuf`/`certifi` PyInstaller
+  collection it documents.
 - **Repo knowledge log**: `.kiro/steering/flatcam-evolution-log.md` records
   verified behavior differences and workarounds (`EVO-*` entries). Append there
   when a user confirms a new difference; feature specs live in `.kiro/specs/`.
