@@ -2,7 +2,7 @@
 
 ``app.options`` is a plain ``LoudDict`` populated from ``AppDefaults.factory_defaults``, so a
 read of a key that was never defined raises ``KeyError`` at the first use of the owning code
-path. ``appParsers/ParseHPGL2.py`` built its whole ``default_data`` dictionary that way: thirteen
+path. ``flatcam_plus/appParsers/ParseHPGL2.py`` built its whole ``default_data`` dictionary that way: thirteen
 ``geometry_*`` keys were read but never shipped, so constructing the parser failed before a
 single line of HPGL2 could be parsed.
 

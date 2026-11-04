@@ -139,7 +139,7 @@ FlatCAM Plus modernizes the FlatCAM workflow with a stronger Windows runtime, cl
 | GRBL status visibility | Homing state and active X/Y/Z limit inputs are normalized and shown in the CNC dashboard for clearer WiFi/TCP GRBL operation. |
 | Machine-aware G-code metadata | Exported G-code now records the active machine profile, travel limits, safe Z, and max spindle RPM as header comments, while Verify checks X/Y/Z motion bounds against the active profile. |
 | CNC Bed Compensation | Preprocessors now support unit-aware **Bed Offset** and **Bed Skew** compensation for non-square machine beds, ensuring milling accuracy across the entire workspace. |
-| Modular CNC architecture | CNC controller features are split into focused modules under `appPlugins/cnc_control/` for easier maintenance and future plugin-style extensions. |
+| Modular CNC architecture | CNC controller features are split into focused modules under `flatcam_plus/appPlugins/cnc_control/` for easier maintenance and future plugin-style extensions. |
 | Centralized manufacturing preferences | Core machine setup starts from a dedicated Manufacturing Settings group before deeper plugin-specific defaults. |
 
 ### Workspace and Project UI
@@ -283,7 +283,7 @@ The CNC page is organized as a compact production dashboard:
 
 ### CNC Plugin Structure
 
-The CNC control feature is organized as a plugin-like package under `appPlugins/cnc_control/`:
+The CNC control feature is organized as a plugin-like package under `flatcam_plus/appPlugins/cnc_control/`:
 
 - `profiles.py` stores controller command profiles.
 - `transports.py` contains Serial, TCP/Telnet, and FluidNC HTTP transport implementations.
@@ -295,7 +295,7 @@ The CNC control feature is organized as a plugin-like package under `appPlugins/
 
 ### CNC 3D Preview Plugin Structure
 
-The standalone CNC 3D preview feature is organized under `appPlugins/cnc_preview_3d/`:
+The standalone CNC 3D preview feature is organized under `flatcam_plus/appPlugins/cnc_preview_3d/`:
 
 - `renderer.py` owns the independent VisPy scene for CNCJob G-code rendering and draws cut paths as single-sided engraved Z-depth channels instead of mirrored or extruded underside geometry.
 - `sections.py` registers modular preview panels for job selection and render stats.
@@ -303,7 +303,7 @@ The standalone CNC 3D preview feature is organized under `appPlugins/cnc_preview
 
 ### AI Assistant Plugin Structure
 
-The AI assistant feature is organized under `appPlugins/ai_assistant/`:
+The AI assistant feature is organized under `flatcam_plus/appPlugins/ai_assistant/`:
 
 - `providers.py` contains OpenAI-compatible, OpenRouter, LM Studio, Ollama, Gemini, and Claude connection helpers.
 - `dialogs.py` manages provider settings, API keys, model options, system prompts, and analysis context selection.
@@ -387,13 +387,13 @@ FlatCAM base code and MIT-licensed project components are covered by the root `L
 
 The CNC Control, PCB Plotter, CNC 3D Preview, and AI Assistant modules are licensed separately and are not covered by the root MIT license:
 
-- `appPlugins/ToolCNCControl.py`
-- `appPlugins/cnc_control/`
-- `appPlugins/ToolPlotter.py`
+- `flatcam_plus/appPlugins/ToolCNCControl.py`
+- `flatcam_plus/appPlugins/cnc_control/`
+- `flatcam_plus/appPlugins/ToolPlotter.py`
 - `preprocessors/GRBL_11_pen_plotter.py`
-- `appPlugins/ToolCNCPreview3D.py`
-- `appPlugins/cnc_preview_3d/`
-- `appPlugins/ToolAIAssistant.py`
-- `appPlugins/ai_assistant/`
+- `flatcam_plus/appPlugins/ToolCNCPreview3D.py`
+- `flatcam_plus/appPlugins/cnc_preview_3d/`
+- `flatcam_plus/appPlugins/ToolAIAssistant.py`
+- `flatcam_plus/appPlugins/ai_assistant/`
 
-See `appPlugins/cnc_control/LICENSE`, `appPlugins/cnc_preview_3d/LICENSE`, and `appPlugins/ai_assistant/LICENSE` for the separate module license terms. The PCB Plotter plugin and `GRBL_11_pen_plotter` preprocessor use the same non-commercial license terms as CNC Control. These modules may be used, studied, modified, and shared for non-commercial purposes, but they may not be sold, sublicensed, monetized, or included in a commercial product or service without separate written permission from Sadri ERCAN.
+See `flatcam_plus/appPlugins/cnc_control/LICENSE`, `flatcam_plus/appPlugins/cnc_preview_3d/LICENSE`, and `flatcam_plus/appPlugins/ai_assistant/LICENSE` for the separate module license terms. The PCB Plotter plugin and `GRBL_11_pen_plotter` preprocessor use the same non-commercial license terms as CNC Control. These modules may be used, studied, modified, and shared for non-commercial purposes, but they may not be sold, sublicensed, monetized, or included in a commercial product or service without separate written permission from Sadri ERCAN.

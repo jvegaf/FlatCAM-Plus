@@ -67,7 +67,9 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
   tree where every other package already moved. Status: done in the commit that adds it to
   `APP_PACKAGES`; it needed one non-import edit, the VisPyData path in `appMain`.
 - **T9 (S4, S5)** — Documentation and skills pass: `AGENTS.md`, `PACKAGING.md`,
-  `.opencode/skills/*`, and the repo map, for paths that kept the old root names.
+  `.opencode/skills/*`, and the repo map, for paths that kept the old root names. Status: done
+  in the commit that repoints `README.md`, the `pyproject.toml` comment, the four prose lines
+  left in code, and the per-package comment above `--collect-submodules flatcam_plus`.
 
 Each task commits its tests, docs and packaging edits together, and the tree is importable and
 green at every commit.
@@ -171,14 +173,13 @@ green at every commit.
   and recent-project tests. Mutation check fails the guard by path. 186 tests before, 190 after.
   With this slice no build script collects a package that lives inside `flatcam_plus`: the four
   scripts and both `PACKAGING.md` snippets now name only `flatcam_plus`.
-  **This slice did not land as one commit.** A single commit for it measures 179 changed paths and
-  145 KB of diff, and the native reviewer refused it in preflight with `lens_context_budget_exceeded`
-  twice: once from the session that opened it and once from a fresh session that retried the exact
-  recipe. Neither attempt created authority, so nothing was left `reviewing`. It is split in two.
-  `e7713b2` moved the `preferences` subtree first, because it is the leaf of the package's import
-  graph: its imports of the core widgets (`appGUI.GUIElements`, `appGUI.PanelStyles`,
-  `appGUI.ColumnarFlowLayout`) keep resolving against the root copy that this commit moves, so both
-  commits leave the application importable and the suite green (75 paths and 64 KB of diff in the
-  first, the rest here). The first commit also fixed the guard artefact that made the split painful
-  and that had already forced four hand cleanups during L15: the root-copy guards now ignore a
-  leftover directory that holds nothing but `__pycache__`.
+- **L13 — T9 done, and the line drawn through the remaining old-path references**: the pass
+  repointed `README.md` (twelve references), the `pyproject.toml` comment that still claimed the
+  application packages were root directories, the vacuous "appCommon is a subpackage now" comment
+  above `--collect-submodules flatcam_plus` in two build scripts and `PACKAGING.md`, and the four
+  prose lines left in code (`tests/test_defaults_coverage.py`, `tests/test_gcode_output.py`,
+  `preprocessors/GRBL_11_pen_plotter.py`, `flatcam_plus/defaults.py`). It deliberately left
+  `CHANGELOG.md`, `.kiro/**` and `locale/**/*.po`: the first two are historical records where the
+  old paths describe what was true when they were written, and the `.po` `#:` lines are xgettext
+  source references that the next extraction regenerates. Every current, user-facing or executable
+  reference now names `flatcam_plus/<package>/`. 190 tests still pass; the pass touches no import.

@@ -21,7 +21,7 @@ def grbl_job(fc_app):
     job.x, job.y = 5.0, 5.0
     job.oldx, job.oldy = 0.0, 0.0
     # The G-code generator copies the source bounds and tool diameter into the job options
-    # before it asks for a header (appObjects/GeometryObject.py:765 and :839), so a job built
+    # before it asks for a header (flatcam_plus/appObjects/GeometryObject.py:765 and :839), so a job built
     # by hand has to carry them too.
     job.obj_options.update(SOURCE_BOUNDS)
     job.obj_options["tool_dia"] = TOOL_DIAMETER

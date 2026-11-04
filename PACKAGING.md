@@ -168,7 +168,6 @@ APPLE_DEVELOPER_ID="Developer ID Application: YOUR NAME" ./FlatCAMPlus_macos_dmg
 Manual build of the `.app` bundle:
 
 ```bash
-# appCommon is a flatcam_plus subpackage now; --collect-submodules flatcam_plus collects it.
 python -m PyInstaller flatcam.py \
   --name "FlatCAM-Plus" \
   --windowed \
@@ -256,7 +255,6 @@ PYTHON_BIN=/path/to/python3 ./FlatCAMPlus_linux_portable_generator.sh
 Manual build of the Linux folder distribution:
 
 ```bash
-# appCommon is a flatcam_plus subpackage now; --collect-submodules flatcam_plus collects it.
 python -m PyInstaller flatcam.py \
   --name "FlatCAM-Plus" \
   --windowed \

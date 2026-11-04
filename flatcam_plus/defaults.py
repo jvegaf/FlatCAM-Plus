@@ -365,7 +365,7 @@ class AppDefaults:
         "geometry_f_plunge": False,
 
         # The rest of the CNC job parameters a Geometry object carries. They complete the set that
-        # appParsers/ParseHPGL2.py copies into its default tool data, so the values mirror the
+        # flatcam_plus/appParsers/ParseHPGL2.py copies into its default tool data, so the values mirror the
         # plugin blocks instead of being invented; most of these keys have no live reader left,
         # because the plugin readers that used them are commented out and camlib reads the
         # tools_mill_* keys, so the contract here is the presence and type of the key: the cut depth and the area selection shape

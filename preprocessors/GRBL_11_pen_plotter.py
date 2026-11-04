@@ -4,7 +4,7 @@
 # File Author: Sadri ERCAN                                 #
 # Date:     05/25/2026                                     #
 # License:  FlatCAM Plus CNC Control Module Non-Commercial License         #
-# See:      appPlugins/cnc_control/LICENSE                  #
+# See:      flatcam_plus/appPlugins/cnc_control/LICENSE                  #
 # ##########################################################
 
 from flatcam_plus.appPreProcessor import PreProc
