@@ -1,5 +1,6 @@
 """FlatCAM Plus package.
 
-Only the metadata lives here so far; the remaining root modules move in as the T4 migration
-phases land. See ``odd/tasks/repo-structure-cleanup.md``.
+The modules that used to live at the repository root move in here phase by phase; ``appMain``,
+``appTool``, ``appPreProcessor`` and ``appTranslation`` are still outside. See
+``odd/tasks/repo-structure-cleanup.md``.
 """

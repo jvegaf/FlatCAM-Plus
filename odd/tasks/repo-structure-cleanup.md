@@ -97,9 +97,11 @@ From L28, ordered by how likely it is to break silently rather than loudly:
 1. **`os.chdir` to the module directory** (`appMain.py:569,578`) makes every `assets/resources`,
    locale and `preprocessors/*.py` lookup CWD-relative. Moving `appMain.py` one level deeper
    repoints the whole app at the package directory, and the preprocessor failure is only logged
-   (`appPreProcessor.py:157-159`). T4.1 exists to remove this dependency before any move.
-2. **Preprocessor discovery** (`appPreProcessor.py:10,149-160`): `SourceFileLoader` with the fixed
-   module name `FlatCAMPostProcessor` plus metaclass registration; a name collision silently
+   (`flatcam_plus/appPreProcessor.py:155,166-168`). T4.1 exists to remove this dependency before
+   any move.
+2. **Preprocessor discovery** (`flatcam_plus/appPreProcessor.py:10,155-170`):
+   `SourceFileLoader` with the fixed module name `FlatCAMPostProcessor` plus metaclass
+   registration; a name collision silently
    replaces a preprocessor.
 3. **Locale resolution from module location** (`appTranslation.py:60,82`) with a swallowed
    `StopIteration`: a wrong depth means an empty language list and an English-only UI, no error.
@@ -384,3 +386,15 @@ Push and merge of the 10 unpushed commits remain human decisions.
   authority (consumed revision `sha256:28e84312...`, target `sha256:da6c9cf3...`). One advisory
   finding stayed open and is now fixed separately: R2-doc-phase-count, readability, SUGGESTION,
   this document's phase count and commit count.
+- **L36 — Review of the whole T4 range (lineage `review-a417c200c19e5786`)**: tier `high` (the
+  changed set reaches `appParsers/ParseGerber.py` process spawning and the packaging shell
+  scripts), 137 files, lenses `readability` and `reliability`, both captured on the first attempt
+  (170 KB prompts each). Approved with no severe finding, so no refuter and no correction; the
+  acknowledgement burned the authority (consumed revision `sha256:28fc1b3d...`). Four advisory
+  findings, all `informational` and none opening a correction: R2-import-guard-syntax
+  (`tests/test_package_layout.py:42-53`, WARNING), R3-001 (`tests/test_app_paths.py:19-22`,
+  WARNING), R2-package-doc-stale (`flatcam_plus/__init__.py:1-5`, SUGGESTION) and
+  R2-risk-register-stale-path (`odd/tasks/repo-structure-cleanup.md:100`, SUGGESTION). As in L19
+  and L26 their text is not recoverable; the two SUGGESTIONS were unambiguous from location and
+  are fixed in the commit that records this entry, the two WARNINGs stay deferred with only their
+  location.
