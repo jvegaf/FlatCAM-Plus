@@ -171,15 +171,22 @@ to be sliced per phase.
 
 ## Next step
 
-T4 is authorized (L27) and four of its seven phases are done: T4.1 anchored the CWD-dependent
-paths, T4.2 and T4.2b moved the six low-fanout modules, T4.3 moved `camlib` and T4.4 moved
-`appTool`. The tree is consistent at every commit: `dev` is 5 commits ahead of `origin/dev` and
-62 tests pass.
+T4 is authorized (L27) and five of its phases are done: T4.1 anchored the CWD-dependent paths,
+T4.2 and T4.2b moved the six low-fanout modules, T4.3 moved `camlib`, T4.4 moved `appTool` and
+T4.4b moved `appPreProcessor`. The tree is consistent at every commit: `dev` is 7 commits ahead
+of `origin/dev`, 68 tests pass, and every phase keeps its tests, docs and skills in the same
+commit.
 
-T4.5 (moving `appTranslation`, 172 statements across 173 files) is the next phase: the largest
-fanout of the migration, so it goes in two or three slices of about 400 authored lines, each with
-its own commit. T4.6 (`appMain` plus the `flatcam.py` launcher) and T4.7 (`descartes`, `libs`)
-stay after it. Push and merge of the 6 unpushed commits remain human decisions.
+T4.5 (moving `appTranslation`, 172 statements across 173 files) is the next phase and it has a
+prerequisite that the other phases did not: `load_languages()` and `languages_dir()` both derive
+`locale/` from `os.path.dirname(os.path.abspath(__file__))` with a silent `parents[1]` fallback
+for cx_Freeze. One level deeper, `languages_dir()` points at `flatcam_plus/locale`, which does not
+exist, so gettext loading would fail without an error and the UI would stay English. The slice has
+to anchor `locale/` to the application directory explicitly — the same fix T4.1 applied to the
+resources — and prove it with a test that asserts the language list is non-empty from the moved
+module. Then the 172 import sites go in two or three commits of about 400 authored lines.
+T4.6 (`appMain` plus the `flatcam.py` launcher) and T4.7 (`descartes`, `libs`) stay after it.
+Push and merge of the 7 unpushed commits remain human decisions.
 
 ## Log
 
