@@ -183,12 +183,13 @@ The T4.5 move and its 172 sites travel together because no shim exists, so split
 would leave the tree unimportable between commits (L37); every other slice is mechanical in the
 same way. Each T4 slice stays under one review slice on its own.
 
-After this commit `dev` is 36 commits ahead of `origin/main` with about 4.1k added and 0.7k
-deleted lines (`git diff --numstat origin/main..dev`, lock files and `requirements.txt`
-excluded), which is well past one review slice. That backlog predates this work and grows by
-one commit per T4 phase. Push, pull request creation and merge remain human decisions and must
-account for it: the accumulated branch is not reviewable as a single candidate, so delivery has
-to be sliced per phase. `dev` itself is pushed: it is level with `origin/dev` (L37).
+The two defect fixes follow as their own commits (`d45b6dc` for the CNC job path, `b7c1024` plus
+its review follow-up `bda3d08` for HPGL2).
+
+The division above is where each work unit ends, not a delivery plan: per L51 everything lands on
+`dev` commit by commit and there are no pull requests. The branch is well past one review slice on
+purpose, and each of these units was reviewed on its own at the time it was written. Push remains
+the human's action.
 
 ## Known follow-ups
 
