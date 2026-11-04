@@ -74,6 +74,34 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
 Each task commits its tests, docs and packaging edits together, and the tree is importable and
 green at every commit.
 
+## Final state
+
+All nine tasks are done, one commit each, and the tree was importable and green at every one:
+
+```
+flatcam.py                    launcher, unchanged location (PyInstaller entry point)
+flatcam_plus/                 307 .py
+  appCommon/ appEditors/ appGUI/ appHandlers/ appObjects/
+  appParsers/ appPlugins/ tclCommands/     the eight application packages
+  appMain.py appTranslation.py appTool.py appPreProcessor.py
+  camlib.py defaults.py appDatabase.py appProcess.py appWorker.py appWorkerStack.py version.py
+  descartes/ libs/                        the vendored trees
+assets/ config/ locale/ preprocessors/     data, still at the root, resolved through _APP_ROOT
+tests/ odd/ packaging/ scripts/ doc/
+```
+
+No `app*` directory is left at the root, no build script collects a package that no longer exists
+there, and no `sys.modules` shim was added anywhere: the import rewrites travelled with each move.
+The suite went from 125 to 190 tests, and the two new guard families are the durable part:
+`tests/test_package_layout.py` pins every package and its modules, and `tests/test_tcl_registry.py`
+pins the one registration path that fails silently.
+
+What is still unverified, in the same terms the previous feature recorded: **no packaged build was
+produced**. The four build scripts lost a `--collect-submodules` line each and the Windows ones
+were never parsed by PowerShell; that the app still runs from source is proven by the boot test on
+every commit, that it still runs from a bundle is not.
+
+
 ## Log
 
 - **L1 — Original request (verbatim)**: "yo pensaba que ibamos a tener una estructura tipo dos
