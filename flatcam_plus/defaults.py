@@ -364,6 +364,29 @@ class AppDefaults:
         "geometry_endxy": None,
         "geometry_f_plunge": False,
 
+        # The rest of the CNC job parameters a Geometry object reads. These complete the set that
+        # appParsers/ParseHPGL2.py copies into its default tool data, so the values mirror the
+        # plugin blocks instead of being invented: the cut depth and the area selection shape
+        # follow the Isolation Routing block (an HPGL2 pen path is an isolation style contour and
+        # its tools are tagged 'Iso'), while travel, dwell, multidepth, extra cut, tool change and
+        # the area strategy follow the Drilling and Milling blocks. geometry_ppname_g must name a
+        # preprocessor that exists in preprocessors/ ('default' is preprocessors/default.py) and
+        # the area options must use the 'square'/'polygon' and 'over'/'around' values the area
+        # selection widgets offer.
+        "geometry_cutz": -0.05,
+        "geometry_travelz": 2,
+        "geometry_dwell": False,
+        "geometry_multidepth": False,
+        "geometry_ppname_g": 'default',
+        "geometry_extracut": False,
+        "geometry_extracut_length": 0.1,
+        "geometry_toolchange": False,
+        "geometry_area_exclusion": False,
+        "geometry_area_shape": "square",
+        "geometry_area_strategy": "over",
+        "geometry_area_overz": 1.0,
+        "geometry_spindlespeed": 0,
+
         # Geometry Export
         "geometry_dxf_format": 'R2010',
         "geometry_paths_only": True,

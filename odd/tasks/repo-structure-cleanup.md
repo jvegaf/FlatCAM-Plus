@@ -200,13 +200,13 @@ to be sliced per phase. `dev` itself is pushed: it is level with `origin/dev` (L
 - `appPreProcessor.load_preprocessors` uses the deprecated `importlib` `SourceFileLoader.load_module()`,
   which emits a `DeprecationWarning` in the suite and is scheduled for removal in Python 3.15.
   Moving it to `exec_module()` is a prerequisite for that interpreter bump.
-- `appParsers/ParseHPGL2.py` cannot construct at all: it reads twelve `geometry_*` options that
-  `defaults.py` has never defined (`geometry_cutz`, `geometry_travelz`, `geometry_dwell`,
-  `geometry_ppname_g`, `geometry_extracut`, `geometry_extracut_length`, `geometry_toolchange`,
-  `geometry_area_exclusion`, `geometry_area_shape`, `geometry_area_strategy`, `geometry_area_overz`,
-  `geometry_spindlespeed`), so an HPGL2 import dies with a `KeyError` on the first one. That is
-  the same class of defect as L12 and it is measured, not guessed (L48); fixing it needs a
-  decision about what an HPGL2 import should default to, and an HPGL2 sample file to verify with.
+- The HPGL2 parser's own unit assumption (divide by 40) and its inability to read combined pen
+  commands such as `PU0,0;` were observed while fixing L49 and left alone: the parser wants a
+  standalone `PU;`/`PD;` followed by `PA x,y;`, which is a parser limitation, not a default.
+- Almost every `cutz`/`travelz`/`area_*` value `ParseHPGL2` copies into its tool data has no live
+  reader left (the readers are commented out in the tool plugins and `camlib` reads the mill keys
+  instead). The defaults now exist and are pinned; whether anything consumes them is the older
+  question of the commented-out plugin paths, not something this cleanup changed.
 - Nothing has verified a packaged build: no PyInstaller bundle was produced in any T4 slice, and
   the three `.ps1` build scripts have not been syntax-checked on a machine with PowerShell. The
   `libs` data-to-code switch in T4.7 (L43) is argued from source and from `PACKAGING.md`, not from
@@ -669,3 +669,25 @@ Everything before `aedf5e7` is the branch backlog that predates this feature: it
 `origin/dev` and is not part of these slices. `dev` is 6 commits ahead of `origin/dev`
 (`ef000e5`..`d45b6dc`); pushing them and opening the chained pull requests are human decisions,
 and `gh` is not authenticated in this session, so they were not attempted.
+- **L49 — The HPGL2 parser fixed on request (verbatim: "arreglalo")**: `appParsers/ParseHPGL2.py`
+  could not be constructed at all, so an HPGL2 import died with `KeyError` before producing
+  geometry. Thirteen `geometry_*` options are now defined in the geometry block of `defaults.py`,
+  each traced to an existing precedent instead of invented: the cut depth and the area shape from
+  the Isolation block (`tools_iso_cutz: -0.05`, `tools_iso_area_shape: "square"`, because the
+  parser tags its tools `Iso`), travel, dwell, multidepth, extra cut, tool change, area strategy,
+  area over-Z and spindle speed from the Drilling and Milling blocks, and `geometry_ppname_g:
+  'default'` naming the preprocessor that exists. The one value where the precedents disagreed is
+  the cut depth — the mill block says `-2.4` — and the Isolation value won because an HPGL2 pen
+  path is an isolation-style contour; that tie-break is recorded in the code comment so changing it
+  is one line. **L48's measurement was off by one**: it reported twelve missing keys because its
+  regex counted the `"geometry_multidepth": Geometry` entry of the GUI route map at
+  `defaults.py:1084` as a definition, and `geometry_multidepth` is read live by the parser. The
+  second half of the fix is the guard that makes the whole class impossible: `tests/
+  test_defaults_coverage.py` AST-parses the `factory_defaults` dict and asserts that every live
+  `app.options["geometry_*"]` read in the tree (comment lines excluded, `.git`/`.venv`/candidate
+  views pruned) is defined, with its own test pinning that commented reads are ignored and that no
+  scanned path escapes the repository. RED observed in both halves: the guard listed all thirteen
+  keys with their `path:line`, and `tests/test_hpgl2_parse.py` failed with `KeyError:
+  'geometry_cutz'` from `HPGL2.__init__`. A real import now parses a nine-statement sample into a
+  `LineString (0 0, 25 0, 25 25)` with bounds `0,0,25,25` millimetres and one tool. Mutation check
+  on the guard: deleting `geometry_spindlespeed` fails it by name. 101 tests before, 125 after.
