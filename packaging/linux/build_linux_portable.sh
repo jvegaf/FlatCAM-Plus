@@ -198,7 +198,6 @@ build_portable() {
         # ``--collect-submodules flatcam_plus`` below already collects it as code.
         # ``appCommon`` is a ``flatcam_plus`` subpackage now; the entry below collects it.
         --collect-submodules appGUI
-        --collect-submodules tclCommands
         --collect-submodules flatcam_plus
         --collect-all PyQt6
         --collect-all vispy

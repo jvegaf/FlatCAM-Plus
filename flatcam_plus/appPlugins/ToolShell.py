@@ -18,7 +18,7 @@ import sys
 import traceback
 
 import tkinter as tk
-import tclCommands
+from flatcam_plus import tclCommands
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

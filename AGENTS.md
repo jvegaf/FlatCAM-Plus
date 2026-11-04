@@ -82,7 +82,7 @@ follow its native lifecycle without treating it as delivery approval.
 | GUI, plot canvases, themes, preferences | `appGUI/` |
 | Object editors and their plugins | `flatcam_plus/appEditors/` |
 | G-code preprocessors | `preprocessors/` |
-| Tcl shell commands | `tclCommands/` |
+| Tcl shell commands | `flatcam_plus/tclCommands/` |
 | Persisted defaults/preferences | `flatcam_plus/defaults.py` |
 | Test suite and headless app fixture | `tests/`, `tests/conftest.py` |
 | CI workflow | `.github/workflows/tests.yml` |
@@ -105,7 +105,7 @@ root directory, not to the package.
   startup and each `PreProc` subclass registers itself by class name. No central
   registry edit is required.
 - **Tcl commands**: after adding a command module, append its import to the
-  explicit alphabetical list in `tclCommands/__init__.py` (it is not autodiscovered).
+  explicit alphabetical list in `flatcam_plus/tclCommands/__init__.py` (it is not autodiscovered).
 - **Two unrelated versions**: `flatcam_plus/version.py` holds the application
   version (`APP_VERSION = "1.2.0"`). `flatcam_plus/defaults.py`'s `version` (`8.992`) is the
   preferences-file format version; it is not the app version. Do not sync them.

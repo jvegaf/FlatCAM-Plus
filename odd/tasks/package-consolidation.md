@@ -60,8 +60,9 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
 - **T6 (S1, S2)** — `appPlugins` (47 files, 48 importers). Status: done in the commit that adds
   it to `APP_PACKAGES` with its three subpackages; one dynamic
   `importlib.import_module("appPlugins.ToolMilling")` target in a test came along.
-- **T7 (S1, S2, S3)** — `tclCommands` (76 files, 298 importers) with the discovery prefix derived
-  from `__name__` and a registry test that fails when it comes back empty.
+- **T7 (S1, S2, S3)** — `tclCommands` (76 files, 149 import statements) with the discovery prefix
+  derived from `__name__` and a registry test that fails when it comes back empty. Status: done
+  in the commit that adds `tests/test_tcl_registry.py`; 101 registered aliases before and after.
 - **T8 (S1, S2)** — `appGUI` (86 files, 580 importers), the largest slice, last so it lands on a
   tree where every other package already moved.
 - **T9 (S4, S5)** — Documentation and skills pass: `AGENTS.md`, `PACKAGING.md`,
@@ -146,3 +147,14 @@ green at every commit.
   unimportable. 165 tests before, 171 after. Leftovers recorded: `README.md`, `CHANGELOG.md`,
   `.kiro/**`, `locale/**/*.po`, the `pyproject.toml` comment and one preprocessor comment still
   name the old path in prose, which is the T9 pass's job.
+- **L11 — T7 done, and the silent failure was reproduced before it was fixed**: the discovery now
+  derives its prefix as `'{}.TclCommand'.format(__name__)` and takes the class name with
+  `key.rsplit('.', 1)[-1]`. The registry test was written before the fix and against the real
+  post-move state, where it failed with `assert 0 >= 100` while the application logged "TCL Shell
+  has been initialized." and booted normally: exactly the failure mode S3 predicted, and one the
+  layout guard never sees. Mutation B (reverting both halves of the discovery) fails all eleven
+  registry cases and leaves the layout guard green, which is why the second test exists. Registered
+  aliases through `app.shell.tcl_commands_storage`: 101 before the move, 101 after. One import
+  needed more than a path rewrite: `ToolShell.py` used `import tclCommands` and called
+  `tclCommands.register_all_commands`, so it became `from flatcam_plus import tclCommands` to keep
+  the call site verbatim instead of rebinding `flatcam_plus`. 171 tests before, 186 after.

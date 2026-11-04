@@ -8,7 +8,9 @@ T4.4 moved ``appTool``, the base class of every tool and editor plugin, T4.4b mo
 vendored dependency packages, ``descartes`` and ``libs``. T1 of the package consolidation
 started the application packages moving, beginning with ``appCommon``, the shared helpers,
 updater and recent-project loader the controller, the GUI, the tools and ``flatcam.py`` import.
-This test pins those facts so a later phase cannot leave a half-migrated tree behind.
+T7 moved ``tclCommands``, the Tcl shell command package, whose own discovery walks
+``sys.modules`` for its package path. This test pins those facts so a later phase cannot leave
+a half-migrated tree behind.
 """
 
 import importlib.util
@@ -41,6 +43,7 @@ APP_PACKAGES = (
     "appObjects",
     "appParsers",
     "appPlugins",
+    "tclCommands",
 )
 APP_MODULES = (
     "appCommon",
@@ -77,6 +80,11 @@ APP_MODULES = (
     "appPlugins.ai_assistant",
     "appPlugins.cnc_control",
     "appPlugins.cnc_preview_3d",
+    # The 75 ``tclCommands.TclCommand*`` modules are not listed one by one: the alphabetical
+    # import block in the package's ``__init__.py`` imports them all, so the registry test in
+    # ``tests/test_tcl_registry.py`` imports them too and fails if any of them stops loading.
+    "tclCommands",
+    "tclCommands.TclCommand",
 )
 
 # Directories that used to be top-level importables and are now subpackages. They are vendored

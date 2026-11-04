@@ -95,7 +95,6 @@ $pyInstallerArgs = @(
     "--add-data", "${preprocessorsPath};preprocessors",
     # "appCommon" is a "flatcam_plus" subpackage now; the entries below collect it.
     "--collect-submodules", "appGUI",
-    "--collect-submodules", "tclCommands",
     "--collect-submodules", "flatcam_plus",
     "--collect-all", "PyQt6",
     "--collect-all", "vispy",

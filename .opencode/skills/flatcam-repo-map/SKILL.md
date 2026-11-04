@@ -32,7 +32,7 @@ Load for any non-trivial change, code-location question, architecture decision, 
 | Geometry / CNC algorithms | `flatcam_plus/camlib.py` |
 | Shared helpers, logging, updater, recent projects | `flatcam_plus/appCommon/` |
 | G-code post-processing | `preprocessors/` |
-| Scripting command | `tclCommands/` |
+| Scripting command | `flatcam_plus/tclCommands/` |
 | Parser (Gerber, Excellon, DXF, SVG, HPGL2) | `flatcam_plus/appParsers/` |
 | Widgets, canvas, themes, preferences UI | `appGUI/` |
 | Persisted defaults | `flatcam_plus/defaults.py` |
