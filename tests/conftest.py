@@ -3,6 +3,10 @@
 The application is one process-wide ``App`` object built by ``flatcam.py``. Tests that need
 the real wiring build it once, headless and offline, under an isolated ``HOME`` so a test
 run never reads or writes the developer's ``~/.FlatCAM`` settings.
+
+The repository root is on ``sys.path`` through the ``pythonpath`` setting in
+``pyproject.toml``, not through an insert here: the application packages live beside
+``flatcam_plus`` at the root and are imported by name.
 """
 
 import os
@@ -10,10 +14,6 @@ import sys
 import tempfile
 
 import pytest
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if REPO_ROOT not in sys.path:
-    sys.path.insert(0, REPO_ROOT)
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 

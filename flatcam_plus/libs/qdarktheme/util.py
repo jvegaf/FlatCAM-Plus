@@ -7,7 +7,7 @@ import operator as ope
 import re
 from pathlib import Path
 
-import libs.qdarktheme
+import flatcam_plus.libs.qdarktheme
 
 # greater_equal and less_equal must be evaluated before greater and less.
 OPERATORS = {"==": ope.eq, "!=": ope.ne, ">=": ope.ge, "<=": ope.le, ">": ope.gt, "<": ope.lt}
@@ -58,7 +58,7 @@ def get_qdarktheme_root_path() -> Path:
     Returns:
         qdarktheme package root path.
     """
-    return Path(inspect.getfile(libs.qdarktheme)).parent
+    return Path(inspect.getfile(flatcam_plus.libs.qdarktheme)).parent
 
 
 def compare_v(v1: str, operator: str, v2: str) -> bool:

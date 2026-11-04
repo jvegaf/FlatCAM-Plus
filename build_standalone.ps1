@@ -77,7 +77,6 @@ $assetsPath = Join-Path $RootDir "assets"
 $configPath = Join-Path $RootDir "config"
 $localePath = Join-Path $RootDir "locale"
 $preprocessorsPath = Join-Path $RootDir "preprocessors"
-$libsPath = Join-Path $RootDir "libs"
 
 $pyInstallerArgs = @(
     "-m", "PyInstaller", "flatcam.py",
@@ -92,7 +91,8 @@ $pyInstallerArgs = @(
     "--add-data", "${configPath};config",
     "--add-data", "${localePath};locale",
     "--add-data", "${preprocessorsPath};preprocessors",
-    "--add-data", "${libsPath};libs",
+    # "libs" is not shipped as data: it is a subpackage of "flatcam_plus", so
+    # "--collect-submodules flatcam_plus" below already collects it as code.
     "--collect-submodules", "appCommon",
     "--collect-submodules", "appEditors",
     "--collect-submodules", "appGUI",

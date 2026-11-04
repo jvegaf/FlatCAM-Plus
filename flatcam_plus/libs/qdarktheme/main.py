@@ -7,9 +7,9 @@ import re
 import shutil
 from pathlib import Path
 
-from libs.qdarktheme.qtpy import __version__ as qt_version
-from libs.qdarktheme.qtpy.qt_compat import QT_API
-from libs.qdarktheme.util import OPERATORS, compare_v, get_logger, multi_replace
+from flatcam_plus.libs.qdarktheme.qtpy import __version__ as qt_version
+from flatcam_plus.libs.qdarktheme.qtpy.qt_compat import QT_API
+from flatcam_plus.libs.qdarktheme.util import OPERATORS, compare_v, get_logger, multi_replace
 
 # Version of PyQtDarkTheme
 __version__ = "1.1.1"
@@ -49,9 +49,9 @@ def _build_svg_files(theme: str, theme_resources_dir: Path) -> None:
         return
 
     if theme == "dark":
-        from libs.qdarktheme.themes.dark.svg import SVG_RESOURCES
+        from flatcam_plus.libs.qdarktheme.themes.dark.svg import SVG_RESOURCES
     else:
-        from libs.qdarktheme.themes.light.svg import SVG_RESOURCES
+        from flatcam_plus.libs.qdarktheme.themes.light.svg import SVG_RESOURCES
 
     for file_name, code in json.loads(SVG_RESOURCES).items():
         (svg_resources_dir / f"{file_name}.svg").write_text(code)
@@ -63,7 +63,7 @@ def get_themes() -> tuple[str, ...]:
     Returns:
         Available themes.
     """
-    from libs.qdarktheme.themes import THEMES
+    from flatcam_plus.libs.qdarktheme.themes import THEMES
 
     return THEMES
 
@@ -186,9 +186,9 @@ def load_stylesheet(theme: str = "dark", border: str = "rounded") -> str:
     _build_svg_files(theme, theme_resources_dir)
 
     if theme == "dark":
-        from libs.qdarktheme.themes.dark.stylesheet import STYLE_SHEET
+        from flatcam_plus.libs.qdarktheme.themes.dark.stylesheet import STYLE_SHEET
     else:
-        from libs.qdarktheme.themes.light.stylesheet import STYLE_SHEET
+        from flatcam_plus.libs.qdarktheme.themes.light.stylesheet import STYLE_SHEET
 
     # Build stylesheet
     # Radius
@@ -245,7 +245,7 @@ def load_palette(theme: str = "dark"):
         raise TypeError("The argument [theme] can only be specified as 'dark' or 'light'.") from None
 
     if theme == "dark":
-        from libs.qdarktheme.themes.dark.palette import PALETTE
+        from flatcam_plus.libs.qdarktheme.themes.dark.palette import PALETTE
     else:
-        from libs.qdarktheme.themes.light.palette import PALETTE
+        from flatcam_plus.libs.qdarktheme.themes.light.palette import PALETTE
     return PALETTE

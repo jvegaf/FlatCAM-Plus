@@ -47,7 +47,7 @@ from shapely import union, difference
 # ---------------------------------------
 # NEEDED for Legacy mode
 # Used for solid polygons in Matplotlib
-# from descartes.patch import PolygonPatch
+# from flatcam_plus.descartes.patch import PolygonPatch
 # ---------------------------------------
 
 import logging

@@ -1,6 +1,6 @@
 """Module setting up ui of frame window."""
-from libs.qdarktheme.qtpy.QtGui import QIcon
-from libs.qdarktheme.qtpy.QtWidgets import (
+from flatcam_plus.libs.qdarktheme.qtpy.QtGui import QIcon
+from flatcam_plus.libs.qdarktheme.qtpy.QtWidgets import (
     QCalendarWidget,
     QCheckBox,
     QFrame,

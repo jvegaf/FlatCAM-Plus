@@ -46,9 +46,9 @@ import socket
 
 import tkinter as tk
 
-import libs.qdarktheme
-import libs.qdarktheme.themes.dark.stylesheet as qdarksheet
-import libs.qdarktheme.themes.light.stylesheet as qlightsheet
+import flatcam_plus.libs.qdarktheme
+import flatcam_plus.libs.qdarktheme.themes.dark.stylesheet as qdarksheet
+import flatcam_plus.libs.qdarktheme.themes.light.stylesheet as qlightsheet
 
 from typing import Union
 
@@ -632,11 +632,11 @@ class App(QtCore.QObject):
         elif self.options["global_theme"] == 'light':
             self.resource_location = os.path.join(self.app_home, 'assets', 'resources')
             qlightsheet.STYLE_SHEET = light_style_sheet.L_STYLE_SHEET
-            self.qapp.setStyleSheet(libs.qdarktheme.load_stylesheet('light'))
+            self.qapp.setStyleSheet(flatcam_plus.libs.qdarktheme.load_stylesheet('light'))
         else:
             self.resource_location = os.path.join(self.app_home, 'assets', 'resources', 'dark_resources')
             qdarksheet.STYLE_SHEET = dark_style_sheet.D_STYLE_SHEET
-            self.qapp.setStyleSheet(libs.qdarktheme.load_stylesheet())
+            self.qapp.setStyleSheet(flatcam_plus.libs.qdarktheme.load_stylesheet())
 
         # ############################################################################################################
         # ################################### Set LOG verbosity ######################################################

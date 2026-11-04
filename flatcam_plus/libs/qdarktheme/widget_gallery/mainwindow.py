@@ -1,8 +1,8 @@
 """Main module of widget gallery."""
-import libs.qdarktheme
-from libs.qdarktheme.qtpy.QtCore import QDir, Qt, Slot
-from libs.qdarktheme.qtpy.QtGui import QAction, QActionGroup, QFont, QIcon
-from libs.qdarktheme.qtpy.QtWidgets import (
+import flatcam_plus.libs.qdarktheme
+from flatcam_plus.libs.qdarktheme.qtpy.QtCore import QDir, Qt, Slot
+from flatcam_plus.libs.qdarktheme.qtpy.QtGui import QAction, QActionGroup, QFont, QIcon
+from flatcam_plus.libs.qdarktheme.qtpy.QtWidgets import (
     QApplication,
     QColorDialog,
     QFileDialog,
@@ -18,10 +18,10 @@ from libs.qdarktheme.qtpy.QtWidgets import (
     QToolButton,
     QWidget,
 )
-from libs.qdarktheme.util import get_qdarktheme_root_path
-from libs.qdarktheme.widget_gallery.ui.dock_ui import DockUI
-from libs.qdarktheme.widget_gallery.ui.frame_ui import FrameUI
-from libs.qdarktheme.widget_gallery.ui.widgets_ui import WidgetsUI
+from flatcam_plus.libs.qdarktheme.util import get_qdarktheme_root_path
+from flatcam_plus.libs.qdarktheme.widget_gallery.ui.dock_ui import DockUI
+from flatcam_plus.libs.qdarktheme.widget_gallery.ui.frame_ui import FrameUI
+from flatcam_plus.libs.qdarktheme.widget_gallery.ui.widgets_ui import WidgetsUI
 
 
 class _WidgetGalleryUI:
@@ -184,12 +184,12 @@ class WidgetGallery(QMainWindow):
     @Slot()
     def _change_theme(self) -> None:
         self._theme = self.sender().text()  # type: ignore
-        QApplication.instance().setStyleSheet(libs.qdarktheme.load_stylesheet(self._theme, self._border_radius))
+        QApplication.instance().setStyleSheet(flatcam_plus.libs.qdarktheme.load_stylesheet(self._theme, self._border_radius))
 
     @Slot()
     def _change_corner_radius(self) -> None:
         self._border_radius: str = self.sender().text()  # type: ignore
-        QApplication.instance().setStyleSheet(libs.qdarktheme.load_stylesheet(self._theme, self._border_radius))
+        QApplication.instance().setStyleSheet(flatcam_plus.libs.qdarktheme.load_stylesheet(self._theme, self._border_radius))
 
     @Slot()
     def _popup_message_box(self) -> None:

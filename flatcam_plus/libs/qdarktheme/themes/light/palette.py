@@ -1,5 +1,5 @@
 """Module loading QPalette."""
-from libs.qdarktheme.qtpy.QtGui import QColor, QPalette
+from flatcam_plus.libs.qdarktheme.qtpy.QtGui import QColor, QPalette
 
 _palette = QPalette()
 

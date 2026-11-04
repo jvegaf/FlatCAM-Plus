@@ -1,6 +1,6 @@
 """Module setting up ui of dock window."""
-from libs.qdarktheme.qtpy.QtCore import Qt
-from libs.qdarktheme.qtpy.QtWidgets import QDockWidget, QMainWindow, QTextEdit, QVBoxLayout, QWidget
+from flatcam_plus.libs.qdarktheme.qtpy.QtCore import Qt
+from flatcam_plus.libs.qdarktheme.qtpy.QtWidgets import QDockWidget, QMainWindow, QTextEdit, QVBoxLayout, QWidget
 
 
 class DockUI:

@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from libs.qdarktheme.qtpy.qt_compat import QT_API
-from libs.qdarktheme.qtpy.QtCore import Qt
-from libs.qdarktheme.qtpy.QtGui import QPalette
+from flatcam_plus.libs.qdarktheme.qtpy.qt_compat import QT_API
+from flatcam_plus.libs.qdarktheme.qtpy.QtCore import Qt
+from flatcam_plus.libs.qdarktheme.qtpy.QtGui import QPalette
 
 if QT_API == "PySide6":
     from PySide6.QtWidgets import *  # type: ignore  # noqa: F403

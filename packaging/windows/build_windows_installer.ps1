@@ -343,7 +343,8 @@ function Build-PyInstallerTarget {
         "--add-data", (New-PyInstallerDataArg "config" "config"),
         "--add-data", (New-PyInstallerDataArg "locale" "locale"),
         "--add-data", (New-PyInstallerDataArg "preprocessors" "preprocessors"),
-        "--add-data", (New-PyInstallerDataArg "libs" "libs"),
+        # "libs" is not shipped as data: it is a subpackage of "flatcam_plus", so
+        # "--collect-submodules flatcam_plus" below already collects it as code.
         "--collect-submodules", "appCommon",
         "--collect-submodules", "appEditors",
         "--collect-submodules", "appGUI",

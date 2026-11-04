@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from libs.qdarktheme.qtpy.QtCore import QAbstractTableModel, QModelIndex, Qt
-from libs.qdarktheme.qtpy.QtGui import QIcon, QTextOption
-from libs.qdarktheme.qtpy.QtWidgets import (
+from flatcam_plus.libs.qdarktheme.qtpy.QtCore import QAbstractTableModel, QModelIndex, Qt
+from flatcam_plus.libs.qdarktheme.qtpy.QtGui import QIcon, QTextOption
+from flatcam_plus.libs.qdarktheme.qtpy.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDateTimeEdit,

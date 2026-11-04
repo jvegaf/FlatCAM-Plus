@@ -29,7 +29,9 @@ uv run --with pytest pytest tests/test_classify_contours.py -v
   (`QT_QPA_PLATFORM=offscreen`) under a throwaway `HOME`, so the suite never
   reads or writes `~/.FlatCAM`. Because the app builds a `multiprocessing.Pool`
   whose forkserver child re-imports the main module, any boot driver must keep
-  top-level work behind `if __name__ == "__main__"`.
+  top-level work behind `if __name__ == "__main__"`. The repository root reaches
+  `sys.path` through `pythonpath = ["."]` in `pyproject.toml`, not through an
+  insert in `tests/conftest.py`, because the application packages stay at the root.
 - `flatcam_plus.appMain.App` parses `sys.argv` with getopt at import time and exits on
   unknown options; `tests/conftest.py` replaces `sys.argv` so pytest's own flags
   cannot reach it.

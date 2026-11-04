@@ -194,7 +194,8 @@ build_portable() {
         --add-data "config:config"
         --add-data "locale:locale"
         --add-data "preprocessors:preprocessors"
-        --add-data "libs:libs"
+        # ``libs`` is not shipped as data: it is a subpackage of ``flatcam_plus``, so
+        # ``--collect-submodules flatcam_plus`` below already collects it as code.
         --collect-submodules appCommon
         --collect-submodules appEditors
         --collect-submodules appGUI

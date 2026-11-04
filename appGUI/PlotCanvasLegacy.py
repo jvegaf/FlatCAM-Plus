@@ -12,7 +12,7 @@ from PyQt6.QtCore import pyqtSignal
 
 # needed for legacy mode
 # Used for solid polygons in Matplotlib
-from descartes.patch import PolygonPatch
+from flatcam_plus.descartes.patch import PolygonPatch
 
 from shapely import Polygon, LineString, LinearRing
 

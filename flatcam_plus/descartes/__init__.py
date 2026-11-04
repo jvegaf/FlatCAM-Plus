@@ -1,4 +1,4 @@
 """Turn geometric objects into matplotlib patches"""
 
-from descartes.patch import PolygonPatch
+from flatcam_plus.descartes.patch import PolygonPatch
 

@@ -48,3 +48,11 @@ dependencies = [
 # with `.venv/bin/python flatcam.py`. It is not an installable package: `uv sync`
 # installs dependencies only, and there is no wheel or console script to build.
 package = false
+
+[tool.pytest.ini_options]
+# `flatcam_plus` is importable because it sits at the root, but the application packages
+# (`appGUI`, `appPlugins`, `appObjects`, `appHandlers`, `appParsers`, `appEditors`,
+# `appCommon`, `tclCommands`) are root modules and directories too, so the suite needs the
+# repository root on `sys.path`. Declaring it here replaces the hand-rolled insert that used
+# to live in `tests/conftest.py`.
+pythonpath = ["."]

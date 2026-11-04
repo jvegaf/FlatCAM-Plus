@@ -124,9 +124,11 @@ From L28, ordered by how likely it is to break silently rather than loudly:
 3. **Locale resolution from module location** (`flatcam_plus/appTranslation.py:_application_dir`)
    with a swallowed `StopIteration`: a wrong depth meant an empty language list and an
    English-only UI, no error. Handled in T4.5 (L38).
-4. **`descartes` and `libs` as top-level importables** (`appGUI/PlotCanvasLegacy.py:15`,
-   `appMain.py:49-51`, no `libs/__init__.py`): a real PyPI `descartes` shadows the vendored one
-   and theme loading changes without an `ImportError`.
+4. **`descartes` and `libs` as top-level importables** (was `appGUI/PlotCanvasLegacy.py:15`,
+   `appMain.py:49-51`, no `libs/__init__.py`): a real PyPI `descartes` could shadow the vendored
+   one and theme loading would change without an `ImportError`. Closed in T4.7 (L43): both trees
+   live inside the package, neither bare name resolves to this repository, and four layout tests
+   pin it.
 5. **Tcl discovery keyed on the module-name prefix** (`tclCommands/__init__.py:88-89`, filter
    `:105`): a renamed package path yields an empty command storage with no error; plus the
    build-time hardcodes of `appVersion.py` (`packaging/linux:84`, `packaging/macos:92`,
@@ -170,13 +172,18 @@ T4 phase slices: T4.1 `420318b` (paths), T4.2 `c3fccc4` (version pilot), T4.2b `
 (low-fanout modules), T4.3 `0424299` (camlib, 43 files, 55 insertions, 49 deletions), T4.4
 `367862b` (appTool, 58 files, 99 insertions, 65 deletions), T4.4b `650e83c`
 (`appPreProcessor`, 33 files, 64 insertions, 42 deletions) plus its R3-001 shim correction
-`91f3165` (3 files, 20 insertions), and T4.5 (this commit; `appTranslation`, 176 code and test
-files with 235 insertions and 186 deletions, where 172 are the same one-line import rewrite
-repeated and the moved module is detected as a rename, plus this document's 68/21). That diff is mechanical and reviewable as a unit:
-splitting it would leave the tree unimportable between commits because no shim exists (L37).
-Each T4 slice stays under one review slice on its own.
+`91f3165` (3 files, 20 insertions), T4.5 `ef000e5` (`appTranslation`, 176 code and test files with
+235 insertions and 186 deletions, where 172 are the same one-line import rewrite repeated and the
+moved module is detected as a rename, plus this document's 68/21), T4.6 `b0aac63` (`appMain`,
+10 files, 94 insertions, 34 deletions, of which the move is a detected rename and 62 lines are
+tests) and T4.7 (this commit; `descartes` and `libs` moved, 57 files, 158 insertions, 94 deletions,
+of which 98 are the rename and 49/49 is the mechanical import rewrite).
 
-After this commit `dev` is 35 commits ahead of `origin/main` with about 4k added and 0.6k
+The T4.5 move and its 172 sites travel together because no shim exists, so splitting that slice
+would leave the tree unimportable between commits (L37); every other slice is mechanical in the
+same way. Each T4 slice stays under one review slice on its own.
+
+After this commit `dev` is 36 commits ahead of `origin/main` with about 4.1k added and 0.7k
 deleted lines (`git diff --numstat origin/main..dev`, lock files and `requirements.txt`
 excluded), which is well past one review slice. That backlog predates this work and grows by
 one commit per T4 phase. Push, pull request creation and merge remain human decisions and must
@@ -184,6 +191,13 @@ account for it: the accumulated branch is not reviewable as a single candidate, 
 to be sliced per phase. `dev` itself is pushed: it is level with `origin/dev` (L37).
 
 ## Known follow-ups
+
+- Nothing has verified a packaged build: no PyInstaller bundle was produced in any T4 slice, and
+  the three `.ps1` build scripts have not been syntax-checked on a machine with PowerShell. The
+  `libs` data-to-code switch in T4.7 (L43) is argued from source and from `PACKAGING.md`, not from
+  a bundle. A local Linux portable build is the cheapest way to close it.
+- `flatcam_plus/libs/qdarktheme` is vendored and unversioned; that predates this work and no slice
+  touched its content.
 
 - `packaging/windows/build_windows_installer.ps1` does not collect `certifi` or
   `google.protobuf`; only the legacy `build_standalone.ps1` does. Verify whether the canonical
@@ -199,21 +213,20 @@ to be sliced per phase. `dev` itself is pushed: it is level with `origin/dev` (L
 
 ## Next step
 
-T4 is authorized (L27) and eight of its phases are done: T4.1 anchored the CWD-dependent paths,
-T4.2 and T4.2b moved the six low-fanout modules, T4.3 moved `camlib`, T4.4 moved `appTool`,
-T4.4b moved `appPreProcessor`, T4.5 moved `appTranslation` with the `locale/` anchoring and
-T4.6 moved `appMain` with the `_APP_ROOT` anchoring. The tree is consistent at every commit:
-`dev` is level with `origin/dev`, 84 tests pass, and every phase keeps its tests, docs and skills
-in the same commit.
+**S1 through S4 are complete.** T1 to T3 delivered the artifact cleanup, the single dependency
+manifest and the safety net; T4 moved every root module and both vendored trees into
+`flatcam_plus/`, anchored the paths that used to depend on the CWD or on a module's own location,
+and replaced the hand-rolled test `sys.path` insert with a declared one. `dev` is level with
+`origin/dev`, 96 tests pass, and every phase carries its tests, docs and skills in its own commit:
+T4.1 `420318b`, T4.2 `c3fccc4`, T4.2b `60f72bb`, T4.3 `0424299`, T4.4 `367862b`, T4.4b `650e83c`
+plus `91f3165`, T4.5 `ef000e5`, T4.6 `b0aac63`, T4.7 (this commit).
 
-**T4.7 is the last phase**: bring the vendored `descartes/` package and the `libs/` namespace
-package inside `flatcam_plus/`, and retire the `tests/conftest.py` `sys.path` insert. It carries
-risk register item 4, the one nothing has touched yet: a real PyPI `descartes` shadows the vendored
-one and theme loading changes without an `ImportError`, and `libs/` has no `__init__.py` at all.
-`sys.path` is currently how eight test modules and the root modules import each other, so the
-insert can only go once every root module has moved — which is now true.
-
-Push and merge of the accumulated `dev` branch remain human decisions.
+What is left is not development work but the human's decision: the branch is 36 commits ahead of
+`origin/main` and must be delivered as per-phase slices, never as one candidate. Push, pull request
+and merge stay yours. Two recorded defects still wait on a decision and were untouched by T4: the
+four missing `geometry_*` options that `CNCjob.generate_from_multitool_geometry` reads, and the
+empty-`xy_end` `IndexError` that leaves a G-code header empty (both L12). The first packaged build
+is the only remaining verification gap (see Known follow-ups).
 
 ## Log
 
@@ -549,3 +562,35 @@ Push and merge of the accumulated `dev` branch remain human decisions.
   check: a scratch file containing `import appMain as probe` fails the guard for `appMain`; removed
   afterwards. 84 tests pass. Unverified on this machine: the Windows-only `_APP_ROOT` substitutions
   and any frozen build; CI needs a push.
+- **L43 — T4.7 executed (`descartes` and `libs`) and the end of S4**: delegated for the same reason
+  as T4.6. Both trees moved under `flatcam_plus/` (40 renames), `flatcam_plus/libs/__init__.py`
+  turned the vendored `qdarktheme` from a namespace directory into a real subpackage, and 17
+  vendored files plus `appGUI/PlotCanvasLegacy.py` and the five `libs` references in `appMain` were
+  repointed at the absolute package path. RED first: the new layout assertions failed ten times and
+  named the real defects — neither package importable from inside `flatcam_plus`, both roots still
+  present at the repository root, `find_spec('descartes')` resolving to the old tree, and the
+  old-name guard naming `appGUI/PlotCanvasLegacy.py` and `libs/qdarktheme/util.py`. Retiring the
+  `tests/conftest.py` `sys.path` insert needed a decision the phase text did not spell out: the
+  application packages stay at the root, so the root still has to be importable, and the insert was
+  replaced by `pythonpath = ["."]` under a new `[tool.pytest.ini_options]` instead of being dropped.
+  Mutation check: commenting that setting out produces five collection errors (`appObjects`,
+  `appParsers`, `flatcam_plus`, …), so the declaration is load-bearing, not decorative. Risk
+  register item 4 is closed: `flatcam_plus.descartes.patch` and `flatcam_plus.libs.qdarktheme`
+  import, neither bare name resolves to this repository, and no PyPI `descartes` is installed or
+  declared anywhere. The differential check that matters for a vendored theme: the generated CSS is
+  byte-identical to `b0aac63` (dark 30120 chars, light 30293, same digests). `libs` was shipped as
+  *data* only because it was a top-level package, so `--add-data "libs:libs"` is retired in the
+  three PyInstaller scripts and in the legacy one, each of which already collects
+  `--collect-submodules flatcam_plus`; `PACKAGING.md`'s two manual snippets had been missing that
+  collect flag since T4.2 and now carry it instead. 96 tests pass, and `uv lock --check` stays clean
+  because no dependency changed.
+- **L44 — Parent-closed leftovers of T4.7**: the worker's surfaces left three things behind that
+  the parent finished, since the phase's own purpose was to leave no top-level importable behind:
+  the redundant `sys.path.insert` in `tests/test_recent_projects.py` and
+  `tests/test_milling_geometry.py` became dead once the insert was declared in `pyproject.toml`
+  (removed, with their then-unused `os`/`sys` imports), and the dead comment in
+  `flatcam_plus/camlib.py:50` now names the new path. Unverified on this machine, recorded rather
+  than papered over: no PyInstaller build, no PowerShell to syntax-check the three `.ps1` scripts,
+  and no Windows run for the `_APP_ROOT` substitutions from L41. With L43 the ODD feature that L1
+  opened is complete: every module and both vendored trees live in `flatcam_plus/`, and what
+  remains is delivery plus the two L12 defects that still need a decision.

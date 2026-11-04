@@ -1,7 +1,7 @@
 """Module for detecting Qt version."""
 from __future__ import annotations
 
-from libs.qdarktheme.qtpy.qt_compat import QT_API
+from flatcam_plus.libs.qdarktheme.qtpy.qt_compat import QT_API
 
 __version__: str | None = None
 if QT_API == "PySide6":
