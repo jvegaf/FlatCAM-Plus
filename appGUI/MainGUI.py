@@ -26,6 +26,7 @@ from appGUI.preferences.excellon.ExcellonPreferencesUI import ExcellonPreference
 from appGUI.preferences.general.GeneralPreferencesUI import GeneralPreferencesUI
 from appGUI.preferences.geometry.GeometryPreferencesUI import GeometryPreferencesUI
 from appGUI.preferences.gerber.GerberPreferencesUI import GerberPreferencesUI
+from appGUI.preferences.machine.MachinePreferencesUI import MachinePreferencesUI
 from appEditors.appGeoEditor import FCShapeTool
 
 import webbrowser
@@ -3220,6 +3221,17 @@ class MainGUI(QtWidgets.QMainWindow):
         self.fa_scroll_area.setWidgetResizable(True)
         self.fa_tab_lay.addWidget(self.fa_scroll_area)
 
+        self.machine_tab = QtWidgets.QWidget()
+        self.machine_tab.setObjectName("machine_tab")
+        self.pref_tab_area.addTab(self.machine_tab, '%s' % _("Machine").upper())
+        self.machine_tab_lay = QtWidgets.QVBoxLayout()
+        self.machine_tab_lay.setContentsMargins(2, 2, 2, 2)
+        self.machine_tab.setLayout(self.machine_tab_lay)
+
+        self.machine_scroll_area = QtWidgets.QScrollArea()
+        self.machine_scroll_area.setWidgetResizable(True)
+        self.machine_tab_lay.addWidget(self.machine_scroll_area)
+
         self._hide_advanced_preference_tabs()
 
         self.pref_tab_bottom_layout = QtWidgets.QHBoxLayout()
@@ -3610,6 +3622,7 @@ class MainGUI(QtWidgets.QMainWindow):
         self.excellon_pref_form = ExcellonPreferencesUI(app=self.app)
         self.geo_pref_form = GeometryPreferencesUI(app=self.app)
         self.cncjob_pref_form = CNCJobPreferencesUI(app=self.app)
+        self.machine_pref_form = MachinePreferencesUI(app=self.app)
         self.plugin_pref_form = PluginsPreferencesUI(app=self.app)
         self.plugin2_pref_form = Plugins2PreferencesUI(app=self.app)
         self.plugin_eng_pref_form = PluginsEngravingPreferencesUI(app=self.app)

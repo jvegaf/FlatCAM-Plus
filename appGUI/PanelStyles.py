@@ -898,7 +898,7 @@ def apply_modern_preferences_style(ui, app=None):
 
     for name in [
         "pref_tab_layout", "general_tab_lay", "gerber_tab_lay",
-        "excellon_tab_lay", "geometry_tab_lay", "cncjob_tab_lay",
+        "excellon_tab_lay", "geometry_tab_lay", "cncjob_tab_lay", "machine_tab_lay",
         "plugins_eng_tab_lay", "tools_tab_lay", "tools2_tab_lay", "fa_tab_lay",
     ]:
         layout = getattr(ui, name, None)
@@ -917,7 +917,7 @@ def apply_modern_preferences_style(ui, app=None):
     scroll_names = [
         "general_scroll_area", "gerber_scroll_area", "excellon_scroll_area",
         "geometry_scroll_area", "cncjob_scroll_area", "plugins_engraving_scroll_area",
-        "tools_scroll_area", "tools2_scroll_area", "fa_scroll_area",
+        "tools_scroll_area", "tools2_scroll_area", "fa_scroll_area", "machine_scroll_area",
     ]
     for name in scroll_names:
         scroll_area = getattr(ui, name, None)
@@ -932,7 +932,7 @@ def apply_modern_preferences_style(ui, app=None):
     form_names = [
         "general_pref_form", "gerber_pref_form", "excellon_pref_form",
         "geo_pref_form", "cncjob_pref_form", "plugin_eng_pref_form",
-        "plugin_pref_form", "plugin2_pref_form", "util_pref_form",
+        "plugin_pref_form", "plugin2_pref_form", "util_pref_form", "machine_pref_form",
     ]
     for name in form_names:
         form = getattr(ui, name, None)

@@ -36,6 +36,7 @@ class PreferencesUIManager(QtCore.QObject):
         self.excellon_displayed = False
         self.geometry_displayed = False
         self.cnc_displayed = False
+        self.machine_displayed = False
         self.engrave_displayed = False
         self.plugins_displayed = False
         self.plugins2_displayed = False
@@ -806,6 +807,7 @@ class PreferencesUIManager(QtCore.QObject):
         self.excellon_displayed = False
         self.geometry_displayed = False
         self.cnc_displayed = False
+        self.machine_displayed = False
         self.engrave_displayed = False
         self.plugins_displayed = False
         self.plugins2_displayed = False
@@ -954,6 +956,18 @@ class PreferencesUIManager(QtCore.QObject):
                 self.ui.app.log.debug("Nothing to remove")
             self.ui.cncjob_scroll_area.setWidget(cnc_form)
             cnc_form.show()
+
+        if idx == 9:
+            if self.machine_displayed is False:
+                self.machine_displayed = True
+                machine_form = self.ui.machine_pref_form
+                try:
+                    self.ui.machine_scroll_area.takeWidget()
+                except Exception:
+                    self.ui.app.log.debug("Nothing to remove")
+                self.ui.machine_scroll_area.setWidget(machine_form)
+                machine_form.show()
+            self.ui.machine_pref_form.machine_group.refresh_from_storage()
 
         if idx == 5 and self.engrave_displayed is False:
             self.engrave_displayed = True
