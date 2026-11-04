@@ -53,7 +53,7 @@ import builtins
 import typing
 
 if typing.TYPE_CHECKING:
-    import appMain
+    import flatcam_plus.appMain as appMain
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:
@@ -2388,7 +2388,7 @@ class appIO(QtCore.QObject):
             return
 
         # How the object should be initialized
-        def obj_init(job_obj, app_obj_: "appMain.App"):
+        def obj_init(job_obj, app_obj_: "flatcam_plus.appMain.App"):
             """
             :param job_obj: the resulting object
             :type app_obj_: App

@@ -92,8 +92,18 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
     One commit, not the two or three the plan predicted: see L37. As with T4.4b, the moved module
     keeps the pre-move name resolvable in `sys.modules` for the out-of-tree user preprocessors,
     and `tests/test_package_layout.py` pins it.
-  - **T4.6** — Move `appMain` and turn `flatcam.py` into a root launcher that keeps
-    `.venv/bin/python flatcam.py` working; update the PyInstaller entrypoints.
+  - **T4.6** — Move `appMain` and keep `.venv/bin/python flatcam.py` working. Status: done in the
+    commit that adds `_APP_ROOT` and three anchor tests to `tests/test_app_paths.py` and
+    `appMain` to `tests/test_package_layout.py`. `flatcam.py` already was the root launcher, so it
+    kept its location, its `__main__` block and its own `base_path`; only its import line moved.
+    The whole module now resolves every `__file__`-derived path from one module-level anchor, the
+    parent of the package, and `os.chdir` follows it, which disarms risk register item 1. Risk
+    register item 5 needed no packaging edit: the four build scripts still name the unchanged root
+    `flatcam.py` and already pass `--collect-submodules flatcam_plus`, and `tclCommands` discovery
+    keys on the `tclCommands` package, not on `appMain` (101 commands registered after the move).
+    The guard's old-name matcher was widened in the same commit, so it now sees the bare
+    `import <name>` form that the T4.4 and T4.5 sweeps used, and the two `TYPE_CHECKING` sites it
+    would then have flagged were repointed.
   - **T4.7** — Bring the vendored `descartes/` and the `libs/` namespace package inside, and
     retire the `tests/conftest.py` `sys.path` insert.
   Every phase keeps the tree consistent on its own: no shim layer, so nothing is left to remove
@@ -103,11 +113,10 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
 
 From L28, ordered by how likely it is to break silently rather than loudly:
 
-1. **`os.chdir` to the module directory** (`appMain.py:569,578`) makes every `assets/resources`,
-   locale and `preprocessors/*.py` lookup CWD-relative. Moving `appMain.py` one level deeper
-   repoints the whole app at the package directory, and the preprocessor failure is only logged
-   (`flatcam_plus/appPreProcessor.py:155,166-168`). T4.1 exists to remove this dependency before
-   any move.
+1. **`os.chdir` to the module directory** (was `appMain.py:569,578`) made every `assets/resources`,
+   locale and `preprocessors/*.py` lookup CWD-relative, and the preprocessor failure is only
+   logged (`flatcam_plus/appPreProcessor.py:155,166-168`). T4.1 removed the CWD dependency;
+   T4.6 replaced the module-relative derivation with `_APP_ROOT` and three tests (L41).
 2. **Preprocessor discovery** (`flatcam_plus/appPreProcessor.py:10,155-170`):
    `SourceFileLoader` with the fixed module name `FlatCAMPostProcessor` plus metaclass
    registration; a name collision silently
@@ -123,7 +132,9 @@ From L28, ordered by how likely it is to break silently rather than loudly:
    build-time hardcodes of `appVersion.py` (`packaging/linux:84`, `packaging/macos:92`,
    `packaging/windows/update_version.ps1:19`) and of `flatcam.py` as entrypoint
    (`packaging/linux:184`, `packaging/macos:209`, `packaging/windows:333`,
-   `build_standalone.ps1:83`).
+   `build_standalone.ps1:83`). Verified in T4.6: discovery keys on the `tclCommands` package and
+   none of the four entrypoint hardcodes had to move, because `flatcam.py` stays at the root.
+   Item 5 is closed; nothing in `packaging/` referenced `appMain`.
 
 ## Decisions
 
@@ -165,7 +176,7 @@ repeated and the moved module is detected as a rename, plus this document's 68/2
 splitting it would leave the tree unimportable between commits because no shim exists (L37).
 Each T4 slice stays under one review slice on its own.
 
-After this commit `dev` is 33 commits ahead of `origin/main` with about 3.9k added and 0.6k
+After this commit `dev` is 35 commits ahead of `origin/main` with about 4k added and 0.6k
 deleted lines (`git diff --numstat origin/main..dev`, lock files and `requirements.txt`
 excluded), which is well past one review slice. That backlog predates this work and grows by
 one commit per T4 phase. Push, pull request creation and merge remain human decisions and must
@@ -188,22 +199,21 @@ to be sliced per phase. `dev` itself is pushed: it is level with `origin/dev` (L
 
 ## Next step
 
-T4 is authorized (L27) and seven of its phases are done: T4.1 anchored the CWD-dependent paths,
+T4 is authorized (L27) and eight of its phases are done: T4.1 anchored the CWD-dependent paths,
 T4.2 and T4.2b moved the six low-fanout modules, T4.3 moved `camlib`, T4.4 moved `appTool`,
-T4.4b moved `appPreProcessor` and T4.5 moved `appTranslation` together with the `locale/`
-anchoring that made the move safe. The tree is consistent at every commit: `dev` is level with `origin/dev`, 76 tests pass, and
-every phase keeps its tests, docs and skills in the same commit.
+T4.4b moved `appPreProcessor`, T4.5 moved `appTranslation` with the `locale/` anchoring and
+T4.6 moved `appMain` with the `_APP_ROOT` anchoring. The tree is consistent at every commit:
+`dev` is level with `origin/dev`, 84 tests pass, and every phase keeps its tests, docs and skills
+in the same commit.
 
-T4.6 (moving `appMain` and turning `flatcam.py` into a root launcher while keeping
-`.venv/bin/python flatcam.py` working, plus the four PyInstaller entrypoint hardcodes) is the
-next phase. It carries risk register items 1 and 5: `App.__init__` chdirs to
-`os.path.dirname(os.path.realpath(__file__))` and owns `app_home`, so the move repoints
-`assets/`, `locale/` and `preprocessors/` at `flatcam_plus/` unless `app_home` is anchored to
-the repository root the way T4.1 anchored `resource_location`; `packaging/linux:184`,
-`packaging/macos:209`, `packaging/windows:333` and `build_standalone.ps1:83` also name
-`flatcam.py` as the entrypoint. T4.7 (`descartes`, `libs` and the `tests/conftest.py`
-`sys.path` insert) stays after it. Push and merge of the accumulated `dev` branch remain human
-decisions.
+**T4.7 is the last phase**: bring the vendored `descartes/` package and the `libs/` namespace
+package inside `flatcam_plus/`, and retire the `tests/conftest.py` `sys.path` insert. It carries
+risk register item 4, the one nothing has touched yet: a real PyPI `descartes` shadows the vendored
+one and theme loading changes without an `ImportError`, and `libs/` has no `__init__.py` at all.
+`sys.path` is currently how eight test modules and the root modules import each other, so the
+insert can only go once every root module has moved — which is now true.
+
+Push and merge of the accumulated `dev` branch remain human decisions.
 
 ## Log
 
@@ -506,3 +516,36 @@ decisions.
   `tests/test_locale_resolution.py:35-54`, SUGGESTION). Both worth checking first: the alias
   comment block (the same lines the independent verifier flagged as A1, now rewritten) and the
   frozen-layout test body.
+- **L41 — T4.6 executed (`appMain`) with the parent past its context backstop**: the phase was
+  delegated to `gentle-ai-worker` with the spec by reference and a narrow surface list, because the
+  parent session had passed 150k tokens; the worker returned the move, the anchor and the evidence,
+  and the parent verified, finished the leftovers, wrote this entry and committed. RED first:
+  adding `appMain` to `PACKAGE_MODULES` failed all three guards, naming `flatcam.py`. Then
+  `git mv appMain.py flatcam_plus/appMain.py` and the two real importers (`flatcam.py`,
+  `tests/conftest.py`) moved to `from flatcam_plus.appMain import App`. The anchor defect showed up
+  exactly as risk register item 1 predicted: with the module-relative derivation still in place,
+  `app_home` became `flatcam_plus/`, `tests/test_app_paths.py` failed four times and
+  `test_app_boot.py` failed with `assert 0 >= 20` on the preprocessor registry — the only assertion
+  that noticed, which is why the register called this the silent one. Fix: one module-level
+  `_APP_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))` with a comment naming
+  the consequence, backing `app_home` and therefore `os.chdir`, `resource_location` and the
+  `app_home/preprocessors` glob, plus the five other `__file__`-derived paths in the module (the
+  win32 `config/configuration.txt` candidates, the win32 portable `data_path`, the win32 VisPyData
+  fallback and the two frozen-build config candidates). Each substitution preserves the pre-move
+  value, and `grep -n __file__ flatcam_plus/appMain.py` now returns that definition only. Risk
+  register item 5 needed no packaging edit: the four build scripts name the unchanged root
+  `flatcam.py` and already pass `--collect-submodules flatcam_plus`, and tcl discovery keys on the
+  `tclCommands` package (`tclCommands/__init__.py:88-89,105`), which still registers 101 commands
+  after the move. Item 4, the `descartes`/`libs` shadowing risk, is untouched and belongs to T4.7.
+- **L42 — The parent-closed gap in the T4.6 evidence**: the worker's surface list did not include
+  `appHandlers/appIO.py`, `appCommon/RegisterFileKeywords.py` or `flatcam_plus/appTool.py`, so it
+  reported two `TYPE_CHECKING`-only `import appMain` sites and their string annotations as
+  unfixable and left them. The parent repointed all three (module name only; the attribute names
+  those annotations use were already stale before this work and changing them is not T4.6's
+  business), so no source file imports the old root name any more. With that done, the guard could
+  finally be widened: `tests/test_package_layout.py` now matches the bare `import <name>` form as
+  well as `from <name> import`, with a test that pins both matchers on sample lines, and the
+  tracked `R2-import-guard-syntax` advisory from L36 and A4 from L39 is closed. Discriminating
+  check: a scratch file containing `import appMain as probe` fails the guard for `appMain`; removed
+  afterwards. 84 tests pass. Unverified on this machine: the Windows-only `_APP_ROOT` substitutions
+  and any frozen build; CI needs a push.

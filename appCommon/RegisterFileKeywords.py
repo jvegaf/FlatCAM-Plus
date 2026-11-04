@@ -13,7 +13,7 @@ if sys.platform == 'win32':
     import winreg
 
 if typing.TYPE_CHECKING:
-    import appMain
+    import flatcam_plus.appMain as appMain
 
 
 @dataclass
@@ -295,11 +295,11 @@ class RegisterFK(QtCore.QObject):
     """
 
     def __init__(self,
-                 ui: 'appMain.MainGUI',
+                 ui: 'flatcam_plus.appMain.MainGUI',
                  inform_sig: pyqtSignal,
-                 options_dict: 'appMain.AppOptions',
-                 shell: 'appMain.FCShell',
-                 log: ('appMain.AppLogging', 'appMain.logging'),
+                 options_dict: 'flatcam_plus.appMain.AppOptions',
+                 shell: 'flatcam_plus.appMain.FCShell',
+                 log: ('flatcam_plus.appMain.AppLogging', 'flatcam_plus.appMain.logging'),
                  keywords: KeyWords,
                  extensions: Extensions):
 

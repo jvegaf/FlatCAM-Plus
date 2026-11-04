@@ -122,6 +122,13 @@ import gettext
 from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
+# ``flatcam_plus/`` is a package: the data directories the application reads at startup
+# (``assets/``, ``locale/``, ``preprocessors/``, ``config/``) sit beside the package, not inside
+# it, so every path this module resolves for itself is anchored to the package's parent. Using
+# this module's own directory would silently repoint them at ``flatcam_plus/``, and the only
+# symptom would be a logged preprocessor load failure.
+_APP_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:
@@ -473,12 +480,12 @@ class App(QtCore.QObject):
             # #######################################################################################################
             # ####### CONFIG FILE WITH PARAMETERS REGARDING PORTABILITY #############################################
             # #######################################################################################################
-            config_file = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '\\config\\configuration.txt'
+            config_file = os.path.dirname(_APP_ROOT) + '\\config\\configuration.txt'
             try:
                 with open(config_file, 'r'):
                     pass
             except FileNotFoundError:
-                config_file = os.path.dirname(os.path.realpath(__file__)) + '\\config\\configuration.txt'
+                config_file = _APP_ROOT + '\\config\\configuration.txt'
 
             try:
                 with open(config_file, 'r') as f:
@@ -505,7 +512,7 @@ class App(QtCore.QObject):
                 # self.data_path = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, None, 0) + '\\FlatCAM'
                 self.data_path = os.path.join(os.getenv('appdata'), 'FlatCAM')
             else:
-                self.data_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '\\config'
+                self.data_path = os.path.dirname(_APP_ROOT) + '\\config'
 
             self.os = 'windows'
         else:  # Linux/Unix/MacOS
@@ -566,7 +573,7 @@ class App(QtCore.QObject):
 
         # Application directory. CHDIR to it. Otherwise, trying to load GUI icons will fail as their path is relative.
         # This will fail under cx_freeze ...
-        self.app_home = os.path.dirname(os.path.realpath(__file__))
+        self.app_home = _APP_ROOT
 
         # self.log.debug("Application path is " + self.app_home)
         # self.log.debug("Started in " + os.getcwd())
@@ -1426,7 +1433,7 @@ class App(QtCore.QObject):
         try:
             shutil.copytree(from_path, to_path)
         except FileNotFoundError:
-            from_new_path = os.path.dirname(os.path.realpath(__file__)) + '\\appGUI\\VisPyData\\data'
+            from_new_path = os.path.join(_APP_ROOT, 'appGUI', 'VisPyData', 'data')
             shutil.copytree(from_new_path, to_path)
 
     def connect_custom_signal(self, target, params):
@@ -3919,9 +3926,9 @@ class App(QtCore.QObject):
 
         # test if the app was frozen and choose the path for the configuration file
         if getattr(sys, "frozen", False) is True:
-            current_data_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '\\config'
+            current_data_path = os.path.dirname(_APP_ROOT) + '\\config'
         else:
-            current_data_path = os.path.dirname(os.path.realpath(__file__)) + '\\config'
+            current_data_path = _APP_ROOT + '\\config'
 
         config_file = current_data_path + '\\configuration.txt'
         try:

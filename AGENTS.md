@@ -30,7 +30,7 @@ uv run --with pytest pytest tests/test_classify_contours.py -v
   reads or writes `~/.FlatCAM`. Because the app builds a `multiprocessing.Pool`
   whose forkserver child re-imports the main module, any boot driver must keep
   top-level work behind `if __name__ == "__main__"`.
-- `appMain.App` parses `sys.argv` with getopt at import time and exits on
+- `flatcam_plus.appMain.App` parses `sys.argv` with getopt at import time and exits on
   unknown options; `tests/conftest.py` replaces `sys.argv` so pytest's own flags
   cannot reach it.
 - CI is `.github/workflows/tests.yml`: `uv sync --frozen` plus the suite on Ubuntu
@@ -44,7 +44,7 @@ All development in this repository follows ODD. Do not ask whether to use it.
 1. **Authorize.** Investigation, explanation, and review stay read-only until a
    change is explicitly requested.
 2. **Explore before writing.** Use CodeGraph or targeted grep; never read
-   `appMain.py`, `flatcam_plus/camlib.py`, or `flatcam_plus/appDatabase.py` whole.
+   `flatcam_plus/appMain.py`, `flatcam_plus/camlib.py`, or `flatcam_plus/appDatabase.py` whole.
 3. **Resolve uncertainty.** Ask one focused question only for a real product or
    design decision, then wait.
 4. **Classify.** Small work (understood, contained risk, resumable from the
@@ -71,7 +71,7 @@ follow its native lifecycle without treating it as delivery approval.
 
 | Area | Entry point |
 | --- | --- |
-| Application controller, menus, tool registration | `appMain.py` (`class App`) |
+| Application controller, menus, tool registration | `flatcam_plus/appMain.py` (`class App`) |
 | Geometry/CNC algorithms | `flatcam_plus/camlib.py` |
 | Tool plugins (Cutout, Isolation, Drilling, …) | `appPlugins/Tool*.py` |
 | Document objects (Gerber, Excellon, Geometry, CNCJob) | `appObjects/` |
@@ -84,15 +84,20 @@ follow its native lifecycle without treating it as delivery approval.
 | Test suite and headless app fixture | `tests/`, `tests/conftest.py` |
 | CI workflow | `.github/workflows/tests.yml` |
 
-`appMain.py`, `flatcam_plus/camlib.py`, and `flatcam_plus/appDatabase.py` are very large
+`flatcam_plus/appMain.py`, `flatcam_plus/camlib.py`, and `flatcam_plus/appDatabase.py` are very large
 (~160–350 KB).
 Search targeted symbols instead of reading them whole.
+
+The runnable entry point stays at the repository root: `flatcam.py` imports
+`flatcam_plus.appMain` and owns the `if __name__ == '__main__'` block. `App.app_home`
+(and therefore `os.chdir`, `assets/`, `locale/` and `preprocessors/`) is anchored to that
+root directory, not to the package.
 
 ## Conventions and gotchas
 
 - **Tool plugins**: subclass `AppTool`/`AppToolEditor` (`flatcam_plus/appTool.py`), implement
   `install()`, then instantiate and add the tool to `App.app_plugins` in
-  `appMain.py` (~line 1958). The tool UI class usually lives in the same file.
+  `flatcam_plus/appMain.py` (~line 1965). The tool UI class usually lives in the same file.
 - **G-code preprocessors**: every `.py` file in `preprocessors/` is imported at
   startup and each `PreProc` subclass registers itself by class name. No central
   registry edit is required.

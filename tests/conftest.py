@@ -17,8 +17,8 @@ if REPO_ROOT not in sys.path:
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
-# ``appMain.App`` parses ``sys.argv`` with getopt at import time and exits on unknown
-# options, so the arguments pytest was started with must not leak into the application.
+# ``flatcam_plus.appMain.App`` parses ``sys.argv`` with getopt at import time and exits on
+# unknown options, so the arguments pytest was started with must not leak into the application.
 sys.argv = ["flatcam"]
 
 # Qt must not need a display server, and the engine is chosen before the app exists.
@@ -45,7 +45,7 @@ def fc_app(isolated_home):
 
     qapp = QtWidgets.QApplication.instance() or QtWidgets.QApplication(["flatcam"])
 
-    from appMain import App
+    from flatcam_plus.appMain import App
 
     app = App(qapp=qapp, startup_project_request=None)
     try:
