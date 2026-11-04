@@ -2,18 +2,22 @@
 
 ``app.options`` is a plain ``LoudDict`` populated from ``AppDefaults.factory_defaults``, so a
 read of a key that was never defined raises ``KeyError`` at the first use of the owning code
-path. ``appParsers/ParseHPGL2.py`` built its whole ``default_data`` dictionary that way: twelve
+path. ``appParsers/ParseHPGL2.py`` built its whole ``default_data`` dictionary that way: thirteen
 ``geometry_*`` keys were read but never shipped, so constructing the parser failed before a
 single line of HPGL2 could be parsed.
 
 The scan is deliberately name-agnostic: it collects the option reads from the source instead
 of listing the known keys, so a new read added anywhere in the tree is covered without
-touching this file. Commented-out reads are not live code and are ignored.
+touching this file. Commented-out reads are not live code and are ignored, including a read
+that only appears after a trailing ``#``: the scan tokenises each file instead of stripping
+comments by hand, so a ``#`` inside a string literal cannot hide or invent a read.
 """
 
 import ast
+import io
 import os
 import re
+import tokenize
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULTS_PATH = os.path.join(REPO_ROOT, "flatcam_plus", "defaults.py")
@@ -39,15 +43,41 @@ def _python_files():
                 yield os.path.join(dirpath, filename)
 
 
+SKIPPED_TOKEN_TYPES = frozenset({
+    tokenize.COMMENT,
+    tokenize.NEWLINE,
+    tokenize.NL,
+    tokenize.INDENT,
+    tokenize.DEDENT,
+    tokenize.ENCODING,
+    tokenize.ENDMARKER,
+})
+
+
 def _live_geometry_reads(path):
-    """Return ``{option_name: [line numbers]}`` for the live reads in one file."""
+    """Return ``{option_name: [line numbers]}`` for the live reads in one file.
+
+    Tokens are concatenated per physical line with comments dropped, which is why a read that
+    sits behind a trailing ``#`` is not collected while a ``#`` inside a string literal cannot
+    truncate the line.
+    """
     reads = {}
     with open(path, encoding="utf-8", errors="replace") as handle:
-        for number, line in enumerate(handle, start=1):
-            if line.strip().startswith("#"):
+        source = handle.read()
+
+    code_by_line = {}
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            if token.type in SKIPPED_TOKEN_TYPES:
                 continue
-            for match in OPTION_READ.finditer(line):
-                reads.setdefault(match.group(2), []).append(number)
+            code_by_line.setdefault(token.start[0], []).append(token.string)
+    except (tokenize.TokenError, IndentationError, SyntaxError):
+        # A file that does not tokenise cannot contribute a trustworthy read either way.
+        return reads
+
+    for number, parts in code_by_line.items():
+        for match in OPTION_READ.finditer("".join(parts)):
+            reads.setdefault(match.group(2), []).append(number)
     return reads
 
 
@@ -107,10 +137,16 @@ def test_only_live_reads_are_collected(tmp_path):
         "    also = " + SYNTHETIC_READ % ("app", "geometry_also_live") + "\n"
         "    # dead = " + SYNTHETIC_READ % ("app", "geometry_commented_key") + "\n"
         "    #\n"
-        "    #    nested = " + SYNTHETIC_READ % ("app", "geometry_nested_comment") + "\n",
+        "    #    nested = " + SYNTHETIC_READ % ("app", "geometry_nested_comment") + "\n"
+        "    trailing = 1  # " + SYNTHETIC_READ % ("app", "geometry_trailing_comment") + "\n"
+        "    colour = '#FF0000'; after = " + SYNTHETIC_READ % ("app", "geometry_after_string") + "\n",
         encoding="utf-8",
     )
-    assert sorted(_live_geometry_reads(str(source))) == ["geometry_also_live", "geometry_live_key"]
+    assert sorted(_live_geometry_reads(str(source))) == [
+        "geometry_after_string",
+        "geometry_also_live",
+        "geometry_live_key",
+    ]
 
 
 def test_every_live_geometry_option_is_defined_in_defaults():

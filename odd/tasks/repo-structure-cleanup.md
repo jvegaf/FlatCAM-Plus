@@ -691,3 +691,20 @@ and `gh` is not authenticated in this session, so they were not attempted.
   'geometry_cutz'` from `HPGL2.__init__`. A real import now parses a nine-statement sample into a
   `LineString (0 0, 25 0, 25 25)` with bounds `0,0,25,25` millimetres and one tool. Mutation check
   on the guard: deleting `geometry_spindlespeed` fails it by name. 101 tests before, 125 after.
+- **L50 — Native review of the HPGL2 fix (lineage `review-85d04374fd80d7ab`)**: tier `medium`,
+  4 changed paths, lenses `readability` and `reliability` (28 KB prompts), approved with no severe
+  finding, so no refuter and no correction; the acknowledgement burned the authority (consumed
+  revision `sha256:45cb2dfe...`). Three readability advisories, all informational and all fixed in
+  the commit that records this entry because each one was unambiguous from its location:
+  **R2-001** (`flatcam_plus/defaults.py:367-369`) was the comment claiming these are parameters "a
+  Geometry object reads" when almost every one of them has no live reader left — the comment now
+  says the contract is the presence and type of the key and names why (the plugin readers are
+  commented out and `camlib` reads the `tools_mill_*` keys); **R2-002**
+  (`tests/test_defaults_coverage.py:5`) was the docstring still saying *twelve* keys, which is the
+  same off-by-one L49 corrects; **R2-003** (`tests/test_defaults_coverage.py:47-49`) was a real
+  weakness in the guard, which skipped only lines that *start* with `#`, so a read behind a
+  trailing comment would have counted as live. The scan now tokenises each file with
+  `tokenize.generate_tokens`, drops comment tokens and concatenates the rest per line: a trailing
+  comment cannot invent a read and a `#` inside a string literal cannot truncate one. The
+  synthetic-line test pins both cases, and the scan stays a per-file walk (the guard file's five
+  tests take ~3.5 s, up from ~0.4 s: the price of tokenising 300 files).

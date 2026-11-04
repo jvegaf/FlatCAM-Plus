@@ -364,9 +364,11 @@ class AppDefaults:
         "geometry_endxy": None,
         "geometry_f_plunge": False,
 
-        # The rest of the CNC job parameters a Geometry object reads. These complete the set that
+        # The rest of the CNC job parameters a Geometry object carries. They complete the set that
         # appParsers/ParseHPGL2.py copies into its default tool data, so the values mirror the
-        # plugin blocks instead of being invented: the cut depth and the area selection shape
+        # plugin blocks instead of being invented; most of these keys have no live reader left,
+        # because the plugin readers that used them are commented out and camlib reads the
+        # tools_mill_* keys, so the contract here is the presence and type of the key: the cut depth and the area selection shape
         # follow the Isolation Routing block (an HPGL2 pen path is an isolation style contour and
         # its tools are tagged 'Iso'), while travel, dwell, multidepth, extra cut, tool change and
         # the area strategy follow the Drilling and Milling blocks. geometry_ppname_g must name a
