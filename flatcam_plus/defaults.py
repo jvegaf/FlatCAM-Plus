@@ -348,6 +348,22 @@ class AppDefaults:
         "geometry_seg_x": 0.0,
         "geometry_seg_y": 0.0,
 
+        # Geometry CNC job parameters. A Geometry object generating its own G-code without a
+        # tool plugin reads these; they mirror the tools_mill_* values used by the milling
+        # plugin. geometry_depthperpass must stay a float and geometry_endz a float so the
+        # header renders it like the mill path does.
+        "geometry_feedrate": 120,
+        "geometry_feedrate_z": 60,
+        "geometry_feedrate_rapid": 1500,
+        "geometry_depthperpass": 0.7,
+        "geometry_dwelltime": 1,
+        "geometry_toolchangez": 15.0,
+        "geometry_toolchangexy": "0.0, 0.0",
+        "geometry_startz": None,
+        "geometry_endz": 15.0,
+        "geometry_endxy": None,
+        "geometry_f_plunge": False,
+
         # Geometry Export
         "geometry_dxf_format": 'R2010',
         "geometry_paths_only": True,

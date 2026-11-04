@@ -44,6 +44,40 @@ def test_header_reports_the_source_extent_and_tool(grbl_job):
     assert "10.0000" in header
 
 
+@pytest.fixture()
+def default_pp_job(fc_app):
+    """A job carrying the constructor's default end coordinate, which is an empty string."""
+    job = CNCJobObject(name="t3_default_cnc", app=fc_app, units="MM", tooldia=TOOL_DIAMETER)
+    job.pp_geometry_name = "default"
+    job.pp_geometry = fc_app.preprocessors["default"]
+    job.obj_options.update(SOURCE_BOUNDS)
+    job.obj_options["tool_dia"] = TOOL_DIAMETER
+    return job
+
+
+def test_header_emits_without_an_end_coordinate(default_pp_job):
+    # The preprocessor indexes the end coordinate whenever it is not None, so a job whose end
+    # coordinate was never set must hand it over as None or the whole header is lost.
+    header = default_pp_job.doformat(default_pp_job.pp_geometry.start_code)
+
+    assert header.strip() != ""
+    assert "G21" in header
+    assert "(X,Y End: None mm)" in header
+
+
+def test_header_reports_an_explicit_end_coordinate(fc_app):
+    job = CNCJobObject(name="t3_explicit_end_cnc", app=fc_app, units="MM", tooldia=TOOL_DIAMETER)
+    job.pp_geometry_name = "default"
+    job.pp_geometry = fc_app.preprocessors["default"]
+    job.xy_end = (1.5, 2.5)
+    job.obj_options.update(SOURCE_BOUNDS)
+    job.obj_options["tool_dia"] = TOOL_DIAMETER
+
+    header = job.doformat(job.pp_geometry.start_code)
+
+    assert "(X,Y End: 1.5000, 2.5000 mm)" in header
+
+
 def test_emits_a_rapid_move_to_travel_height(grbl_job):
     assert grbl_job.doformat(grbl_job.pp_geometry.lift_code, x=5.0, y=5.0) == "G00 Z0.1000\n"
 

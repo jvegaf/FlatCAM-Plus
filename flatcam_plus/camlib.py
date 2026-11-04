@@ -2791,7 +2791,11 @@ class CNCjob(Geometry):
 
         self.startz = None
         self.z_end = endz
-        self.xy_end = endxy
+        # The preprocessors test the end coordinate for None (or for truthiness, which an empty
+        # string also fails) and then index it, so "no end coordinate" has to be None and not
+        # the empty string the signature defaults to. Otherwise doformat2 swallows the
+        # IndexError and the whole G-code header is silently empty.
+        self.xy_end = endxy if endxy else None
 
         self.extracut = False
         self.extracut_length = None
@@ -5039,7 +5043,7 @@ class CNCjob(Geometry):
         self.z_feedrate = float(feedrate_z) if feedrate_z is not None else self.app.options["geometry_feedrate_z"]
         self.feedrate_rapid = float(feedrate_rapid) if feedrate_rapid else self.app.options["geometry_feedrate_rapid"]
 
-        self.spindlespeed = int(spindlespeed) if spindlespeed != 0 else None
+        self.spindlespeed = int(spindlespeed) if spindlespeed else None
         self.spindledir = spindledir
         self.dwell = dwell
         self.dwelltime = float(dwelltime) if dwelltime else self.app.options["geometry_dwelltime"]

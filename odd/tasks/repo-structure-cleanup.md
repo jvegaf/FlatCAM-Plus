@@ -200,9 +200,13 @@ to be sliced per phase. `dev` itself is pushed: it is level with `origin/dev` (L
 - `appPreProcessor.load_preprocessors` uses the deprecated `importlib` `SourceFileLoader.load_module()`,
   which emits a `DeprecationWarning` in the suite and is scheduled for removal in Python 3.15.
   Moving it to `exec_module()` is a prerequisite for that interpreter bump.
-- The latent defects recorded in L12 (`generate_from_multitool_geometry` reading four missing
-  `geometry_*` options, and `preprocessors/default.py` crashing on the default empty `xy_end`)
-  still need a decision; neither is covered by a test that would fail on purpose.
+- `appParsers/ParseHPGL2.py` cannot construct at all: it reads twelve `geometry_*` options that
+  `defaults.py` has never defined (`geometry_cutz`, `geometry_travelz`, `geometry_dwell`,
+  `geometry_ppname_g`, `geometry_extracut`, `geometry_extracut_length`, `geometry_toolchange`,
+  `geometry_area_exclusion`, `geometry_area_shape`, `geometry_area_strategy`, `geometry_area_overz`,
+  `geometry_spindlespeed`), so an HPGL2 import dies with a `KeyError` on the first one. That is
+  the same class of defect as L12 and it is measured, not guessed (L48); fixing it needs a
+  decision about what an HPGL2 import should default to, and an HPGL2 sample file to verify with.
 - Nothing has verified a packaged build: no PyInstaller bundle was produced in any T4 slice, and
   the three `.ps1` build scripts have not been syntax-checked on a machine with PowerShell. The
   `libs` data-to-code switch in T4.7 (L43) is argued from source and from `PACKAGING.md`, not from
@@ -611,3 +615,35 @@ is the only remaining verification gap (see Known follow-ups).
   repeated, then `Review controller START supports only "ordinary" or "judgment-day" mode` with
   `input` sent as an object). The third, with `mode: "ordinary"` and `input` as the serialized
   object, created the lineage. Neither rejection performed a mutation, so nothing was left behind.
+- **L47 — The two L12 defects fixed on request (verbatim: "arreglalo")**: both were recorded at
+  T3 time as needing a separate decision, and the human now asked for them.
+  **(1) The missing `geometry_*` options.** The four named keys are added to the geometry options
+  block in `flatcam_plus/defaults.py` (`geometry_dwelltime: 1`, `geometry_startz: None`,
+  `geometry_endz: 15.0`, `geometry_endxy: None`, mirroring the `tools_mill_*` convention), and
+  proving the method actually emits G-code needed seven more keys it reads on the same path
+  (`geometry_feedrate`, `_feedrate_z`, `_feedrate_rapid`, `_depthperpass`, `_toolchangez`,
+  `_toolchangexy`, `_f_plunge`): with only the four, the `KeyError` simply moved to the next one.
+  RED observed in both stages, the second one (`KeyError: 'geometry_f_plunge'`) being the evidence
+  that the literal four-key reading of L12 was incomplete. `None` is only used where the code
+  tolerates it, which two assertions in the emitted header now pin (`(Z Start: None mm)`,
+  `(X,Y End: None mm)`); the keys that are formatted or compared numerically got concrete values.
+  **(2) The empty end coordinate.** The preprocessors guard the end move with two flavours of the
+  same truthiness test (`is not None` in nineteen of them, `and != ''` in `default.py`), so the
+  only value that satisfies both is `None`; `CNCjob.__init__` now normalizes `endxy=''` to `None`
+  at the single choke point, and no preprocessor was touched. RED observed as the exact reported
+  symptom: the header came back empty with `IndexError: string index out of range` swallowed inside
+  `doformat2`. **(3) A third defect found while fixing (1).** The same method raised `TypeError`
+  on its own `spindlespeed=None` default, because the storing line compared the argument to `0` and
+  then called `int()`; two truthiness characters fix it, and the tests no longer pass the
+  `spindlespeed=0` workaround the tool plugins use. G-code for a job that does have an end
+  coordinate is unchanged: a differential capture of `start_code`/`lift_code`/`linear_code`/
+  `end_code` for the explicit `(1.5, 2.5)` job under both `default` and `GRBL_11` compared empty
+  between the previous commit and this one. 96 tests before, 101 after; mutation checks on all
+  three fixes fail the tests that pin them and were restored.
+- **L48 — Measured, not guessed: the `geometry_*` option gap is bigger than L12 recorded**: a scan
+  of every live `app.options["geometry_*"]` read (comment lines excluded) against the keys
+  `defaults.py` defines reports 35 read, 24 defined, 12 missing, and after L47 **every** remaining
+  reader is `appParsers/ParseHPGL2.py`, which therefore cannot be constructed today. That is
+  recorded as a Known follow-up with the exact key list rather than fixed blind: unlike the CNC job
+  generator, the right defaults for an HPGL2 import are a product question and there is no HPGL2
+  sample in `tests/data/` to verify against.
