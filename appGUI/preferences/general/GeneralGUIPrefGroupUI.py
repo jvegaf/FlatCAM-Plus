@@ -316,9 +316,6 @@ class GeneralGUIPrefGroupUI(OptionsGroupUI):
 
         self.layout.addWidget(self.project_autohide_cb)
 
-        self.hover_cb.hide()
-        self.selection_outline_cb.hide()
-
         self.layout.addStretch()
 
         # #############################################################################

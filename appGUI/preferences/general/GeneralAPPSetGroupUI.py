@@ -489,17 +489,9 @@ class GeneralAPPSetGroupUI(OptionsGroupUI):
             [grids_grid, m_grid, par_grid, wk_grid, fnt_grid, ax_grid], 0
         )
 
-        # These are retained for legacy defaults but hidden from the simplified Preferences UI.
-        self.font_size_label.hide()
-        fnt_frame.hide()
-        self.mouse_lbl.hide()
-        m_frame.hide()
-        self.allow_edit_cb.hide()
-        self.open_style_cb.hide()
+        # Bookmarks limit has no backing implementation; keep it out of the Preferences UI.
         self.bm_limit_label.hide()
         self.bm_limit_spinner.hide()
-        self.activity_label.hide()
-        self.activity_combo.hide()
 
         self.layout.addStretch()
 
