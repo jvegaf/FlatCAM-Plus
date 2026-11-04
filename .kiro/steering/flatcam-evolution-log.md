@@ -392,6 +392,21 @@ insight that was not mapped in previous steerings.
 
 ---
 
+### EVO-021: Milling plugin generates geometry for Excellon sources
+
+- **Date:** 2026-11-04
+- **Status:** ACTIVE
+- **Context:** User tried to use the Milling plugin to machine slots and found no Generate Geometry button. They asked to add it and to remove the CNCJob creation controls plus the Common Parameters section from that view. Confirmed working in the UI by the user.
+- **Version 8.994:** The Milling plugin only exposes "Generate CNCJob object" and the Common Parameters section. Geometry for slots/drills is created from the Excellon object's Utilities (Mill Drills / Mill Slots), not from the Milling plugin.
+- **FlatCAM Plus:** With Source Type = Excellon, the Milling plugin shows "Generate Geometry" and hides "Generate CNCJob object" and Common Parameters. The button creates a multi-tool Geometry object using the per-tool Milling Type (Drills/Slots/Both), Milling Diameter, offset, overlap and connect. With Source Type = Geometry, the previous CNCJob behavior and Common Parameters remain unchanged.
+- **Key difference:** The Milling plugin now has two modes depending on the source object kind.
+- **Optimization?** NO — feature/UX difference.
+- **Impact:** MEDIUM (changes the Milling plugin workflow)
+- **Tags:** #milling #excellon #geometry #slots #cncjob #ui
+- **Modified files:** `appPlugins/ToolMilling.py`, `tests/test_milling_geometry.py`
+
+---
+
 ## Consolidation Rules
 
 An entry must be consolidated when:
@@ -410,8 +425,8 @@ When consolidating:
 
 ## Statistics
 
-- Total entries: 20
-- Active: 20
+- Total entries: 21
+- Active: 21
 - Consolidated: 0
 - Obsolete: 0
-- Last update: 2026-07-10
+- Last update: 2026-11-04
