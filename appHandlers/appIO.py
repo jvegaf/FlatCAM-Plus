@@ -36,7 +36,7 @@ except ImportError:
 from datetime import datetime
 import simplejson as json
 
-from appCommon.Common import LoudDict
+from flatcam_plus.appCommon.Common import LoudDict
 
 from vispy.gloo.util import _screenshot
 from vispy.io import write_png

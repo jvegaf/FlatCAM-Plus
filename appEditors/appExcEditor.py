@@ -23,7 +23,7 @@ from appEditors.appGeoEditor import FCShapeTool, DrawTool, DrawToolShape, DrawTo
 from shapely import LineString, LinearRing, MultiLineString, Polygon, MultiPolygon, Point
 from shapely.geometry.base import BaseGeometry
 from shapely.affinity import scale, rotate, translate
-# from appCommon.Common import LoudDict
+# from flatcam_plus.appCommon.Common import LoudDict
 
 import numpy as np
 

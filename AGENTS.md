@@ -75,6 +75,7 @@ follow its native lifecycle without treating it as delivery approval.
 | --- | --- |
 | Application controller, menus, tool registration | `flatcam_plus/appMain.py` (`class App`) |
 | Geometry/CNC algorithms | `flatcam_plus/camlib.py` |
+| Shared helpers (logging, `LoudDict`, updater, recent projects) | `flatcam_plus/appCommon/` |
 | Tool plugins (Cutout, Isolation, Drilling, …) | `appPlugins/Tool*.py` |
 | Document objects (Gerber, Excellon, Geometry, CNCJob) | `appObjects/` |
 | Parsers (Gerber, Excellon, DXF, SVG, HPGL2) | `appParsers/` |

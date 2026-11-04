@@ -24,7 +24,7 @@ import gettext
 from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
-from appCommon.Common import LoudDict
+from flatcam_plus.appCommon.Common import LoudDict
 
 from flatcam_plus.camlib import distance
 from appEditors.appTextEditor import AppTextEditor

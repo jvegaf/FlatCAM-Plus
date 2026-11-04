@@ -11,8 +11,8 @@ from flatcam_plus.appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, RadioSet, \
     FCDoubleSpinner, FCComboBox2, FCEntry, FCCheckBox
 
-from appCommon.Common import LoudDict
-from appCommon.Common import GracefulException as grace
+from flatcam_plus.appCommon.Common import LoudDict
+from flatcam_plus.appCommon.Common import GracefulException as grace
 from flatcam_plus.camlib import flatten_shapely_geometry
 
 import logging

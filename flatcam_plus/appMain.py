@@ -67,11 +67,11 @@ from appGUI.GUIElements import FCMessageBox, FCInputSpinner, FCButton, DialogBox
 from appGUI.themes import dark_style_sheet, light_style_sheet
 
 # Various
-from appCommon.Common import color_variant
-from appCommon.Common import ExclusionAreas
-from appCommon.Common import AppLogging
-from appCommon.AutoUpdater import AutoUpdater
-from appCommon.RegisterFileKeywords import RegisterFK, Extensions, KeyWords
+from flatcam_plus.appCommon.Common import color_variant
+from flatcam_plus.appCommon.Common import ExclusionAreas
+from flatcam_plus.appCommon.Common import AppLogging
+from flatcam_plus.appCommon.AutoUpdater import AutoUpdater
+from flatcam_plus.appCommon.RegisterFileKeywords import RegisterFK, Extensions, KeyWords
 
 from appHandlers.appIO import appIO
 from appHandlers.appEdit import appEditor

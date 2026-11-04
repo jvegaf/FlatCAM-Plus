@@ -30,6 +30,7 @@ Load for any non-trivial change, code-location question, architecture decision, 
 | Menu tool, wizard, tool panel | `appPlugins/Tool*.py` |
 | Document type, serialization, plotting | `appObjects/` |
 | Geometry / CNC algorithms | `flatcam_plus/camlib.py` |
+| Shared helpers, logging, updater, recent projects | `flatcam_plus/appCommon/` |
 | G-code post-processing | `preprocessors/` |
 | Scripting command | `tclCommands/` |
 | Parser (Gerber, Excellon, DXF, SVG, HPGL2) | `appParsers/` |

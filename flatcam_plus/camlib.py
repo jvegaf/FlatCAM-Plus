@@ -8,7 +8,7 @@
 import shapely
 from PyQt6 import QtWidgets
 
-from appCommon.Common import GracefulException as grace
+from flatcam_plus.appCommon.Common import GracefulException as grace
 
 # from scipy.spatial import KDTree, Delaunay
 # from scipy.spatial import Delaunay

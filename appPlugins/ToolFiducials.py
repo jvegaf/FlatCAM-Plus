@@ -10,7 +10,7 @@ from PyQt6 import QtWidgets, QtCore, QtGui
 from flatcam_plus.appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, FCCheckBox, \
     FCComboBox2, RadioSet, FCDoubleSpinner, EvalEntry, FCTable
-from appCommon.Common import LoudDict
+from flatcam_plus.appCommon.Common import LoudDict
 
 import logging
 from copy import deepcopy

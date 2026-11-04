@@ -14,7 +14,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from appGUI.ObjectUI import ObjectUI
 from appGUI.PanelStyles import apply_modern_panel_style, apply_modern_sidebar_style
-from appCommon.Common import LoudDict
+from flatcam_plus.appCommon.Common import LoudDict
 from appGUI.VisPyVisuals import ShapeCollection
 
 from shapely.ops import unary_union

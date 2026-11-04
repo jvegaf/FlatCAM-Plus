@@ -20,11 +20,12 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
   tests/
   ```
 
-- **S2 — Scope, measured before any write** (L3): `appCommon` (5 files, 32 import statements),
-  `appHandlers` (3, 4), `appParsers` (8, 51), `appObjects` (10, 63), `appEditors` (31, 82),
-  `appPlugins` (47, 96), `tclCommands` (76, 298), `appGUI` (86, 580). 266 files and 1206 import
-  statements in total. Import forms are the absolute ones (`from appGUI.MainGUI import App`),
-  so every rewrites to `from flatcam_plus.appGUI.MainGUI import App`.
+- **S2 — Scope, measured before any write** (L3, corrected in L5): `appCommon` (5 files, 16
+  import statements), `appHandlers` (3, 2), `appParsers` (8, 26), `appObjects` (10, 32),
+  `appEditors` (31, 41), `appPlugins` (47, 48), `tclCommands` (76, 149), `appGUI` (86, 290).
+  266 files and 604 import statements in total. Import forms are the absolute ones
+  (`from appGUI.MainGUI import App`), so every rewrites to
+  `from flatcam_plus.appGUI.MainGUI import App`.
 
 - **S3 — `tclCommands` discovery keeps working, provably.** `tclCommands/__init__.py:110` filters
   `sys.modules` by the literal prefix `'tclCommands.TclCommand'` and then takes
@@ -45,8 +46,10 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
 
 ## Tasks
 
-- **T1 (S1, S2)** — Move `appCommon` to `flatcam_plus/appCommon/`, rewrite its 32 importers, retire
-  its `--collect-submodules` entry in the four build scripts, update the layout guards.
+- **T1 (S1, S2)** — Move `appCommon` to `flatcam_plus/appCommon/`, rewrite its importers, retire its
+  `--collect-submodules` entry in the four build scripts, update the layout guards. Status: done in
+  the commit that adds `APP_PACKAGES` to `tests/test_package_layout.py`; `appCommon` already had an
+  `__init__.py`, so unlike `libs` it needed no new one.
 - **T2 (S1, S2)** — `appHandlers` (3 files, 4 importers).
 - **T3 (S1, S2)** — `appParsers` (8 files, 51 importers).
 - **T4 (S1, S2)** — `appObjects` (10 files, 63 importers).
@@ -79,3 +82,13 @@ green at every commit.
 - **L4 — Why `src/` was not chosen**: it needs an installable package (it reverses D5,
   `[tool.uv] package = false`), `pythonpath`/`--paths` for `src`, and a resource root for the data
   directories; the human picked the half step, so none of that is in scope.
+- **L5 — L3's measurement was inflated, and T1 is done**: L3 counted import statements with a
+  repository-wide grep, which also matched the `.git/gentle-ai/candidate-views` snapshot copies;
+  the real worktree counts are the ones now in S2, roughly half of what L3 recorded (`appCommon`
+  was 16, not 32). T1 moved the package (five staged renames, no new `__init__.py` needed) and
+  rewrote its 16 live import statements plus one commented one, retired the `appCommon` entry from
+  the four build scripts and both `PACKAGING.md` blocks, and extended the layout guard with an
+  `APP_PACKAGES`/`APP_MODULES` pin. RED: seven guard cases failed, naming `flatcam.py` as the
+  last old-name importer; GREEN: 53 in that file. Mutation check: pointing
+  `appObjects/AppObjectTemplate.py` back at `from appCommon.Common import LoudDict` fails the guard
+  by path. 125 tests before, 132 after; no statement outside an import line changed.

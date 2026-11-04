@@ -1,12 +1,14 @@
-"""The migrated modules live inside the package.
+"""The migrated modules and packages live inside the package.
 
 T4.2b moved the modules that only ``appMain`` and the preferences manager imported by name and
 deleted the pool module nothing referenced; T4.3 moved ``camlib``, the geometry and G-code core;
 T4.4 moved ``appTool``, the base class of every tool and editor plugin, T4.4b moved
 ``appPreProcessor``, whose contract the path-loaded preprocessors import, T4.6 moved
 ``appMain``, the application controller ``flatcam.py`` instantiates, and T4.7 moved the two
-vendored dependency packages, ``descartes`` and ``libs``. This test pins those facts so a later
-phase cannot leave a half-migrated tree behind.
+vendored dependency packages, ``descartes`` and ``libs``. T1 of the package consolidation
+started the application packages moving, beginning with ``appCommon``, the shared helpers,
+updater and recent-project loader the controller, the GUI, the tools and ``flatcam.py`` import.
+This test pins those facts so a later phase cannot leave a half-migrated tree behind.
 """
 
 import importlib.util
@@ -28,6 +30,18 @@ PACKAGE_MODULES = (
     "appMain",
 )
 DELETED_MODULES = ("appPool",)
+
+# Application packages that used to be top-level importables and are now subpackages of
+# ``flatcam_plus``. ``appCommon`` is the first of the eight; each later slice adds its own entry
+# here so a root copy or a root-name importer cannot come back.
+APP_PACKAGES = ("appCommon",)
+APP_MODULES = (
+    "appCommon",
+    "appCommon.AutoUpdater",
+    "appCommon.Common",
+    "appCommon.RegisterFileKeywords",
+    "appCommon.recent_projects",
+)
 
 # Directories that used to be top-level importables and are now subpackages. They are vendored
 # code, so a real PyPI ``descartes`` (or any other ``libs``) silently wins over them once the
@@ -89,6 +103,17 @@ def test_no_root_copy_is_left_behind(name):
     assert not os.path.exists(os.path.join(REPO_ROOT, name + ".py"))
 
 
+@pytest.mark.parametrize("name", APP_MODULES)
+def test_the_app_modules_import_from_the_package(name):
+    module = importlib.import_module("flatcam_plus." + name)
+    assert module.__name__ == "flatcam_plus." + name
+
+
+@pytest.mark.parametrize("name", APP_PACKAGES)
+def test_no_root_copy_of_the_app_package_is_left_behind(name):
+    assert not os.path.exists(os.path.join(REPO_ROOT, name))
+
+
 @pytest.mark.parametrize("name", VENDORED_MODULES)
 def test_the_vendored_modules_import_from_the_package(name):
     module = importlib.import_module("flatcam_plus." + name)
@@ -120,7 +145,7 @@ def test_the_vendored_theme_root_resolves_inside_the_package():
     assert os.path.realpath(get_qdarktheme_root_path()) == expected
 
 
-@pytest.mark.parametrize("name", PACKAGE_MODULES + VENDORED_PACKAGES)
+@pytest.mark.parametrize("name", PACKAGE_MODULES + APP_PACKAGES + VENDORED_PACKAGES)
 def test_no_module_outside_the_package_imports_the_root_name(name):
     offender = root_name_import(name)
     for directory, _, filenames in os.walk(REPO_ROOT):

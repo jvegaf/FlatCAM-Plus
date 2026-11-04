@@ -1,6 +1,6 @@
 import json
 
-from appCommon.recent_projects import load_recent_project_paths
+from flatcam_plus.appCommon.recent_projects import load_recent_project_paths
 
 
 def write_recent_file(path, records):

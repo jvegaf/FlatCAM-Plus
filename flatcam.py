@@ -60,7 +60,7 @@ from flatcam_plus import appTranslation as fcTranslate
 from flatcam_plus.appMain import App
 from appGUI import VisPyPatches
 from flatcam_plus.version import APP_NAME, APP_VERSION
-from appCommon.recent_projects import load_recent_project_paths
+from flatcam_plus.appCommon.recent_projects import load_recent_project_paths
 
 from appGUI.GUIElements import FCMessageBox
 
