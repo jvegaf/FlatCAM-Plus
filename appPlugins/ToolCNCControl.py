@@ -10,7 +10,7 @@
 from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtCore import Qt, pyqtSignal
 
-from appTool import AppTool
+from flatcam_plus.appTool import AppTool
 from appGUI.GUIElements import FCFileSaveDialog, VerticalScrollArea
 from appPlugins.cnc_control.dialogs import MachineProfileDialog, MacroDialog
 from appPlugins.cnc_control.machine_profiles import normalize_machine_profile, normalize_machine_profiles

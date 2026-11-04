@@ -68,7 +68,14 @@ before it existed; everything from phase 2 on is multi-session and tracked here.
     path-loaded preprocessors — the one place a broken import would not fail loudly — are not
     involved in this phase at all.
   - **T4.4** — Move `appTool` (53 statements) or `appPreProcessor` (29) and the preprocessor
-    discovery with it.
+    discovery with it. Status: `appTool` chosen and done in the commit that adds `appTool` to
+    `tests/test_package_layout.py`. All 53 external import sites became
+    `from flatcam_plus.appTool import ...`; no package-internal module imports it, and nothing
+    loads it by name at runtime, so the phase is a pure rename. The preprocessor half of this
+    phase stays open as T4.4b.
+  - **T4.4b** — Move `appPreProcessor` (29 statements) together with the preprocessor discovery:
+    the `SourceFileLoader` glob, the fixed module name and the metaclass registry are risk
+    register item 2, so this slice needs its own verification of the registry.
   - **T4.5** — Move `appTranslation` (172 statements across 173 files) in two or three slices of
     about 400 authored lines.
   - **T4.6** — Move `appMain` and turn `flatcam.py` into a root launcher that keeps
@@ -129,13 +136,19 @@ From L28, ordered by how likely it is to break silently rather than loudly:
 
 ## Slice boundary and delivery state
 
-This feature's slices are T1+T2 (14 files, 84 insertions, 137 deletions, `aedf5e7`) and T3
-(7 files, 214 insertions in `dbf3c1a` plus 49 insertions and 3 deletions in `1e890ea`).
+This feature's slices are T1+T2 (14 files, 84 insertions, 137 deletions, `aedf5e7`), T3
+(7 files, 214 insertions in `dbf3c1a` plus 49 insertions and 3 deletions in `1e890ea`), and the
+T4 phase slices: T4.1 `420318b` (paths), T4.2 `c3fccc4` (version pilot), T4.2b `60f72bb`
+(low-fanout modules), T4.3 `0424299` (camlib, 43 files, 55 insertions, 49 deletions), and T4.4
+(this commit; appTool, 58 files, 99 insertions, 65 deletions). Each T4 slice stays under one
+review slice on its own.
 
-`dev` is 17 commits ahead of `origin/main` with 3291 added and 434 deleted lines
-(`git diff --numstat origin/main..dev`, lock files excluded), which is well past one review
-slice. That backlog predates this work. Push, pull request creation and merge remain human
-decisions and must account for it.
+After this commit `dev` is 27 commits ahead of `origin/main` with about 3.8k added and 0.5k
+deleted lines (`git diff --numstat origin/main..dev`, lock files and `requirements.txt`
+excluded), which is well past one review slice. That backlog predates this work and grows by
+one commit per T4 phase. Push, pull request creation and merge remain human decisions and must
+account for it: the accumulated branch is not reviewable as a single candidate, so delivery has
+to be sliced per phase.
 
 ## Known follow-ups
 
@@ -153,12 +166,16 @@ decisions and must account for it.
 
 ## Next step
 
-T3 is done and reviewed twice: the suite boots the real application headless, covers the four
-critical domains, runs in CI, and its advisory findings from the first review were addressed. The
-five findings of the second review stay deferred by decision L24 (L26).
+T4 is authorized (L27) and four of its seven phases are done: T4.1 anchored the CWD-dependent
+paths, T4.2 and T4.2b moved the six low-fanout modules, T4.3 moved `camlib` and T4.4 moved
+`appTool`. The tree is consistent at every commit: `dev` is 5 commits ahead of `origin/dev` and
+62 tests pass.
 
-T4 (moving the root modules into a package) is unblocked but not authorized; it still touches 210
-import sites and needs an explicit go-ahead first.
+T4.4b (moving `appPreProcessor` together with the preprocessor discovery) is the next phase and
+the first one that touches the path-loaded modules, so it needs its own commit and its own
+verification of the `SourceFileLoader` registry. T4.5 (`appTranslation`), T4.6 (`appMain`) and
+T4.7 (`descartes`, `libs`) stay after it. Push and merge of the 5 unpushed commits remain human
+decisions.
 
 ## Log
 
@@ -311,3 +328,17 @@ import sites and needs an explicit go-ahead first.
   7 of the 8 test modules depend on the root being on `sys.path`.
 - **L29 — Unavailable check for T4**: no package-layout design was reviewed with anyone but the
   evidence above; the phase order below is the parent's judgement, not a peer-reviewed plan.
+- **L30 — T4.4 executed (`appTool`)**: RED first — adding `appTool` to `PACKAGE_MODULES` in
+  `tests/test_package_layout.py` failed the three guards (package import, root copy, no root-name
+  importer), naming `appEditors/appGerberEditor.py`. Then `git mv appTool.py
+  flatcam_plus/appTool.py` and all 53 import sites became `from flatcam_plus.appTool import ...`
+  (30 `AppTool`, 21 `AppToolEditor`, 2 both); no `import appTool` form and no multiline import
+  existed, so the rewrite was exact. GREEN: `tests/test_package_layout.py` reports 22 passed.
+  Nothing imports `appTool` by name at runtime and no package-internal module imports it, so no
+  relative import was needed. `AGENTS.md` and `.opencode/skills/flatcam-tool-plugin/SKILL.md`
+  (two references) now point at `flatcam_plus/appTool.py`.
+- **L31 — The Engram mirror does not exist**: at the start of this session `mem_*` tools were not
+  callable and the store at `~/.local/share/gentle-shell/install/home/.engram/engram.db` held 0
+  observations and 0 sessions. The task document is therefore the only continuity source, and it
+  was missing the log entries for T4.1 to T4.3 too; the Tasks section carried them. Recorded here
+  so no later session trusts a mirror that was never written.

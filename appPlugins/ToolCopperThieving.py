@@ -7,7 +7,7 @@
 # ##########################################################
 
 from PyQt6 import QtWidgets, QtGui, QtCore
-from appTool import AppTool
+from flatcam_plus.appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, RadioSet, \
     FCDoubleSpinner, FCComboBox2, FCEntry, FCCheckBox
 

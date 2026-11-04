@@ -16,7 +16,7 @@ from shapely import Polygon, Point, LineString
 from shapely.ops import unary_union
 
 from appGUI.VisPyVisuals import ShapeCollection
-from appTool import AppTool
+from flatcam_plus.appTool import AppTool
 
 from copy import deepcopy
 import collections

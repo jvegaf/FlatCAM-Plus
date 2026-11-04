@@ -10,7 +10,7 @@ import gettext
 
 from PyQt6 import QtWidgets
 
-from appTool import AppTool
+from flatcam_plus.appTool import AppTool
 from appPlugins.cnc_preview_3d.ui import CNCPreview3DUI
 
 import appTranslation as fcTranslate

@@ -18,7 +18,7 @@ from PyQt6 import QtCore, QtWidgets
 
 from appGUI.GUIElements import FCLabel
 from appPlugins.cnc_control.widgets import FluidStyleButton
-from appTool import AppTool
+from flatcam_plus.appTool import AppTool
 
 import appTranslation as fcTranslate
 

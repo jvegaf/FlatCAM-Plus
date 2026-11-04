@@ -90,7 +90,7 @@ Search targeted symbols instead of reading them whole.
 
 ## Conventions and gotchas
 
-- **Tool plugins**: subclass `AppTool`/`AppToolEditor` (`appTool.py`), implement
+- **Tool plugins**: subclass `AppTool`/`AppToolEditor` (`flatcam_plus/appTool.py`), implement
   `install()`, then instantiate and add the tool to `App.app_plugins` in
   `appMain.py` (~line 1958). The tool UI class usually lives in the same file.
 - **G-code preprocessors**: every `.py` file in `preprocessors/` is imported at

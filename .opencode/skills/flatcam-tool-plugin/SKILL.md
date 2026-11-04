@@ -15,7 +15,7 @@ Load when adding or changing a tool/plugin under `appPlugins/`, its menu action,
 
 ## Hard Rules
 
-- Subclass `AppTool` for panels; subclass `AppToolEditor` for editing tools. Import from `appTool`.
+- Subclass `AppTool` for panels; subclass `AppToolEditor` for editing tools. Import from `flatcam_plus.appTool`.
 - Keep the tool class and its `...UI` class in one `appPlugins/Tool<Name>.py` file. Build the UI on `self.layout` using widgets from `appGUI.GUIElements`.
 - Override `install()` and call `AppTool.install(self, icon, separator, shortcut=..., **kwargs)`; pass menu placement through `pos=`, `before=`, `separator=`, `icon=`, `shortcut=`.
 - Register the instance in BOTH `App.install_tools` (instantiate + `install()`) and the `self.app_plugins` list in `appMain.py`. `App.init_tools` rebuilds tools after layout changes by calling `install_tools`.
@@ -47,7 +47,7 @@ Report: new or edited files, class names, menu placement, defaults added, regist
 
 ## References
 
-- `appTool.py` — `AppTool` and `AppToolEditor` contracts.
+- `flatcam_plus/appTool.py` — `AppTool` and `AppToolEditor` contracts.
 - `appPlugins/ToolDistance.py` — minimal panel plus UI example.
 - `appMain.py` — `install_tools` registration and `app_plugins` list.
 - `flatcam_plus/defaults.py` — option key naming.
