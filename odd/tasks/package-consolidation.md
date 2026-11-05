@@ -64,8 +64,10 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
   derived from `__name__` and a registry test that fails when it comes back empty. Status: done
   in the commit that adds `tests/test_tcl_registry.py`; 101 registered aliases before and after.
 - **T8 (S1, S2)** — `appGUI` (86 files, 290 importers), the largest slice, last so it lands on a
-  tree where every other package already moved. Status: done in the commit that adds it to
-  `APP_PACKAGES`; it needed one non-import edit, the VisPyData path in `appMain`.
+  tree where every other package already moved. Status: done in three commits (`e7713b2`,
+  `c47338e`, `01a51b5`) because the single-commit form exceeds the reviewer budget (L17); each
+  lands its own part of `APP_PACKAGES`, and the last one pins `appGUI` with its `preferences`
+  subpackage. It needed one non-import edit, the VisPyData path in `appMain`.
 - **T9 (S4, S5)** — Documentation and skills pass: `AGENTS.md`, `PACKAGING.md`,
   `.opencode/skills/*`, and the repo map, for paths that kept the old root names. Status: done
   in the commit that repoints `README.md`, the `pyproject.toml` comment, the four prose lines
@@ -76,7 +78,9 @@ green at every commit.
 
 ## Final state
 
-All nine tasks are done, one commit each, and the tree was importable and green at every one:
+All nine tasks are done, and the tree was importable and green at every commit. T1 to T7 and T9 are
+one commit each; T8 is three, because a single commit for it exceeded the reviewer's lens context
+budget (L17):
 
 ```
 flatcam.py                    launcher, unchanged location (PyInstaller entry point)
@@ -239,14 +243,51 @@ every commit, that it still runs from a bundle is not.
   `review-671d7a047c3f0281` (none), T6 `review-8fd6d486289a04b3` (R2-001 the `try/except ImportError`
   block in `appPlugins/__init__.py`, R2-002 this document's T6 line) and T7
   `review-0f5b918982c5ea47` (R2-001 and R3-001 on `tests/test_tcl_registry.py:35`, the `>= 100`
-  lower bound, and R2-002 on the guard entries). **T8 (`appGUI`, base `d5ba3f0`, 268 changed paths)
-  was not reviewed**: the session reached its context budget before the transaction, and a
-  half-run review would have left the authority `reviewing` instead of closing it. Run it in a
-  fresh session with `git checkout 48bb3c8` and START on `d5ba3f0c7c2116412361dc8339a0f72316dae349`,
-  the same way the other seven ran; then `git checkout dev`.
+  lower bound, and R2-002 on the guard entries). **T8 (`appGUI`) was not reviewed in that session**:
+  it reached its context budget before the transaction, and a half-run review would have left the
+  authority `reviewing` instead of closing it. It was reviewed later, in three slices (L17).
 - **L16 — A guard artefact worth fixing**: `tests/test_package_layout.py`'s
   `test_no_root_copy_of_the_app_package_is_left_behind` asserts the root directory is gone, and a
   `git checkout` back to an older commit leaves the moved directory behind as soon as it holds
   nothing but an ignored `__pycache__`. That false failure hit four of the eight checkouts and had
   to be cleared by hand with `rm -rf <package>` before the suite was green. The assertion should
   ignore a directory that contains no tracked file, which is a one-test change.
+- **L17 — T8 split in three commits because the reviewer budget refused it, and reviewed slice by
+  slice**: the single T8 commit (`48bb3c8`, base `d5ba3f0`) measures 179 changed paths and 145 KB of
+  diff, and the provider refused it in preflight with `lens_context_budget_exceeded` twice, once
+  from the session that opened it and once from a fresh session that retried the exact recipe.
+  Neither attempt created authority, so nothing was left `reviewing` and nothing needed repair.
+  The scope cannot be reduced inside one candidate: it is a single commit, so no smaller committed
+  range covers part of it, and there is no path filter. It was therefore split into three commits
+  whose trees are identical to the single one at the end (the only additions are the guard fix of
+  L18 and this record):
+  - `e7713b2` moves the `preferences` subtree. It is the leaf of the package's import graph, so its
+    imports of the core widgets keep resolving against the root copy the next commit moves. 75
+    paths, 64 KB of diff, 188 tests green. Reviewed as `review-0906de9d8c737362`, tier medium,
+    lenses `readability` and `reliability`, **approved** with one advisory: R3-001 (reliability,
+    `tests/test_package_layout.py:164-167`, WARNING) on the root-copy guard; acknowledged and
+    burned.
+  - `c47338e` moves the three widget modules (`GUIElements`, `PanelStyles`, `ColumnarFlowLayout`)
+    and rewrites the 140 import sites that name them in the same commit. 141 paths, 96 KB. Reviewed
+    as `review-59a25978393746f5`, tier high (a preferences module trips the process scan), lenses
+    `readability` and `reliability`, **approved with no finding**; the first group submission was
+    refused at admission because a reviewer payload carried two JSON objects, the slot was not
+    consumed, and the reoffered slot produced a clean result; acknowledged and burned.
+  - `01a51b5` moves the remaining core modules, the `themes` subpackage, the VisPy data files and
+    the package `__init__`, repoints the last root-name sites, and pins `appGUI` in the layout
+    guard. 42 paths, 32 KB. Reviewed as `review-b7d8875515475323`, tier high (the packaging scripts),
+    lenses `readability` and `reliability`, **approved** with one advisory: R2-001 (readability,
+    `odd/tasks/package-consolidation.md:66`, SUGGESTION) on this document's T8 line; acknowledged
+    and burned. `git diff 48bb3c8 01a51b5` showed only the L18 guard fix and this document.
+  Only T8's code needed slicing: it is the only slice near the budget. The eight slices before it
+  fitted as single commits, and the documentation pass (10 files, 87 lines) was reviewed in L14.
+- **L18 — The guard artefact of L16 fixed, and it earned its keep during the split**:
+  `tests/test_package_layout.py` now decides through `holds_no_package_files`, which walks the
+  leftover path and treats a `__pycache__` directory and `.pyc`/`.pyo` files as something a fresh
+  interpreter regenerates rather than as a copy of the package. Both root-copy guards (application
+  packages and vendored packages) use it, and two `tmp_path` cases pin the rule in both directions
+  so a later simplification back to `os.path.exists` fails. RED was the real artefact, not a
+  contrived one, and it also bit the split itself: checking out `d5ba3f0` left `__pycache__`
+  directories occupying the destination paths of `flatcam_plus/appGUI/`, so the first `git mv`
+  nested the tree one level too deep and had to be undone. Mutation check: adding
+  `appGUI/MainGUI.py` fails the guard. The full suite is green at all three commits.
