@@ -73,3 +73,23 @@ def test_the_build_scripts_keep_the_data_inside_the_bundle_root():
             assert not destination.startswith("/"), (script, destination)
             assert ".." not in destination, (script, destination)
             assert ";" not in destination, (script, destination)
+            assert not destination.startswith("_internal"), (
+                "PyInstaller already nests --add-data under _internal, so this would put the "
+                "data one level below _APP_ROOT",
+                script,
+                destination,
+            )
+
+
+def test_the_windows_helper_keeps_the_data_at_the_bundle_root():
+    """The Windows script builds its data arguments differently, so it needs its own guard."""
+    with open(
+        os.path.join(REPO_ROOT, "packaging", "windows", "build_windows_installer.ps1"),
+        encoding="utf-8",
+    ) as handle:
+        pairs = re.findall(r'New-PyInstallerDataArg\s+"([^"]+)"\s+"([^"]+)"', handle.read())
+
+    assert pairs
+    for source, destination in pairs:
+        assert destination and not destination.startswith("_internal"), (source, destination)
+        assert "\\" not in destination and ":" not in destination, (source, destination)

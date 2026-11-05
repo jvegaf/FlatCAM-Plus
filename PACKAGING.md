@@ -105,7 +105,7 @@ dist\installer\FlatCAMPlus-Setup-<version>-x64.exe
 
 The 32-bit build folder still uses the internal `x86` name, but the installer filename uses the user-facing `x32` label.
 
-Upload both files to the GitHub release. The in-app auto updater reads the GitHub release body as the changelog and chooses the installer asset whose filename contains the running architecture (`x32`, `x86`, or `x64`).
+Upload both files to the GitHub release. A checkout launched from source can still ask that release for a newer version and read its body as the changelog; an installed build does not: PyInstaller sets `sys.frozen`, the application does not create its updater, and updating means running the newer installer.
 
 The installer installs to:
 
