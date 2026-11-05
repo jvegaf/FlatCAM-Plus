@@ -3,16 +3,34 @@ name: tests
 on:
   push:
     branches: [main, dev]
+    # A commit that only touches prose, task records or design notes runs nothing: this suite
+    # boots the application, and every run spends the account's minutes.
+    paths-ignore:
+      - "**.md"
+      - "odd/**"
+      - ".kiro/**"
+      - "design/**"
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "odd/**"
+      - ".kiro/**"
+      - "design/**"
   # The release pipeline gates on this job instead of duplicating it.
   workflow_call:
 
 permissions:
   contents: read
 
+# A second push to the same ref supersedes the first run instead of paying for both.
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       # The suite boots the real application; it must never need a display server.
       QT_QPA_PLATFORM: offscreen

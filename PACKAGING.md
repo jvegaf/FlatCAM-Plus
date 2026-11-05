@@ -314,6 +314,22 @@ It wraps the same PyInstaller payload as the packages above, so there is one bun
 
 This is **not** a Flathub submission. Flathub forbids shipping a prebuilt binary payload, so publishing there would mean building PyQt6 and the application against `org.kde.Sdk` as real modules; the self-hosted bundle is unsigned and installs with `flatpak install --user FlatCAMPlus-<version>-linux-x86_64.flatpak`. Application state lands in `~/.var/app/io.github.thebestgoodguy.FlatCAMPlus/`, which the sandbox owns, so the hardcoded `~/.FlatCAM` directory keeps working and persists.
 
+### What runs in CI, and what it costs
+
+Two workflows exist, and neither should be triggered casually:
+
+| Workflow | Trigger | Guard |
+| --- | --- | --- |
+| `tests.yml` | push to `main`/`dev`, pull request, and the release job | prose-only commits (`**.md`, `odd/`, `.kiro/`, `design/`) run nothing; a second push to the same ref cancels the first; the job is capped at 20 minutes |
+| `release.yml` | `v*` tag only | a run from anywhere else stops in the first job in seconds, before the build matrix; every job has its own timeout |
+
+Rules that keep this cheap:
+
+- Do not push to `dev` to "see if it works". Run the suite locally with `uv run --with pytest pytest tests -q`.
+- Do not use `workflow_dispatch` on a branch to try the release: it now fails on purpose before spending minutes. To exercise the packaging without publishing, run the same scripts locally (`packaging/linux/build_linux_packages.sh`, `packaging/flatpak/build_flatpak.sh`).
+- A failing packaging job is the cheap outcome; a hung one is the expensive one. That is why the timeouts exist and why the release jobs are bounded well under an hour.
+- Standard runners are free for public repositories on GitHub's free plan; check the repository's billing setting before assuming otherwise, because this document cannot.
+
 ## Packaging Notes
 
 - Always test import, project open/save, Gerber/Excellon rendering, CNCJob generation, and plugin startup from the packaged app.

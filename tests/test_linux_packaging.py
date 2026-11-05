@@ -208,3 +208,45 @@ def test_the_build_script_packages_both_formats_from_one_configuration():
         assert "for packager in deb rpm" in script and "nfpm package" in script
     assert "packaging/linux/nfpm.yaml" in script
     assert "--skip-bundle" in script, "the container builds the bundle, the host packages it"
+
+
+def workflow_jobs(text):
+    """Split the jobs section: a line with exactly two spaces, a name and a colon."""
+    jobs_section = text.split("\njobs:\n", 1)[1]
+    blocks = re.split(r"\n  (?=[A-Za-z][\w-]*:\n)", "\n" + jobs_section)
+    jobs = {}
+    for block in blocks:
+        if not block.strip():
+            continue
+        header = block.strip().splitlines()[0]
+        jobs[header.rstrip(":")] = block
+    return jobs
+
+
+def test_no_workflow_job_can_run_unbounded():
+    """A hung packaging job burns the account's minutes for as long as nobody looks."""
+    release = read(os.path.join(WORKFLOW_DIR, "release.yml"))
+    tests = read(os.path.join(WORKFLOW_DIR, "tests.yml"))
+
+    assert "timeout-minutes:" in tests, "the suite must be bounded"
+    for name, block in workflow_jobs(release).items():
+        if "uses: ./.github/workflows/tests.yml" in block:
+            continue  # the reusable workflow carries its own bounds
+        assert "timeout-minutes:" in block, name
+
+
+def test_the_suite_skips_prose_only_changes_and_drops_superseded_runs():
+    tests = read(os.path.join(WORKFLOW_DIR, "tests.yml"))
+
+    assert "paths-ignore:" in tests and "**.md" in tests
+    assert "group: tests-" in tests
+    assert "cancel-in-progress: true" in tests
+
+
+def test_a_release_run_from_a_branch_stops_before_building():
+    release = read(os.path.join(WORKFLOW_DIR, "release.yml"))
+
+    assert "startsWith(github.ref, 'refs/tags/v')" in release
+    meta = workflow_jobs(release)["meta"]
+    refusal = meta.split("Refuse anything that is not a version tag", 1)[1]
+    assert "if: ${{ ! startsWith(github.ref, 'refs/tags/v') }}" in refusal.split("- uses:", 1)[0]
