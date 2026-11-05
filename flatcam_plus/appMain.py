@@ -83,8 +83,8 @@ from flatcam_plus.defaults import AppDefaults, FIXED_LIGHT_UI_DEFAULTS
 from flatcam_plus.defaults import AppOptions
 
 # App Objects
-from appGUI.preferences.OptionsGroupUI import OptionsGroupUI
-from appGUI.preferences.PreferencesUIManager import PreferencesUIManager
+from flatcam_plus.appGUI.preferences.OptionsGroupUI import OptionsGroupUI
+from flatcam_plus.appGUI.preferences.PreferencesUIManager import PreferencesUIManager
 from flatcam_plus.appObjects.ObjectCollection import ObjectCollection, GerberObject, ExcellonObject, GeometryObject, \
     CNCJobObject, ScriptObject, DocumentObject
 from flatcam_plus.appObjects.AppObjectTemplate import FlatCAMObj

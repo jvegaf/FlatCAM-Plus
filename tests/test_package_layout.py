@@ -153,9 +153,29 @@ def test_the_app_modules_import_from_the_package(name):
     assert module.__name__ == "flatcam_plus." + name
 
 
+def stray_files(root):
+    """Every file under ``root`` that is not Python bytecode left by an older checkout.
+
+    ``git checkout`` back to a commit from before a move leaves the source directory behind, and
+    running the suite in it fills it with a ``__pycache__``. That directory is still not a copy of
+    the package: only bytecode a fresh interpreter regenerates lives there.
+    """
+    for directory, dirnames, filenames in os.walk(root):
+        dirnames[:] = [name for name in dirnames if name != "__pycache__"]
+        for filename in filenames:
+            if os.path.splitext(filename)[1] not in (".pyc", ".pyo"):
+                yield os.path.join(directory, filename)
+
+
+def holds_no_package_files(root):
+    """True when ``root`` is absent or holds nothing but the bytecode a checkout leaves."""
+    return not os.path.exists(root) or not list(stray_files(root))
+
+
 @pytest.mark.parametrize("name", APP_PACKAGES)
 def test_no_root_copy_of_the_app_package_is_left_behind(name):
-    assert not os.path.exists(os.path.join(REPO_ROOT, name))
+    leftover = os.path.join(REPO_ROOT, name)
+    assert holds_no_package_files(leftover), leftover
 
 
 @pytest.mark.parametrize("name", VENDORED_MODULES)
@@ -166,7 +186,21 @@ def test_the_vendored_modules_import_from_the_package(name):
 
 @pytest.mark.parametrize("name", VENDORED_PACKAGES)
 def test_no_root_copy_of_the_vendored_package_is_left_behind(name):
-    assert not os.path.exists(os.path.join(REPO_ROOT, name))
+    leftover = os.path.join(REPO_ROOT, name)
+    assert holds_no_package_files(leftover), leftover
+
+
+def test_a_leftover_directory_holding_only_bytecode_is_not_a_copy(tmp_path):
+    """The L16 artefact: ``git checkout`` back past a move leaves the directory and a cache."""
+    cache = tmp_path / "__pycache__"
+    cache.mkdir()
+    (cache / "MainGUI.cpython-314.pyc").write_bytes(b"bytecode")
+    assert holds_no_package_files(str(tmp_path))
+
+
+def test_a_leftover_directory_holding_a_source_file_is_a_copy(tmp_path):
+    (tmp_path / "MainGUI.py").write_text("x = 1\n", encoding="utf-8")
+    assert not holds_no_package_files(str(tmp_path))
 
 
 @pytest.mark.parametrize("name", VENDORED_PACKAGES)

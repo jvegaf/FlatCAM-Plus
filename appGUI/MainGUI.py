@@ -22,21 +22,21 @@ from appGUI.PanelStyles import (
     apply_modern_main_workspace_style, apply_modern_preferences_style, apply_modern_sidebar_style
 )
 
-from appGUI.preferences.cncjob.CNCJobPreferencesUI import CNCJobPreferencesUI
-from appGUI.preferences.excellon.ExcellonPreferencesUI import ExcellonPreferencesUI
-from appGUI.preferences.general.GeneralPreferencesUI import GeneralPreferencesUI
-from appGUI.preferences.geometry.GeometryPreferencesUI import GeometryPreferencesUI
-from appGUI.preferences.gerber.GerberPreferencesUI import GerberPreferencesUI
-from appGUI.preferences.machine.MachinePreferencesUI import MachinePreferencesUI
+from flatcam_plus.appGUI.preferences.cncjob.CNCJobPreferencesUI import CNCJobPreferencesUI
+from flatcam_plus.appGUI.preferences.excellon.ExcellonPreferencesUI import ExcellonPreferencesUI
+from flatcam_plus.appGUI.preferences.general.GeneralPreferencesUI import GeneralPreferencesUI
+from flatcam_plus.appGUI.preferences.geometry.GeometryPreferencesUI import GeometryPreferencesUI
+from flatcam_plus.appGUI.preferences.gerber.GerberPreferencesUI import GerberPreferencesUI
+from flatcam_plus.appGUI.preferences.machine.MachinePreferencesUI import MachinePreferencesUI
 from flatcam_plus.appEditors.appGeoEditor import FCShapeTool
 
 import webbrowser
 
-from appGUI.preferences.tools.PluginsPreferencesUI import PluginsPreferencesUI
-from appGUI.preferences.tools.Plugins2PreferencesUI import Plugins2PreferencesUI
-from appGUI.preferences.tools.PluginsEngravingPreferencesUI import PluginsEngravingPreferencesUI
+from flatcam_plus.appGUI.preferences.tools.PluginsPreferencesUI import PluginsPreferencesUI
+from flatcam_plus.appGUI.preferences.tools.Plugins2PreferencesUI import Plugins2PreferencesUI
+from flatcam_plus.appGUI.preferences.tools.PluginsEngravingPreferencesUI import PluginsEngravingPreferencesUI
 
-from appGUI.preferences.utilities.UtilPreferencesUI import UtilPreferencesUI
+from flatcam_plus.appGUI.preferences.utilities.UtilPreferencesUI import UtilPreferencesUI
 from flatcam_plus.appObjects.ObjectCollection import EventSensitiveListView
 
 import subprocess
