@@ -169,3 +169,6 @@ PLOTTER_TASKS.md
 /.atl
 # Local AI runtime state
 .atl/
+
+# flatpak-builder cache and output
+.flatpak-builder/

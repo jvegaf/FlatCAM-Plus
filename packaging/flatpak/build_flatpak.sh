@@ -44,8 +44,20 @@ echo "[INFO] Version: $VERSION"
 mkdir -p "$OUTPUT_DIR" "$(dirname "$BUILD_DIR")"
 rm -rf "$BUILD_DIR" "$REPO_DIR"
 
+# rofiles-fuse needs /dev/fuse, which a build container usually does not expose; without it
+# flatpak-builder fails with "fuse: device not found" and an uninitialized rofiles directory.
+builder_args=(--force-clean --repo="$REPO_DIR")
+if [ ! -e /dev/fuse ]; then
+    echo "[INFO] /dev/fuse is absent: disabling rofiles-fuse"
+    builder_args+=(--disable-rofiles-fuse)
+fi
+if [ -n "${FLATPAK_BUILDER_ARGS:-}" ]; then
+    # shellcheck disable=SC2206  # deliberately word-split: the variable carries several flags
+    builder_args+=(${FLATPAK_BUILDER_ARGS})
+fi
+
 echo "[INFO] Building the Flatpak"
-flatpak-builder --force-clean --repo="$REPO_DIR" "$BUILD_DIR" "$MANIFEST"
+flatpak-builder "${builder_args[@]}" "$BUILD_DIR" "$MANIFEST"
 
 echo "[INFO] Bundling"
 flatpak build-bundle "$REPO_DIR" "$OUTPUT_DIR/FlatCAMPlus-${VERSION}-linux-x86_64.flatpak" "$APP_ID"
