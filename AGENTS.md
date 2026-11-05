@@ -106,11 +106,13 @@ root directory, not to the package.
   registry edit is required.
 - **Tcl commands**: after adding a command module, append its import to the
   explicit alphabetical list in `flatcam_plus/tclCommands/__init__.py` (it is not autodiscovered).
-- **Two unrelated versions**: `flatcam_plus/version.py` holds the application
-  version (`APP_VERSION = "1.2.0"`). `flatcam_plus/defaults.py`'s `version` (`8.992`) is the
-  preferences-file format version; it is not the app version. Do not sync them.
-  The build scripts extract `APP_VERSION` from that file by path, so it must stay
-  a single-line assignment at `flatcam_plus/version.py`.
+- **The application version has one source.** `pyproject.toml`'s `[project] version` is it;
+  `flatcam_plus/version.py` reads that file at import time (from the checkout, or from
+  `sys._MEIPASS` in a bundle) and exposes `APP_VERSION`. The build scripts read the same file, and
+  every bundle must ship it with `--add-data pyproject.toml`, or the frozen app raises on import.
+  `flatcam_plus/defaults.py`'s `version` (`8.992`) is the preferences-file format version; it is
+  not the app version. Do not sync them. `packaging/windows/update_version.ps1` bumps
+  `pyproject.toml` and the release date in `version.py` together.
 - **Persisted state**: QSettings organization/application is
   `"Open Source"` / `"FlatCAM_Plus"`. User data and `log.txt` go to `~/.FlatCAM`
   on Linux/macOS and `%APPDATA%\FlatCAM` on Windows.

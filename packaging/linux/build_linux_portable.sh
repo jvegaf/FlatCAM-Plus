@@ -79,11 +79,9 @@ PYTHON_BIN="$(resolve_python)" || {
 cd "$ROOT_DIR"
 
 VERSION="$("$PYTHON_BIN" - <<'PY'
-import re
+import tomllib
 from pathlib import Path
-text = Path("flatcam_plus/version.py").read_text(encoding="utf-8")
-match = re.search(r'APP_VERSION\s*=\s*["\']([^"\']+)["\']', text)
-print(match.group(1) if match else "0.0.0")
+print(tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])
 PY
 )"
 
@@ -190,6 +188,7 @@ build_portable() {
         --workpath "$ROOT_DIR/build/pyinstaller/linux"
         --specpath "$ROOT_DIR/build/pyinstaller/linux"
         --icon "$ROOT_DIR/assets/resources/app256.png"
+        --add-data "pyproject.toml:pyproject.toml"
         --add-data "assets:assets"
         --add-data "config:config"
         --add-data "locale:locale"

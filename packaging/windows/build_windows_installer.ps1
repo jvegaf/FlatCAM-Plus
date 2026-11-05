@@ -18,7 +18,7 @@ $InstallerScript = Join-Path $ScriptDir "FlatCAMPlus.iss"
 Set-Location $RootDir
 
 if ([string]::IsNullOrWhiteSpace($Version)) {
-    $versionMatch = Select-String -Path (Join-Path $RootDir "flatcam_plus\version.py") -Pattern 'APP_VERSION\s*=\s*"([^"]+)"' | Select-Object -First 1
+    $versionMatch = Select-String -Path (Join-Path $RootDir "pyproject.toml") -Pattern '^version\s*=\s*"([^"]+)"' | Select-Object -First 1
     if ($versionMatch) {
         $Version = $versionMatch.Matches[0].Groups[1].Value
     } else {
@@ -339,6 +339,7 @@ function Build-PyInstallerTarget {
         "--distpath", $archRoot,
         "--workpath", $workPath,
         "--specpath", $specPath,
+        "--add-data", (New-PyInstallerDataArg "pyproject.toml" "pyproject.toml"),
         "--add-data", (New-PyInstallerDataArg "assets" "assets"),
         "--add-data", (New-PyInstallerDataArg "config" "config"),
         "--add-data", (New-PyInstallerDataArg "locale" "locale"),

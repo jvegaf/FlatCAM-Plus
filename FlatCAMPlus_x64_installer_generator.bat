@@ -13,9 +13,9 @@ echo   FlatCAM Plus ^| x64 Release Builder
 echo  =========================================================
 echo.
 
-:: ---- Mevcut versiyonu flatcam_plus\version.py'den oku ----
+:: ---- Mevcut versiyonu pyproject.toml'den oku ----
 for /f "usebackq" %%V in (`powershell -NoProfile -Command ^
-    "(Select-String -Path '%~dp0flatcam_plus\version.py' -Pattern 'APP_VERSION\s*=\s*[\""]([^\""]+)[\""]').Matches[0].Groups[1].Value 2>$null"`) do (
+    "(Select-String -Path '%~dp0pyproject.toml' -Pattern '^version\s*=\s*[\""]([^\""]+)[\""]').Matches[0].Groups[1].Value 2>$null"`) do (
     set "CURRENT_VERSION=%%V"
 )
 if not defined CURRENT_VERSION set "CURRENT_VERSION=bilinmiyor"

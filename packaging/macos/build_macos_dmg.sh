@@ -87,11 +87,9 @@ PYTHON_BIN="$(resolve_python)" || {
 cd "$ROOT_DIR"
 
 VERSION="$("$PYTHON_BIN" - <<'PY'
-import re
+import tomllib
 from pathlib import Path
-text = Path("flatcam_plus/version.py").read_text(encoding="utf-8")
-match = re.search(r'APP_VERSION\s*=\s*["\']([^"\']+)["\']', text)
-print(match.group(1) if match else "0.0.0")
+print(tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])
 PY
 )"
 
@@ -215,6 +213,7 @@ build_app() {
         --workpath "$ROOT_DIR/build/pyinstaller/macos"
         --specpath "$ROOT_DIR/build/pyinstaller/macos"
         --osx-bundle-identifier "com.flatcamplus.app"
+        --add-data "pyproject.toml:pyproject.toml"
         --add-data "assets:assets"
         --add-data "config:config"
         --add-data "locale:locale"

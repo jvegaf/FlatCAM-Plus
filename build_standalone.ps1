@@ -73,6 +73,7 @@ Write-Host "=== Step 5: Run PyInstaller ===" -ForegroundColor Cyan
 Set-Location $RootDir
 
 # Use absolute paths for --add-data (source;dest format on Windows)
+$pyprojectPath = Join-Path $RootDir "pyproject.toml"
 $assetsPath = Join-Path $RootDir "assets"
 $configPath = Join-Path $RootDir "config"
 $localePath = Join-Path $RootDir "locale"
@@ -89,6 +90,7 @@ $pyInstallerArgs = @(
     "--distpath", (Join-Path $RootDir "dist\standalone"),
     "--workpath", (Join-Path $RootDir "build\pyinstaller"),
     "--specpath", (Join-Path $RootDir "build\pyinstaller"),
+    "--add-data", "${pyprojectPath};pyproject.toml",
     "--add-data", "${assetsPath};assets",
     "--add-data", "${configPath};config",
     "--add-data", "${localePath};locale",
