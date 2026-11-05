@@ -342,6 +342,16 @@ Rules that keep this cheap:
 - A failing packaging job is the cheap outcome; a hung one is the expensive one. That is why the timeouts exist and why the release jobs are bounded well under an hour.
 - Standard runners are free for public repositories on GitHub's free plan; check the repository's billing setting before assuming otherwise, because this document cannot.
 
+What the pipeline keeps between runs, and what it pays every time:
+
+| Kept | Key | Why it matters |
+| --- | --- | --- |
+| `~/.cache/uv` (also mounted into the build container) | `hashFiles('uv.lock')` | the wheel set is several hundred MB and the container would fetch it again on every release |
+| `~/.local/share/flatpak` | the KDE runtime version | the runtime is about a gigabyte |
+| action tool caches | `setup-uv` cache | the Windows and test jobs reuse the resolved environment |
+
+Paid on every run on purpose: the manylinux container image (a runner cannot persist Docker layers usefully), the PyInstaller build itself (about three minutes, no warm cache exists), and the test job, which runs again for the release even though the same commit was pushed — a release that builds on untested code is worse than two minutes. Artifact uploads skip re-compression (`compression-level: 0`) because the packages are already compressed.
+
 ## Packaging Notes
 
 - Always test import, project open/save, Gerber/Excellon rendering, CNCJob generation, and plugin startup from the packaged app.

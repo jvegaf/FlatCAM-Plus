@@ -24,6 +24,7 @@ env:
   # RHEL/Alma/Rocky 9 (2.34) is the oldest distribution this can support.
   MANYLINUX_IMAGE: quay.io/pypa/manylinux_2_34_x86_64
   GLIBC_FLOOR: "2.34"
+  KDE_RUNTIME_VERSION: "6.9"
 
 jobs:
   test:
@@ -43,15 +44,13 @@ jobs:
           echo "This workflow publishes releases; run it from a v* tag." >&2
           exit 1
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: "3.14"
-          enable-cache: true
       - id: version
         name: Read the version and check the tag against it
+        # No uv here on purpose: syncing the environment to read one key out of a TOML file would
+        # spend a minute and a few hundred megabytes of downloads on every release.
         run: |
           set -euo pipefail
-          VERSION="$(uv run --frozen python -c 'import tomllib,pathlib;print(tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])')"
+          VERSION="$(python3 -c 'import tomllib,pathlib;print(tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])')"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             test "${GITHUB_REF_NAME}" = "v${VERSION}" || {
@@ -82,6 +81,14 @@ jobs:
       # The bundle is built against glibc 2.28 so that one package starts on RHEL/Alma/Rocky 9,
       # Debian 12 and Ubuntu 22.04 alike. Building on the runner itself would raise that floor to
       # the runner's glibc and break the older targets silently.
+      - name: Cache the wheel downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-
+
       - name: Build the bundle against the old glibc
         run: |
           set -euo pipefail
@@ -91,6 +98,8 @@ jobs:
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
             -e UV_PYTHON_PREFERENCE=only-managed \
+            -e UV_CACHE_DIR=/tmp/uv-cache \
+            -v "$HOME/.cache/uv:/tmp/uv-cache" \
             -v "$PWD:/work" -w /work "${MANYLINUX_IMAGE}" /bin/bash -lc '
             set -euo pipefail
             curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/tmp/uv sh
@@ -117,6 +126,9 @@ jobs:
             dist/installer/*.deb
             dist/installer/*.rpm
             dist/installer/*.tar.gz
+          # These are compressed containers already; re-compressing them costs minutes and
+          # saves nothing.
+          compression-level: 0
           if-no-files-found: error
 
   windows-installer:
@@ -144,6 +156,7 @@ jobs:
         with:
           name: windows-installer
           path: dist/installer/*.exe
+          compression-level: 0
           if-no-files-found: error
 
   flatpak:
@@ -160,15 +173,24 @@ jobs:
           name: linux-packages
           path: dist/installer
 
+      - name: Cache the Flatpak runtime
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/flatpak
+            ~/.cache/flatpak
+          key: flatpak-kde-${{ env.KDE_RUNTIME_VERSION }}
+
       - name: Install flatpak-builder and the runtime
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends flatpak flatpak-builder
+          sudo apt-get update -qq
+          sudo apt-get install --yes --no-install-recommends -qq flatpak flatpak-builder
           flatpak remote-add --user --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
+          # Already installed from the cache: this only verifies and returns.
           flatpak install --user --noninteractive --yes flathub \
-            org.kde.Platform//6.9 org.kde.Sdk//6.9
+            "org.kde.Platform//${KDE_RUNTIME_VERSION}" "org.kde.Sdk//${KDE_RUNTIME_VERSION}"
 
       # The Flatpak wraps the same PyInstaller bundle as the deb and the rpm, so it reuses the
       # artifact instead of building a second one.
@@ -183,6 +205,7 @@ jobs:
         with:
           name: flatpak
           path: dist/installer/*.flatpak
+          compression-level: 0
           if-no-files-found: error
 
   publish:
