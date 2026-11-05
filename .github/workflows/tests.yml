@@ -34,6 +34,9 @@ jobs:
     env:
       # The suite boots the real application; it must never need a display server.
       QT_QPA_PLATFORM: offscreen
+      # The interpreter this runner ships has no Tk bindings and appMain imports tkinter; a
+      # uv-managed CPython ships them, so the suite runs on a known interpreter.
+      UV_PYTHON_PREFERENCE: only-managed
     steps:
       - uses: actions/checkout@v4
 
@@ -47,6 +50,8 @@ jobs:
         with:
           python-version: "3.14"
           enable-cache: true
+      - name: Make sure the managed interpreter is present
+        run: uv python install 3.14
 
       - name: Install dependencies from the lockfile
         run: uv sync --frozen
