@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=FlatCAM Plus
+GenericName=PCB CAM
+Comment=G-code from Gerber, Excellon, DXF and SVG files
+Exec=flatcam-plus %U
+Icon=flatcam-plus
+Terminal=false
+StartupNotify=true
+Categories=Graphics;Engineering;

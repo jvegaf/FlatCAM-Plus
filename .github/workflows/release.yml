@@ -1,0 +1,145 @@
+name: release
+
+# Tag-triggered packaging. The version comes from pyproject.toml alone, and the tag has to agree
+# with it, so a release can never be built from a manifest that says something else.
+#
+# Tool versions below are pinned by hand and were not verified against upstream from this
+# environment (no network during authoring): confirm NPM/nfpm/action tags before the first run.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+# Read-only by default; only the publish job needs to write, and it is the only job that does.
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NFPM_VERSION: "2.35.3"
+  MANYLINUX_IMAGE: quay.io/pypa/manylinux_2_28_x86_64
+  GLIBC_FLOOR: "2.28"
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
+
+  meta:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.14"
+          enable-cache: true
+      - id: version
+        name: Read the version and check the tag against it
+        run: |
+          set -euo pipefail
+          VERSION="$(uv run --frozen python -c 'import tomllib,pathlib;print(tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])')"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            test "${GITHUB_REF_NAME}" = "v${VERSION}" || {
+              echo "tag ${GITHUB_REF_NAME} does not match pyproject.toml ${VERSION}" >&2
+              exit 1
+            }
+          fi
+
+  linux-packages:
+    needs: [test, meta]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # This workspace is bind-mounted into a container that runs fetched code; the job token
+          # has no business being reachable from there.
+          persist-credentials: false
+
+      - name: Install nfpm
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/nfpm.tgz \
+            "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}/nfpm_${NFPM_VERSION}_Linux_x86_64.tar.gz"
+          sudo tar -C /usr/local/bin -xzf /tmp/nfpm.tgz nfpm
+          nfpm --version
+
+      # The bundle is built against glibc 2.28 so that one package starts on RHEL/Alma/Rocky 9,
+      # Debian 12 and Ubuntu 22.04 alike. Building on the runner itself would raise that floor to
+      # the runner's glibc and break the older targets silently.
+      - name: Build the bundle against the old glibc
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            -v "$PWD:/work" -w /work "${MANYLINUX_IMAGE}" /bin/bash -lc '
+            set -euo pipefail
+            curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/tmp/uv sh
+            export PATH="/tmp/uv:$PATH"
+            uv sync --frozen
+            bash packaging/linux/build_linux_portable.sh
+          '
+
+      - name: Check the glibc floor and build the packages
+        run: |
+          set -euo pipefail
+          bash packaging/linux/build_linux_packages.sh --skip-bundle
+        env:
+          GLIBC_FLOOR: ${{ env.GLIBC_FLOOR }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            dist/installer/*.deb
+            dist/installer/*.rpm
+          if-no-files-found: error
+
+  windows-installer:
+    needs: [test, meta]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.14"
+          enable-cache: true
+      - name: Install the dependencies from the lockfile
+        run: uv sync --frozen
+      - name: Build the x64 installer
+        shell: pwsh
+        run: |
+          ./packaging/windows/build_windows_installer.ps1 -Version "${{ needs.meta.outputs.version }}" -Target x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/installer/*.exe
+          if-no-files-found: error
+
+  publish:
+    needs: [linux-packages, windows-installer, meta]
+    runs-on: ubuntu-24.04
+    # A workflow_dispatch can run from a branch; publishing is tag-only, whatever triggered the run.
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          ls -l dist
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --title "FlatCAM Plus ${VERSION}" \
+            --generate-notes

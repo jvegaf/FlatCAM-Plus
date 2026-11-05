@@ -285,7 +285,22 @@ Create a compressed archive for sharing:
 tar -C dist -czf FlatCAM-Plus-linux-x86_64.tar.gz FlatCAM-Plus
 ```
 
-The repository also includes a basic Linux install helper in `Makefile` and desktop launcher files in `assets/linux/`. Those are useful for source-based Linux installs, but they are not a full AppImage, DEB, or RPM packaging system.
+The repository also includes a basic Linux install helper in `Makefile` and desktop launcher files in `assets/linux/`. Those are useful for source-based Linux installs.
+
+### Debian and RPM packages
+
+Both formats come from one bundle and one metadata file. `nfpm` generates them, so there is no `debian/` tree and no `.spec` to keep in sync:
+
+```bash
+packaging/linux/build_linux_packages.sh            # bundle, glibc check, deb + rpm
+packaging/linux/build_linux_packages.sh --skip-bundle   # reuse dist/linux/FlatCAM-Plus
+```
+
+The package installs the bundle under `/opt/flatcam-plus` and puts a launcher at `/usr/bin/flatcam-plus`, with the desktop entry, the icon and the AppStream metadata in the usual places. `packaging/linux/nfpm.yaml` is the only place the dependency lists live, spelled once per format because Debian and RPM name the same libraries differently.
+
+**The bundle must be built against an old glibc.** glibc is forward-compatible only, so a bundle built on a recent distribution starts there and fails on older ones. `packaging/linux/check_glibc_floor.py` reads the bundle's own symbol requirements and fails when they exceed the declared floor (2.28 by default: the tag every native wheel in `uv.lock` requires, and the glibc of RHEL/Alma/Rocky 9). The release workflow builds inside `quay.io/pypa/manylinux_2_28_x86_64` for that reason, and packaging on a modern host would silently raise the floor.
+
+`.github/workflows/release.yml` runs this on a `v*` tag: it refuses a tag that disagrees with `pyproject.toml`, builds the bundle in the manylinux container, packages deb and rpm on the runner, builds the Windows installer, and publishes the artifacts.
 
 ## Packaging Notes
 

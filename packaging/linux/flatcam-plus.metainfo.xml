@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.thebestgoodguy.FlatCAMPlus</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>FlatCAM Plus</name>
+  <summary>PCB CAM and CNC workflow</summary>
+  <description>
+    <p>
+      FlatCAM Plus turns PCB artwork into machine instructions. It imports Gerber,
+      Excellon, DXF and SVG files and produces isolation routing, drilling, cutout and
+      milling toolpaths, then emits G-code through a selectable preprocessor.
+    </p>
+    <ul>
+      <li>Isolation routing, drilling, cutout, panelization and copper clearing</li>
+      <li>G-code preprocessors for GRBL, Marlin, Mach3 and others</li>
+      <li>3D preview of the generated job and a pen-plotter workflow</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">flatcam-plus.desktop</launchable>
+  <url type="homepage">https://github.com/thebestgoodguy/FlatCAM-Plus</url>
+  <url type="bugtracker">https://github.com/thebestgoodguy/FlatCAM-Plus/issues</url>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.3.0" date="2026-11-05"/>
+  </releases>
+  <categories>
+    <category>Graphics</category>
+    <category>Engineering</category>
+  </categories>
+</component>
