@@ -174,6 +174,7 @@ python -m PyInstaller flatcam.py \
   --clean \
   --noconfirm \
   --icon "assets/resources/app256.png" \
+  --add-data "pyproject.toml:pyproject.toml" \
   --add-data "assets:assets" \
   --add-data "config:config" \
   --add-data "locale:locale" \
@@ -260,6 +261,7 @@ python -m PyInstaller flatcam.py \
   --windowed \
   --clean \
   --noconfirm \
+  --add-data "pyproject.toml:pyproject.toml" \
   --add-data "assets:assets" \
   --add-data "config:config" \
   --add-data "locale:locale" \

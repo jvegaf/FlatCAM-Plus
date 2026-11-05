@@ -7,7 +7,10 @@ module said 1.2.0 — so this pins the whole chain: pyproject, then the module, 
 """
 
 import os
+import pathlib
 import re
+import subprocess
+import sys
 import tomllib
 
 # Scripts that only consume the version: they must get it from pyproject.toml.
@@ -90,3 +93,91 @@ def test_every_bundle_ships_the_manifest():
             if "add-data" in line and "pyproject.toml" in line
         ]
         assert shipped, script
+
+
+def test_pyproject_is_bom_free():
+    """tomllib rejects a BOM, so the manifest has to stay plain UTF-8."""
+    raw = (pathlib.Path(REPO_ROOT) / "pyproject.toml").read_bytes()
+
+    assert not raw.startswith(b"\xef\xbb\xbf")
+    assert tomllib.loads(raw.decode("utf-8"))["project"]["version"] == declared_version()
+
+
+def test_the_release_helper_never_writes_a_bom():
+    for line in read_repo_file(VERSION_WRITER).splitlines():
+        if "WriteAllText" in line:
+            assert "${utf8NoBom}" in line or "$utf8NoBom" in line, line
+            assert "[System.Text.Encoding]::UTF8" not in line, line
+
+
+def test_the_release_helper_writes_the_date_the_module_declares():
+    text = read_repo_file(VERSION_WRITER)
+
+    assert 'Get-Date -Format "yyyy.MM.dd"' in text
+
+
+def test_the_windows_regex_hits_the_project_entry():
+    """The .ps1 and .bat pattern must find [project] version and nothing earlier."""
+    pattern = re.compile(r'^version\s*=\s*"([^"]+)"')
+    hits = [
+        match.group(1)
+        for line in read_repo_file("pyproject.toml").splitlines()
+        for match in [pattern.match(line)]
+        if match
+    ]
+
+    assert hits == [declared_version()]
+
+
+def test_the_module_raises_when_the_manifest_is_missing(tmp_path):
+    package = tmp_path / "flatcam_plus"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "version.py").write_text(
+        read_repo_file(os.path.join("flatcam_plus", "version.py")), encoding="utf-8"
+    )
+
+    finished = subprocess.run(
+        [sys.executable, "-c", "import flatcam_plus.version"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+
+    assert finished.returncode != 0
+    assert "pyproject.toml is missing" in finished.stderr
+
+
+def test_the_bundle_reads_the_manifest_beside_the_executable(tmp_path):
+    bundle = tmp_path / "bundle"
+    (bundle / "flatcam_plus").mkdir(parents=True)
+    (bundle / "pyproject.toml").write_bytes(
+        (pathlib.Path(REPO_ROOT) / "pyproject.toml").read_bytes()
+    )
+    (bundle / "flatcam_plus" / "__init__.py").write_text("", encoding="utf-8")
+    (bundle / "flatcam_plus" / "version.py").write_text(
+        read_repo_file(os.path.join("flatcam_plus", "version.py")), encoding="utf-8"
+    )
+    code = (
+        "import sys; sys._MEIPASS = {0!r}\n"
+        "from flatcam_plus.version import APP_VERSION\n"
+        "print(APP_VERSION)\n".format(str(bundle))
+    )
+
+    finished = subprocess.run(
+        [sys.executable, "-c", code], cwd=bundle, capture_output=True, text=True
+    )
+
+    assert finished.returncode == 0, finished.stderr
+    assert finished.stdout.strip() == declared_version()
+
+
+def test_documented_manual_builds_ship_the_manifest():
+    """Every PyInstaller recipe in PACKAGING.md must add pyproject.toml as data."""
+    recipes = re.findall(
+        r"python -m PyInstaller flatcam\.py.*?```", read_repo_file("PACKAGING.md"), re.S
+    )
+
+    assert recipes
+    for recipe in recipes:
+        assert '--add-data "pyproject.toml:pyproject.toml"' in recipe, recipe

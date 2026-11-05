@@ -18,7 +18,7 @@ $ErrorActionPreference = "Stop"
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 # ---- pyproject.toml is the single source of truth for the version ----
-$releaseDate = Get-Date -Format "yyyy/MM/dd"
+$releaseDate = Get-Date -Format "yyyy.MM.dd"
 $pyprojectFile = Join-Path $RootDir "pyproject.toml"
 
 if (-not (Test-Path $pyprojectFile)) {
