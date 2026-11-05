@@ -19,7 +19,7 @@ import math
 from flatcam_plus.camlib import distance, arc, three_point_circle, Geometry, AppRTreeStorage, flatten_shapely_geometry
 from flatcam_plus.appGUI.GUIElements import FCLabel, GLay, FCDoubleSpinner, FCTree, FCButton, FCFrame, FCCheckBox, FCEntry, \
     FCTextEdit
-from appGUI.VisPyVisuals import ShapeCollection
+from flatcam_plus.appGUI.VisPyVisuals import ShapeCollection
 
 from flatcam_plus.appEditors.geo_plugins.GeoBufferPlugin import BufferSelectionTool
 from flatcam_plus.appEditors.geo_plugins.GeoPaintPlugin import PaintOptionsTool
@@ -111,7 +111,7 @@ class AppGeoEditor(QtCore.QObject):
             self.sel_shapes = self.app.plotcanvas.new_shape_collection(layers=1)
             self.tool_shape = self.app.plotcanvas.new_shape_collection(layers=1)
         else:
-            from appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
+            from flatcam_plus.appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
             self.shapes = ShapeCollectionLegacy(obj=self, app=self.app, name='shapes_geo_editor')
             self.sel_shapes = ShapeCollectionLegacy(obj=self, app=self.app, name='sel_shapes_geo_editor')
             self.tool_shape = ShapeCollectionLegacy(obj=self, app=self.app, name='tool_shapes_geo_editor')

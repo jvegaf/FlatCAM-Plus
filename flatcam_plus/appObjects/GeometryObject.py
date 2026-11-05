@@ -13,7 +13,7 @@
 from PyQt6 import QtWidgets, QtCore
 from flatcam_plus.appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted
 from flatcam_plus.appGUI.GUIElements import FCCheckBox
-from appGUI.ObjectUI import GeometryObjectUI
+from flatcam_plus.appGUI.ObjectUI import GeometryObjectUI
 
 from shapely import MultiLineString, LinearRing, Polygon, MultiPolygon, LineString
 from shapely.affinity import scale, translate

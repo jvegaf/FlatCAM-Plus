@@ -63,8 +63,9 @@ subpackage of `flatcam_plus`, one package per commit, with the tree importable a
 - **T7 (S1, S2, S3)** — `tclCommands` (76 files, 149 import statements) with the discovery prefix
   derived from `__name__` and a registry test that fails when it comes back empty. Status: done
   in the commit that adds `tests/test_tcl_registry.py`; 101 registered aliases before and after.
-- **T8 (S1, S2)** — `appGUI` (86 files, 580 importers), the largest slice, last so it lands on a
-  tree where every other package already moved.
+- **T8 (S1, S2)** — `appGUI` (86 files, 290 importers), the largest slice, last so it lands on a
+  tree where every other package already moved. Status: done in the commit that adds it to
+  `APP_PACKAGES`; it needed one non-import edit, the VisPyData path in `appMain`.
 - **T9 (S4, S5)** — Documentation and skills pass: `AGENTS.md`, `PACKAGING.md`,
   `.opencode/skills/*`, and the repo map, for paths that kept the old root names.
 
@@ -158,3 +159,26 @@ green at every commit.
   needed more than a path rewrite: `ToolShell.py` used `import tclCommands` and called
   `tclCommands.register_all_commands`, so it became `from flatcam_plus import tclCommands` to keep
   the call site verbatim instead of rebinding `flatcam_plus`. 171 tests before, 186 after.
+- **L12 — T8 done, and it caught a path that only the move could break**: `appGUI` moved with its
+  eleven `__init__.py` files and its three tracked VisPy data files; 290 import statements were
+  rewritten in 149 files, 130 of them inside the moved package. The slice is the one that needed a
+  non-import edit: `appMain`'s VisPyData fallback built its path as `_APP_ROOT/appGUI/VisPyData/data`
+  and the directory now sits inside the package, so the fallback would have re-raised
+  `FileNotFoundError`. It now resolves through `flatcam_plus/appGUI/VisPyData/data`. The worker also
+  replayed the rewrite over `git show HEAD:appGUI/<file>` for all 86 modules and diffed the result
+  against the new files to prove no line beyond the import moved (`checked=86 unexpected_diffs=0`).
+  RED: four guard cases, naming `flatcam.py`; GREEN: 100 in that file, plus the boot, locale, path
+  and recent-project tests. Mutation check fails the guard by path. 186 tests before, 190 after.
+  With this slice no build script collects a package that lives inside `flatcam_plus`: the four
+  scripts and both `PACKAGING.md` snippets now name only `flatcam_plus`.
+  **This slice did not land as one commit.** A single commit for it measures 179 changed paths and
+  145 KB of diff, and the native reviewer refused it in preflight with `lens_context_budget_exceeded`
+  twice: once from the session that opened it and once from a fresh session that retried the exact
+  recipe. Neither attempt created authority, so nothing was left `reviewing`. It is split in two.
+  `e7713b2` moved the `preferences` subtree first, because it is the leaf of the package's import
+  graph: its imports of the core widgets (`appGUI.GUIElements`, `appGUI.PanelStyles`,
+  `appGUI.ColumnarFlowLayout`) keep resolving against the root copy that this commit moves, so both
+  commits leave the application importable and the suite green (75 paths and 64 KB of diff in the
+  first, the rest here). The first commit also fixed the guard artefact that made the split painful
+  and that had already forced four hand cleanups during L15: the root-copy guards now ignore a
+  leftover directory that holds nothing but `__pycache__`.

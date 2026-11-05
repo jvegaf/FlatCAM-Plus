@@ -14,7 +14,7 @@ from vispy.color import Color
 from shapely import Polygon, LineString, LinearRing
 import threading
 import numpy as np
-from appGUI.VisPyTesselators import GLUTess
+from flatcam_plus.appGUI.VisPyTesselators import GLUTess
 
 
 # class FlatCAMLineVisual(LineVisual):

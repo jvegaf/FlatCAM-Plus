@@ -8,8 +8,8 @@
 from PyQt6 import QtCore, QtGui
 
 import logging
-from appGUI.VisPyCanvas import VisPyCanvas, Color
-from appGUI.VisPyVisuals import ShapeGroup, ShapeCollection, TextCollection, TextGroup, Cursor
+from flatcam_plus.appGUI.VisPyCanvas import VisPyCanvas, Color
+from flatcam_plus.appGUI.VisPyVisuals import ShapeGroup, ShapeCollection, TextCollection, TextGroup, Cursor
 from vispy.scene.visuals import InfiniteLine, Line, Rectangle, Text
 
 import gettext

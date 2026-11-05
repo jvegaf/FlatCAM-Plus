@@ -12,10 +12,10 @@
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from appGUI.ObjectUI import ObjectUI
+from flatcam_plus.appGUI.ObjectUI import ObjectUI
 from flatcam_plus.appGUI.PanelStyles import apply_modern_panel_style, apply_modern_sidebar_style
 from flatcam_plus.appCommon.Common import LoudDict
-from appGUI.VisPyVisuals import ShapeCollection
+from flatcam_plus.appGUI.VisPyVisuals import ShapeCollection
 
 from shapely.ops import unary_union
 from shapely import Polygon, MultiPolygon, Point, LineString
@@ -106,7 +106,7 @@ class FlatCAMObj(QtCore.QObject, _QtInitTerminator):
             self.mark_shapes = ShapeCollection(parent=self.app.plotcanvas.view.scene, layers=1, pool=self.app.pool,
                                                fcoptions=self.app.options)
         else:
-            from appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
+            from flatcam_plus.appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
             self.shapes = ShapeCollectionLegacy(obj=self, app=self.app, name=name)
             self.mark_shapes = ShapeCollectionLegacy(obj=self, app=self.app, name=name + "_mark_shapes")
 

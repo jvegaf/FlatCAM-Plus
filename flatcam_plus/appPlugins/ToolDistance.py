@@ -9,7 +9,7 @@
 from PyQt6 import QtWidgets, QtCore
 from flatcam_plus.appTool import AppTool
 from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCEntry, FCCheckBox
-from appGUI.VisPyVisuals import ShapeCollection
+from flatcam_plus.appGUI.VisPyVisuals import ShapeCollection
 from flatcam_plus.camlib import AppRTreeStorage
 from flatcam_plus.appEditors.appGeoEditor import DrawToolShape
 
@@ -87,7 +87,7 @@ class Distance(AppTool):
         if self.app.use_3d_engine:
             self.sel_shapes = ShapeCollection(parent=self.app.plotcanvas.view.scene, layers=1, pool=self.app.pool)
         else:
-            from appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
+            from flatcam_plus.appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
             self.sel_shapes = ShapeCollectionLegacy(obj=self, app=self.app, name='measurement')
         
         # Signals

@@ -9,7 +9,7 @@ import os
 
 from PyQt6.QtCore import QSettings
 
-from appGUI.MainGUI import MainGUI
+from flatcam_plus.appGUI.MainGUI import MainGUI
 
 
 def test_boots_headless_into_a_main_window(fc_app):

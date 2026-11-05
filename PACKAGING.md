@@ -179,7 +179,6 @@ python -m PyInstaller flatcam.py \
   --add-data "config:config" \
   --add-data "locale:locale" \
   --add-data "preprocessors:preprocessors" \
-  --collect-submodules appGUI \
   --collect-submodules flatcam_plus \
   --collect-all PyQt6 \
   --collect-all vispy \
@@ -267,7 +266,6 @@ python -m PyInstaller flatcam.py \
   --add-data "config:config" \
   --add-data "locale:locale" \
   --add-data "preprocessors:preprocessors" \
-  --collect-submodules appGUI \
   --collect-submodules flatcam_plus \
   --collect-all PyQt6 \
   --collect-all vispy \

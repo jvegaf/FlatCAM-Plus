@@ -8,7 +8,7 @@
 
 from PyQt6 import QtWidgets, QtCore
 from flatcam_plus.appTool import AppTool
-from appGUI.VisPyVisuals import ShapeCollection
+from flatcam_plus.appGUI.VisPyVisuals import ShapeCollection
 
 import logging
 from copy import copy

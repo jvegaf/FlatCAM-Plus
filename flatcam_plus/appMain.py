@@ -57,14 +57,14 @@ from typing import Union
 # ####################################################################################################################
 
 # App appGUI
-from appGUI.PlotCanvas import PlotCanvas
-from appGUI.MainGUI import MainGUI
+from flatcam_plus.appGUI.PlotCanvas import PlotCanvas
+from flatcam_plus.appGUI.MainGUI import MainGUI
 from flatcam_plus.appGUI.PanelStyles import apply_modern_main_workspace_style, apply_modern_panel_style
-from appGUI.VisPyVisuals import ShapeCollection
+from flatcam_plus.appGUI.VisPyVisuals import ShapeCollection
 from flatcam_plus.appGUI.GUIElements import FCMessageBox, FCInputSpinner, FCButton, DialogBoxRadio, FCTree, \
     FCInputDoubleSpinner, FCFileSaveDialog, message_dialog, AppSystemTray, FCInputDialogSlider, \
     GLay, FCLabel, DialogBoxChoice, VerticalScrollArea
-from appGUI.themes import dark_style_sheet, light_style_sheet
+from flatcam_plus.appGUI.themes import dark_style_sheet, light_style_sheet
 
 # Various
 from flatcam_plus.appCommon.Common import color_variant
@@ -949,7 +949,7 @@ class App(QtCore.QObject):
             self.sel_shapes = ShapeCollection(parent=self.plotcanvas.view.scene, layers=1, pool=self.pool)
             self.sel_shapes.order = 10001
         else:
-            from appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
+            from flatcam_plus.appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
             self.tool_shapes = ShapeCollectionLegacy(obj=self, app=self, name="tool")
 
             # Storage for Hover Shapes will use the default Matplotlib axes
@@ -1433,7 +1433,7 @@ class App(QtCore.QObject):
         try:
             shutil.copytree(from_path, to_path)
         except FileNotFoundError:
-            from_new_path = os.path.join(_APP_ROOT, 'appGUI', 'VisPyData', 'data')
+            from_new_path = os.path.join(_APP_ROOT, 'flatcam_plus', 'appGUI', 'VisPyData', 'data')
             shutil.copytree(from_new_path, to_path)
 
     def connect_custom_signal(self, target, params):
@@ -7309,7 +7309,7 @@ class App(QtCore.QObject):
                 self.inform.emit(msg)
                 return 'fail'
         else:
-            from appGUI.PlotCanvasLegacy import PlotCanvasLegacy
+            from flatcam_plus.appGUI.PlotCanvasLegacy import PlotCanvasLegacy
             plotcanvas = PlotCanvasLegacy(self)
             if plotcanvas.status != 'ok':
                 return 'fail'

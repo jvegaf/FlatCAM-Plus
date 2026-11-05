@@ -15,7 +15,7 @@ from PyQt6 import QtCore
 from shapely import Polygon, Point, LineString
 from shapely.ops import unary_union
 
-from appGUI.VisPyVisuals import ShapeCollection
+from flatcam_plus.appGUI.VisPyVisuals import ShapeCollection
 from flatcam_plus.appTool import AppTool
 
 from copy import deepcopy
@@ -248,7 +248,7 @@ class ExclusionAreas(QtCore.QObject):
             except AttributeError:
                 self.exclusion_shapes = None
         else:
-            from appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
+            from flatcam_plus.appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
             self.exclusion_shapes = ShapeCollectionLegacy(obj=self, app=self.app, name="exclusion")
 
         # Event signals disconnect id holders

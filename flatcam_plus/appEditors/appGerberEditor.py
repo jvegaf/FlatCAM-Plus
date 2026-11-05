@@ -3990,7 +3990,7 @@ class AppGerberEditor(QtCore.QObject):
             self.tool_shape = self.canvas.new_shape_collection(layers=1)
             self.ma_annotation = self.canvas.new_text_group()
         else:
-            from appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
+            from flatcam_plus.appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
             self.shapes = ShapeCollectionLegacy(obj=self, app=self.app, name='shapes_grb_editor')
             self.tool_shape = ShapeCollectionLegacy(obj=self, app=self.app, name='tool_shapes_grb_editor')
             self.ma_annotation = ShapeCollectionLegacy(

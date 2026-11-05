@@ -58,7 +58,7 @@ except ImportError as exc:
     raise
 from flatcam_plus import appTranslation as fcTranslate
 from flatcam_plus.appMain import App
-from appGUI import VisPyPatches
+from flatcam_plus.appGUI import VisPyPatches
 from flatcam_plus.version import APP_NAME, APP_VERSION
 from flatcam_plus.appCommon.recent_projects import load_recent_project_paths
 

@@ -9,8 +9,9 @@ vendored dependency packages, ``descartes`` and ``libs``. T1 of the package cons
 started the application packages moving, beginning with ``appCommon``, the shared helpers,
 updater and recent-project loader the controller, the GUI, the tools and ``flatcam.py`` import.
 T7 moved ``tclCommands``, the Tcl shell command package, whose own discovery walks
-``sys.modules`` for its package path. This test pins those facts so a later phase cannot leave
-a half-migrated tree behind.
+``sys.modules`` for its package path. T8, the last and largest slice, moved ``appGUI``, the plot
+canvases, main window, themes and preferences tree the controller and every tool plugin import.
+This test pins those facts so a later phase cannot leave a half-migrated tree behind.
 """
 
 import importlib.util
@@ -39,6 +40,7 @@ DELETED_MODULES = ("appPool",)
 APP_PACKAGES = (
     "appCommon",
     "appEditors",
+    "appGUI",
     "appHandlers",
     "appObjects",
     "appParsers",
@@ -55,6 +57,11 @@ APP_MODULES = (
     "appEditors.exc_plugins",
     "appEditors.geo_plugins",
     "appEditors.grb_plugins",
+    # The 86 ``appGUI`` modules and their eight preferences groups are not listed one by one: the
+    # package's ``preferences`` subpackage is pinned here and its ``__init__`` imports the shared
+    # widgets, so a half-moved preferences tree cannot stay green.
+    "appGUI",
+    "appGUI.preferences",
     "appHandlers",
     "appHandlers.appEdit",
     "appHandlers.appIO",
@@ -93,6 +100,24 @@ APP_MODULES = (
 # ``__init__.py``, so it was only importable as a namespace package.
 VENDORED_PACKAGES = ("descartes", "libs")
 VENDORED_MODULES = ("descartes", "descartes.patch", "libs", "libs.qdarktheme")
+
+def stray_files(root):
+    """Every file under ``root`` that is not Python bytecode left by an older checkout.
+
+    ``git checkout`` back to a commit from before a move leaves the source directory behind, and
+    running the suite in it fills it with a ``__pycache__``. That directory is still not a copy of
+    the package: only bytecode a fresh interpreter regenerates lives there.
+    """
+    for directory, dirnames, filenames in os.walk(root):
+        dirnames[:] = [name for name in dirnames if name != "__pycache__"]
+        for filename in filenames:
+            if os.path.splitext(filename)[1] not in (".pyc", ".pyo"):
+                yield os.path.join(directory, filename)
+
+
+def holds_no_package_files(root):
+    """True when ``root`` is absent or holds nothing but the bytecode a checkout leaves."""
+    return not os.path.exists(root) or not list(stray_files(root))
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -151,25 +176,6 @@ def test_no_root_copy_is_left_behind(name):
 def test_the_app_modules_import_from_the_package(name):
     module = importlib.import_module("flatcam_plus." + name)
     assert module.__name__ == "flatcam_plus." + name
-
-
-def stray_files(root):
-    """Every file under ``root`` that is not Python bytecode left by an older checkout.
-
-    ``git checkout`` back to a commit from before a move leaves the source directory behind, and
-    running the suite in it fills it with a ``__pycache__``. That directory is still not a copy of
-    the package: only bytecode a fresh interpreter regenerates lives there.
-    """
-    for directory, dirnames, filenames in os.walk(root):
-        dirnames[:] = [name for name in dirnames if name != "__pycache__"]
-        for filename in filenames:
-            if os.path.splitext(filename)[1] not in (".pyc", ".pyo"):
-                yield os.path.join(directory, filename)
-
-
-def holds_no_package_files(root):
-    """True when ``root`` is absent or holds nothing but the bytecode a checkout leaves."""
-    return not os.path.exists(root) or not list(stray_files(root))
 
 
 @pytest.mark.parametrize("name", APP_PACKAGES)

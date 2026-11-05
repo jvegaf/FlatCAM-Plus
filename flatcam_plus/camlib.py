@@ -580,7 +580,7 @@ class Geometry(object):
         if self.app.use_3d_engine:
             self.temp_shapes = self.app.plotcanvas.new_shape_collection(layers=1)
         else:
-            from appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
+            from flatcam_plus.appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
             self.temp_shapes = ShapeCollectionLegacy(obj=self, app=self.app, name='camlib.geometry')
 
         # Attributes to be included in serialization

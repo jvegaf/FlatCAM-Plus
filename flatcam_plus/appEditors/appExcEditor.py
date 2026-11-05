@@ -3017,7 +3017,7 @@ class AppExcEditor(QtCore.QObject):
             else:
                 self.tool_shape = self.canvas.new_shape_collection(layers=1)
         else:
-            from appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
+            from flatcam_plus.appGUI.PlotCanvasLegacy import ShapeCollectionLegacy
             self.shapes = ShapeCollectionLegacy(obj=self, app=self.app, name='shapes_exc_editor')
             self.tool_shape = ShapeCollectionLegacy(obj=self, app=self.app, name='tool_shapes_exc_editor')
 

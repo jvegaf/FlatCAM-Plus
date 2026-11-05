@@ -14,7 +14,7 @@ from PyQt6.QtCore import Qt
 
 from flatcam_plus.appEditors.appTextEditor import AppTextEditor
 from flatcam_plus.appObjects.AppObjectTemplate import *
-from appGUI.ObjectUI import DocumentObjectUI
+from flatcam_plus.appGUI.ObjectUI import DocumentObjectUI
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate
