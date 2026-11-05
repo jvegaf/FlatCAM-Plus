@@ -7,7 +7,6 @@ relative ``Exec`` or an unreadable desktop file fails here instead of in a relea
 
 import os
 import re
-import stat
 import subprocess
 import xml.etree.ElementTree as ElementTree
 
@@ -68,13 +67,6 @@ def test_the_desktop_entry_is_written_for_a_system_install():
     assert not fields["Icon"].startswith("./")
     assert fields["Icon"] == "flatcam-plus"
     assert "Categories" in fields
-
-
-@pytest.mark.parametrize("path", [DESKTOP_FILE, METAINFO_FILE])
-def test_the_desktop_data_is_world_readable(path):
-    mode = stat.S_IMODE(os.stat(path).st_mode)
-
-    assert mode & stat.S_IROTH, oct(mode)
 
 
 def test_the_package_forces_the_desktop_data_mode():
@@ -196,7 +188,7 @@ def test_the_release_pipeline_is_wired_to_the_tests_and_the_manifest():
     assert "uses: ./.github/workflows/tests.yml" in release
     assert "needs: [test, meta]" in release
     assert "pyproject.toml" in release, "the version is read from the manifest, not hardcoded"
-    assert "GLIBC_FLOOR" in release and "manylinux_2_28" in release
+    assert "GLIBC_FLOOR" in release and "manylinux_2_34" in release
     assert "dist/installer/*.deb" in release and "dist/installer/*.rpm" in release
 
 
@@ -250,3 +242,71 @@ def test_a_release_run_from_a_branch_stops_before_building():
     meta = workflow_jobs(release)["meta"]
     refusal = meta.split("Refuse anything that is not a version tag", 1)[1]
     assert "if: ${{ ! startsWith(github.ref, 'refs/tags/v') }}" in refusal.split("- uses:", 1)[0]
+
+
+LOCKFILE = os.path.join(REPO_ROOT, "uv.lock")
+RELEASE_WORKFLOW = os.path.join(WORKFLOW_DIR, "release.yml")
+
+
+def test_the_promised_glibc_floor_is_one_the_lockfile_can_meet():
+    """The floor is set by the newest manylinux x86_64 wheel we depend on, not by preference."""
+    import tomllib
+
+    lock = tomllib.loads(read(LOCKFILE))
+    tags = set()
+    for package in lock.get("package", []):
+        for wheel in package.get("wheels", []):
+            match = re.search(r"manylinux_(\d+)_(\d+)_x86_64", wheel.get("url", ""))
+            if match:
+                tags.add((int(match.group(1)), int(match.group(2))))
+    promised = tuple(
+        int(part) for part in re.search(r'GLIBC_FLOOR: "(\d+)\.(\d+)"', read(RELEASE_WORKFLOW)).groups()
+    )
+
+    assert tags, "no manylinux x86_64 wheels in the lockfile"
+    assert max(tags) <= promised, "the lockfile needs glibc {0}, the pipeline promises {1}".format(
+        max(tags), promised
+    )
+
+
+def test_the_pipeline_installs_the_build_tools_it_calls():
+    """PyInstaller is not a runtime dependency, so it has to be in the lockfile or CI cannot build."""
+    import tomllib
+
+    project = tomllib.loads(read(os.path.join(REPO_ROOT, "pyproject.toml")))
+    dev_group = " ".join(project.get("dependency-groups", {}).get("dev", []))
+
+    assert "pyinstaller" in dev_group.lower()
+    assert "pyinstaller" in read(LOCKFILE).lower()
+
+
+def test_the_windows_job_points_the_script_at_the_synced_environment():
+    """The script falls back to whatever `python` is on PATH; that interpreter has no PyQt6."""
+    release = read(RELEASE_WORKFLOW)
+    windows = workflow_jobs(release)["windows-installer"]
+
+    assert "PYTHON_X64" in windows
+    assert "innosetup" in windows.lower(), "the job must provide the compiler it calls"
+
+
+def test_the_deb_keeps_the_recommendations_the_package_declares():
+    """nfpm overrides replace a list; a deb without them loses mesa's DRI drivers."""
+    config = read(NFPM_CONFIG)
+    shared = re.findall(r"^  - (\S+)$", config.split("recommends:", 1)[1].split("contents:", 1)[0], re.M)
+    deb_block = config.split("  deb:\n", 1)[1].split("\nrpm:", 1)[0]
+
+    assert shared
+    for name in shared:
+        assert name in deb_block, name
+    assert "libxcb-cursor0" in deb_block
+
+
+def test_the_glibc_checker_reads_the_bootloader_that_has_no_extension(tmp_path, monkeypatch):
+    checker = load_glibc_checker()
+    bootloader = tmp_path / "FlatCAM-Plus"
+    bootloader.write_bytes(b"\x7fELF")
+    bootloader.chmod(0o755)
+    monkeypatch.setattr(checker, "symbols_of", lambda path: "GLIBC_2.34 pow\n")
+
+    assert checker.main(["check", str(tmp_path), "2.34"]) == 0
+    assert checker.main(["check", str(tmp_path), "2.31"]) == 1

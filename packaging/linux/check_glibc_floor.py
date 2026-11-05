@@ -7,16 +7,17 @@ requirements against a declared floor and fails loudly when it moves.
 
 Usage: check_glibc_floor.py <bundle-dir> [expected-floor]
 
-The expected floor defaults to the environmental contract of the packaging pipeline: 2.28, the
-manylinux tag every native wheel in uv.lock requires and the glibc of RHEL/Alma/Rocky 9.
+The expected floor defaults to the environmental contract of the packaging pipeline: 2.34, the
+tag of the only x86_64 PyQt6 wheel in uv.lock and the glibc of RHEL/Alma/Rocky 9.
 """
 
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 
-EXPECTED_FLOOR = "2.28"
+EXPECTED_FLOOR = "2.34"
 SYMBOL = re.compile(r"GLIBC_(\d+)\.(\d+)")
 SHARED_OBJECT = re.compile(r"\.so(\.\d+)*$")
 
@@ -36,11 +37,16 @@ def max_glibc_version(objdump_output):
 
 
 def bundle_libraries(bundle_dir):
-    return sorted(
-        path
-        for path in Path(bundle_dir).rglob("*")
-        if path.is_file() and SHARED_OBJECT.search(path.name)
-    )
+    """Every shared object, plus the extensionless executables: the bootloader links glibc first."""
+    found = []
+    for path in Path(bundle_dir).rglob("*"):
+        if not path.is_file():
+            continue
+        if SHARED_OBJECT.search(path.name):
+            found.append(path)
+        elif "." not in path.name and os.access(path, os.X_OK):
+            found.append(path)
+    return sorted(found)
 
 
 def symbols_of(path):

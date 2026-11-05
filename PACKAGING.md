@@ -289,7 +289,7 @@ The repository also includes a basic Linux install helper in `Makefile` and desk
 
 ### Debian and RPM packages
 
-Both formats come from one bundle and one metadata file. `nfpm` generates them, so there is no `debian/` tree and no `.spec` to keep in sync:
+Both formats come from one bundle and one metadata file. `nfpm` generates them, so there is no `debian/` tree and no `.spec` to keep in sync. PyInstaller is a `dev` dependency group in `pyproject.toml`, so `uv sync` provides the builder as well as the package metadata:
 
 ```bash
 packaging/linux/build_linux_packages.sh            # bundle, glibc check, deb + rpm
@@ -298,7 +298,7 @@ packaging/linux/build_linux_packages.sh --skip-bundle   # reuse dist/linux/FlatC
 
 The package installs the bundle under `/opt/flatcam-plus` and puts a launcher at `/usr/bin/flatcam-plus`, with the desktop entry, the icon and the AppStream metadata in the usual places. `packaging/linux/nfpm.yaml` is the only place the dependency lists live, spelled once per format because Debian and RPM name the same libraries differently.
 
-**The bundle must be built against an old glibc.** glibc is forward-compatible only, so a bundle built on a recent distribution starts there and fails on older ones. `packaging/linux/check_glibc_floor.py` reads the bundle's own symbol requirements and fails when they exceed the declared floor (2.28 by default: the tag every native wheel in `uv.lock` requires, and the glibc of RHEL/Alma/Rocky 9). The release workflow builds inside `quay.io/pypa/manylinux_2_28_x86_64` for that reason, and packaging on a modern host would silently raise the floor.
+**The bundle must be built against an old glibc.** glibc is forward-compatible only, so a bundle built on a recent distribution starts there and fails on older ones. `packaging/linux/check_glibc_floor.py` reads the bundle's own symbol requirements — the shared objects *and* the extensionless bootloader — and fails when they exceed the declared floor. The floor is **2.34**, and it is not a preference: `pyqt6-qt6` publishes only a `manylinux_2_34` x86_64 wheel, so that is the oldest glibc this application can run on, which happens to be exactly RHEL/Alma/Rocky 9. The release workflow therefore builds inside `quay.io/pypa/manylinux_2_34_x86_64`; building on a modern host would silently raise the floor above what the gate promises.
 
 `.github/workflows/release.yml` runs this on a `v*` tag: it refuses a tag that disagrees with `pyproject.toml`, builds the bundle in the manylinux container, packages deb and rpm on the runner, builds the Windows installer, builds the Flatpak, and publishes the artifacts.
 

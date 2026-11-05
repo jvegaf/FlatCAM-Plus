@@ -68,4 +68,4 @@ for packager in deb rpm; do
 done
 
 echo "[INFO] Packages written to $OUTPUT_DIR:"
-ls -1 "$OUTPUT_DIR"/flatcam-plus_*."${VERSION}"-* 2>/dev/null || ls -1 "$OUTPUT_DIR"
+ls -1 "$OUTPUT_DIR"/*.deb "$OUTPUT_DIR"/*.rpm 2>/dev/null || ls -1 "$OUTPUT_DIR"

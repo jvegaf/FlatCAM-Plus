@@ -50,7 +50,10 @@ rpm:
 # libraries, so both lists are spelled out rather than shared.
 overrides:
   deb:
+    # An override replaces the top-level list, so the shared entries are repeated here.
     recommends:
+      - libgl1-mesa-dri
+      - xdg-utils
       - libxcb-cursor0
   rpm:
     depends:
