@@ -8,7 +8,7 @@ import gettext
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 
-from appGUI.GUIElements import FCCheckBox, FCComboBox, FCDoubleSpinner, FCLabel, FCSpinner
+from flatcam_plus.appGUI.GUIElements import FCCheckBox, FCComboBox, FCDoubleSpinner, FCLabel, FCSpinner
 
 from .widgets import DashboardGauge, FluidStyleButton
 

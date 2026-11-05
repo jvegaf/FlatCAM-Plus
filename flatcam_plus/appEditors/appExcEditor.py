@@ -17,7 +17,7 @@ from flatcam_plus.appEditors.exc_plugins.ExcSlotArrayPlugin import ExcSlotArrayE
 from flatcam_plus.appEditors.exc_plugins.ExcResizePlugin import ExcResizeEditorTool
 from flatcam_plus.appEditors.exc_plugins.ExcCopyPlugin import ExcCopyEditorTool
 
-from appGUI.GUIElements import FCEntry, FCTable, FCDoubleSpinner, FCButton, FCLabel, GLay
+from flatcam_plus.appGUI.GUIElements import FCEntry, FCTable, FCDoubleSpinner, FCButton, FCLabel, GLay
 from flatcam_plus.appEditors.appGeoEditor import FCShapeTool, DrawTool, DrawToolShape, DrawToolUtilityShape, AppGeoEditor
 
 from shapely import LineString, LinearRing, MultiLineString, Polygon, MultiPolygon, Point

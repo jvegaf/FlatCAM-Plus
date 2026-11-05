@@ -2,7 +2,7 @@
 from PyQt6 import QtCore, QtGui
 
 from flatcam_plus.appObjects.ObjectCollection import GeometryObject, GerberObject, ExcellonObject
-from appGUI.GUIElements import DialogBoxChoice
+from flatcam_plus.appGUI.GUIElements import DialogBoxChoice
 
 from copy import deepcopy
 from shapely import MultiPolygon, Polygon, LinearRing, LineString, Point, unary_union

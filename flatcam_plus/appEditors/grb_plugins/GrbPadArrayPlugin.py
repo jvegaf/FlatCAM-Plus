@@ -1,7 +1,7 @@
 
 from PyQt6 import QtWidgets, QtGui
 from flatcam_plus.appTool import AppToolEditor
-from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, NumericalEvalEntry, \
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, NumericalEvalEntry, \
     FCDoubleSpinner, FCSpinner, RadioSet
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

@@ -1,7 +1,7 @@
 
 from PyQt6 import QtWidgets
 
-from appGUI.GUIElements import FCCheckBox, RadioSet, FCDoubleSpinner, FCLabel, OptionalInputSection, GLay, \
+from flatcam_plus.appGUI.GUIElements import FCCheckBox, RadioSet, FCDoubleSpinner, FCLabel, OptionalInputSection, GLay, \
     FCFrame
 from flatcam_plus.appGUI.preferences.OptionsGroupUI import OptionsGroupUI
 

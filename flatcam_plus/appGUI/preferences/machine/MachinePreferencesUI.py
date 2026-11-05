@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets
 
 from flatcam_plus.appGUI.preferences.machine.MachinePrefGroupUI import MachinePrefGroupUI
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

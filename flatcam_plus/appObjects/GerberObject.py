@@ -11,7 +11,7 @@
 # ##########################################################
 
 from PyQt6 import QtWidgets, QtCore
-from appGUI.GUIElements import FCCheckBox
+from flatcam_plus.appGUI.GUIElements import FCCheckBox
 from appGUI.ObjectUI import GerberObjectUI
 from flatcam_plus.appParsers.ParseGerber import Gerber
 from flatcam_plus.appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted, ValidationError

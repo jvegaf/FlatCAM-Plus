@@ -1,7 +1,7 @@
 
 from PyQt6 import QtGui, QtWidgets, QtCore
 from flatcam_plus.appTool import AppToolEditor
-from appGUI.GUIElements import VerticalScrollArea, GLay, FCLabel, FCButton, FCFrame, FCTextEdit, FCEntry, \
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, GLay, FCLabel, FCButton, FCFrame, FCTextEdit, FCEntry, \
     FCDoubleSpinner
 
 # from flatcam_plus.camlib import  flatten_shapely_geometry

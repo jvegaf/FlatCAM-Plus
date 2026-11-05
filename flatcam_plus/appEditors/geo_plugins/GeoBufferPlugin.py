@@ -1,7 +1,7 @@
 
 from PyQt6 import QtWidgets
 from flatcam_plus.appTool import AppToolEditor
-from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCDoubleSpinner, FCComboBox
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCDoubleSpinner, FCComboBox
 
 from shapely import Polygon
 

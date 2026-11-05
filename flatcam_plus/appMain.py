@@ -59,9 +59,9 @@ from typing import Union
 # App appGUI
 from appGUI.PlotCanvas import PlotCanvas
 from appGUI.MainGUI import MainGUI
-from appGUI.PanelStyles import apply_modern_main_workspace_style, apply_modern_panel_style
+from flatcam_plus.appGUI.PanelStyles import apply_modern_main_workspace_style, apply_modern_panel_style
 from appGUI.VisPyVisuals import ShapeCollection
-from appGUI.GUIElements import FCMessageBox, FCInputSpinner, FCButton, DialogBoxRadio, FCTree, \
+from flatcam_plus.appGUI.GUIElements import FCMessageBox, FCInputSpinner, FCButton, DialogBoxRadio, FCTree, \
     FCInputDoubleSpinner, FCFileSaveDialog, message_dialog, AppSystemTray, FCInputDialogSlider, \
     GLay, FCLabel, DialogBoxChoice, VerticalScrollArea
 from appGUI.themes import dark_style_sheet, light_style_sheet

@@ -7,7 +7,7 @@ from flatcam_plus.appGUI.preferences.excellon.ExcellonAdvOptPrefGroupUI import E
 from flatcam_plus.appGUI.preferences.excellon.ExcellonOptPrefGroupUI import ExcellonOptPrefGroupUI
 from flatcam_plus.appGUI.preferences.excellon.ExcellonGenPrefGroupUI import ExcellonGenPrefGroupUI
 
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

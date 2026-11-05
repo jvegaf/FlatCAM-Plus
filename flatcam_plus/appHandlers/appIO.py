@@ -6,7 +6,7 @@ from flatcam_plus.appEditors.appExcEditor import AppExcEditor
 from flatcam_plus.appEditors.appGeoEditor import AppGeoEditor
 from flatcam_plus.appEditors.appGerberEditor import AppGerberEditor
 
-from appGUI.GUIElements import FCFileSaveDialog, FCMessageBox
+from flatcam_plus.appGUI.GUIElements import FCFileSaveDialog, FCMessageBox
 from flatcam_plus.camlib import to_dict, dict2obj, ET, ParseError
 from flatcam_plus.appParsers.ParseHPGL2 import HPGL2
 

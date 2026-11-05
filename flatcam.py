@@ -62,7 +62,7 @@ from appGUI import VisPyPatches
 from flatcam_plus.version import APP_NAME, APP_VERSION
 from flatcam_plus.appCommon.recent_projects import load_recent_project_paths
 
-from appGUI.GUIElements import FCMessageBox
+from flatcam_plus.appGUI.GUIElements import FCMessageBox
 
 from multiprocessing import freeze_support
 

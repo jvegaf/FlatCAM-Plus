@@ -8,7 +8,7 @@ import os
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from appGUI.GUIElements import FCComboBox, FCLabel
+from flatcam_plus.appGUI.GUIElements import FCComboBox, FCLabel
 from flatcam_plus.appPlugins.cnc_control.widgets import FluidStyleButton
 
 from .renderer import CNCPreview3DCanvas

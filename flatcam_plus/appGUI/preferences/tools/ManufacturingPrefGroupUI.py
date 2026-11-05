@@ -4,7 +4,7 @@
 # License:  MIT Licence                                   #
 # ##########################################################
 
-from appGUI.GUIElements import FCFrame, FCLabel, GLay
+from flatcam_plus.appGUI.GUIElements import FCFrame, FCLabel, GLay
 from flatcam_plus.appGUI.preferences.OptionsGroupUI import OptionsGroupUI
 
 import gettext

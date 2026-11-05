@@ -10,7 +10,7 @@
 from PyQt6 import QtWidgets, QtGui, QtCore
 
 from flatcam_plus.appTool import AppTool
-from appGUI.GUIElements import FCLabel, FCButton, FCFrame, GLay, FCDoubleSpinner, RadioSet
+from flatcam_plus.appGUI.GUIElements import FCLabel, FCButton, FCFrame, GLay, FCDoubleSpinner, RadioSet
 
 from copy import deepcopy
 import gettext

@@ -9,7 +9,7 @@
 from flatcam_plus.appEditors.grb_plugins.GrbCommon import DrawToolUtilityShape, DrawToolShape, DrawTool, ShapeToolEditorGrb
 
 from flatcam_plus.camlib import distance, arc, three_point_circle, flatten_shapely_geometry
-from appGUI.GUIElements import *
+from flatcam_plus.appGUI.GUIElements import *
 
 from flatcam_plus.appTool import AppTool
 from flatcam_plus.appEditors.grb_plugins.GrbPadPlugin import PadEditorTool

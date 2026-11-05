@@ -8,7 +8,7 @@ import gettext
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, pyqtSignal
 
-from appGUI.GUIElements import FCComboBox, FCLabel, FCTable
+from flatcam_plus.appGUI.GUIElements import FCComboBox, FCLabel, FCTable
 
 from .machine_profile_editor import MachineProfilesEditor
 from .widgets import FluidStyleButton

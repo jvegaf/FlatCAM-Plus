@@ -1,7 +1,7 @@
 
 from PyQt6 import QtWidgets, QtGui
 from flatcam_plus.appTool import AppToolEditor
-from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, GLay, FCFrame, FCDoubleSpinner, RadioSetCross, \
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, GLay, FCFrame, FCDoubleSpinner, RadioSetCross, \
     RadioSet, NumericalEvalEntry
 
 from shapely import box

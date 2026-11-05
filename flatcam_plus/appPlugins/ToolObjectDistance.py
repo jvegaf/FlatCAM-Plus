@@ -8,7 +8,7 @@
 
 from PyQt6 import QtWidgets, QtCore, QtGui
 from flatcam_plus.appTool import AppTool
-from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCEntry, FCComboBox2
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCEntry, FCComboBox2
 
 import logging
 from copy import deepcopy

@@ -8,7 +8,7 @@
 
 from PyQt6 import QtGui, QtWidgets, QtCore
 from shapely import Polygon, LineString
-from appGUI.PanelStyles import apply_modern_panel_style, apply_modern_sidebar_style
+from flatcam_plus.appGUI.PanelStyles import apply_modern_panel_style, apply_modern_sidebar_style
 
 import gettext
 from . import appTranslation as fcTranslate

@@ -7,7 +7,7 @@ from flatcam_plus.appGUI.preferences.utilities.FAGrbPrefGroupUI import FAGrbPref
 from flatcam_plus.appGUI.preferences.utilities.FAGcoPrefGroupUI import FAGcoPrefGroupUI
 from flatcam_plus.appGUI.preferences.utilities.FAExcPrefGroupUI import FAExcPrefGroupUI
 
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 
 class UtilPreferencesUI(QtWidgets.QWidget):

@@ -11,7 +11,7 @@ import time
 from PyQt6 import QtWidgets, QtGui, QtCore
 from PyQt6.QtCore import Qt
 
-from appGUI.GUIElements import (
+from flatcam_plus.appGUI.GUIElements import (
     FCLabel, FCComboBox, FCSpinner, FCEntry, FCTable, FCDoubleSpinner
 )
 

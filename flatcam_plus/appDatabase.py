@@ -1,8 +1,8 @@
 
 from PyQt6 import QtGui, QtCore, QtWidgets
-from appGUI.GUIElements import FCEntry, FCButton, FCDoubleSpinner, FCComboBox, FCCheckBox, FCSpinner, \
+from flatcam_plus.appGUI.GUIElements import FCEntry, FCButton, FCDoubleSpinner, FCComboBox, FCCheckBox, FCSpinner, \
     FCTree, RadioSet, FCFileSaveDialog, FCLabel, FCComboBox2, GLay
-from appGUI.PanelStyles import apply_modern_panel_style
+from flatcam_plus.appGUI.PanelStyles import apply_modern_panel_style
 from .camlib import to_dict
 
 import sys
@@ -1733,7 +1733,7 @@ class ToolsDB2(QtWidgets.QWidget):
     def storage_to_form(self, dict_storage):
         self.ui_disconnect()
         self.normalize_tool_preset(dict_storage)
-        from appGUI.GUIElements import RadioSet
+        from flatcam_plus.appGUI.GUIElements import RadioSet
         for form_key in self.form_fields:
             for storage_key in dict_storage:
                 if form_key == storage_key:

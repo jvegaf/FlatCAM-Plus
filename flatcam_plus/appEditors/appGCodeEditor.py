@@ -11,7 +11,7 @@ from PyQt6.QtCore import Qt
 
 from flatcam_plus.appEditors.appTextEditor import AppTextEditor
 from flatcam_plus.appObjects.CNCJobObject import CNCJobObject
-from appGUI.GUIElements import FCTextArea, FCEntry, FCButton, FCTable, GLay, FCLabel
+from flatcam_plus.appGUI.GUIElements import FCTextArea, FCEntry, FCButton, FCTable, GLay, FCLabel
 
 # from io import StringIO
 

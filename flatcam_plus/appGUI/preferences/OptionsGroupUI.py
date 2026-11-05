@@ -15,7 +15,7 @@ from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 from flatcam_plus.appGUI.preferences.OptionUI import OptionUI
-from appGUI.GUIElements import GLay
+from flatcam_plus.appGUI.GUIElements import GLay
 
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:

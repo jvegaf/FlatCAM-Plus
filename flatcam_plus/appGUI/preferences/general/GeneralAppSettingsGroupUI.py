@@ -2,7 +2,7 @@
 from PyQt6 import QtCore
 from PyQt6.QtCore import QSettings
 
-from appGUI.GUIElements import OptionalInputSection
+from flatcam_plus.appGUI.GUIElements import OptionalInputSection
 from flatcam_plus.appGUI.preferences.OptionUI import OptionUI, HeadingOptionUI, SeparatorOptionUI, DoubleSpinnerOptionUI, \
     SpinnerOptionUI, CheckboxOptionUI, ComboboxOptionUI, RadioSetOptionUI, ColorOptionUI
 from flatcam_plus.appGUI.preferences.OptionsGroupUI import OptionsGroupUI2

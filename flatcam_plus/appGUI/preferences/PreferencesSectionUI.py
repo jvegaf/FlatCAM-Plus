@@ -2,7 +2,7 @@
 from typing import Dict
 from PyQt6 import QtWidgets
 
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 from flatcam_plus.appGUI.preferences.OptionUI import OptionUI
 from flatcam_plus.appGUI.preferences.OptionsGroupUI import OptionsGroupUI
 

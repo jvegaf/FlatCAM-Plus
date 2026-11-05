@@ -14,7 +14,7 @@ from flatcam_plus.appGUI.preferences.tools.ToolsCutoutPrefGroupUI import ToolsCu
 from flatcam_plus.appGUI.preferences.tools.ToolsDrillPrefGroupUI import ToolsDrillPrefGroupUI
 from flatcam_plus.appGUI.preferences.tools.ToolsMillPrefGroupUI import ToolsMillPrefGroupUI
 
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

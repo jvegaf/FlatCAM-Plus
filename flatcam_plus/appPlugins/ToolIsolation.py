@@ -8,7 +8,7 @@
 
 from PyQt6 import QtWidgets, QtCore, QtGui
 from flatcam_plus.appTool import AppTool
-from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, FCCheckBox, \
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, FCCheckBox, \
     FCComboBox2, RadioSet, FCDoubleSpinner, FCSpinner, FCInputDialogSpinnerButton, FCTable, \
     OptionalInputSection
 
@@ -1041,7 +1041,7 @@ class ToolIsolation(Gerber, AppTool):
             if form_key in dict_storage:
                 try:
                     val = dict_storage[form_key]
-                    from appGUI.GUIElements import RadioSet
+                    from flatcam_plus.appGUI.GUIElements import RadioSet
                     if isinstance(self.form_fields[form_key], RadioSet) and (val == 0 or val == '0'):
                         continue
                     self.form_fields[form_key].set_value(val)
@@ -1054,7 +1054,7 @@ class ToolIsolation(Gerber, AppTool):
             if flat_key in dict_storage:
                 try:
                     val = dict_storage[flat_key]
-                    from appGUI.GUIElements import RadioSet
+                    from flatcam_plus.appGUI.GUIElements import RadioSet
                     if isinstance(self.form_fields[form_key], RadioSet) and (val == 0 or val == '0'):
                         continue
                     self.form_fields[form_key].set_value(val)

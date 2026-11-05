@@ -7,7 +7,7 @@ from flatcam_plus.appGUI.preferences.tools.ToolsNCCPrefGroupUI import ToolsNCCPr
 from flatcam_plus.appGUI.preferences.tools.ToolsPaintPrefGroupUI import ToolsPaintPrefGroupUI
 from flatcam_plus.appGUI.preferences.tools.ToolsISOPrefGroupUI import ToolsISOPrefGroupUI
 
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

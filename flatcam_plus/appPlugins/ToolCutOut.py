@@ -8,7 +8,7 @@
 
 from PyQt6 import QtWidgets, QtGui, QtCore
 from flatcam_plus.appTool import AppTool
-from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, RadioSet, \
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, RadioSet, \
     FCDoubleSpinner, FCComboBox2, OptionalInputSection, FCCheckBox
 from flatcam_plus.camlib import flatten_shapely_geometry
 

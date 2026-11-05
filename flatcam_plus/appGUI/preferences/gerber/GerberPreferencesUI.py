@@ -7,7 +7,7 @@ from flatcam_plus.appGUI.preferences.gerber.GerberAdvOptPrefGroupUI import Gerbe
 from flatcam_plus.appGUI.preferences.gerber.GerberOptPrefGroupUI import GerberOptPrefGroupUI
 from flatcam_plus.appGUI.preferences.gerber.GerberGenPrefGroupUI import GerberGenPrefGroupUI
 
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

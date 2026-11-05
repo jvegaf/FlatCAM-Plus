@@ -5,7 +5,7 @@ from flatcam_plus.appGUI.preferences.general.GeneralAppPrefGroupUI import Genera
 from flatcam_plus.appGUI.preferences.general.GeneralAPPSetGroupUI import GeneralAPPSetGroupUI
 from flatcam_plus.appGUI.preferences.general.GeneralGUIPrefGroupUI import GeneralGUIPrefGroupUI
 
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

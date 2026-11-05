@@ -17,8 +17,8 @@ import platform
 from flatcam_plus.version import APP_NAME
 from flatcam_plus.appCommon.recent_projects import load_recent_project_paths
 
-from appGUI.GUIElements import *
-from appGUI.PanelStyles import (
+from flatcam_plus.appGUI.GUIElements import *
+from flatcam_plus.appGUI.PanelStyles import (
     apply_modern_main_workspace_style, apply_modern_preferences_style, apply_modern_sidebar_style
 )
 

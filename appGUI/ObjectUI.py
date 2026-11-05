@@ -11,7 +11,7 @@
 # Date: 3/10/2019                                          #
 # ##########################################################
 
-from appGUI.GUIElements import *
+from flatcam_plus.appGUI.GUIElements import *
 import sys
 
 import gettext

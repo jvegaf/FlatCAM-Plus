@@ -2,7 +2,7 @@
 from PyQt6 import QtWidgets, QtGui
 from PyQt6.QtCore import QSettings
 
-from appGUI.GUIElements import VerticalScrollArea, FCButton, FCTextArea, FCEntry, FCLabel
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, FCButton, FCTextArea, FCEntry, FCLabel
 from flatcam_plus.appGUI.preferences.OptionsGroupUI import OptionsGroupUI
 
 import gettext

@@ -14,7 +14,7 @@ from PyQt6 import QtCore, QtWidgets
 
 from flatcam_plus.appEditors.appTextEditor import AppTextEditor
 from flatcam_plus.appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted
-from appGUI.GUIElements import FCFileSaveDialog, FCCheckBox
+from flatcam_plus.appGUI.GUIElements import FCFileSaveDialog, FCCheckBox
 from appGUI.ObjectUI import CNCObjectUI
 from flatcam_plus.camlib import CNCjob
 

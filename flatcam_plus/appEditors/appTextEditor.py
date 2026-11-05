@@ -7,7 +7,7 @@
 # ##########################################################
 
 from PyQt6 import QtPrintSupport, QtWidgets, QtCore, QtGui
-from appGUI.GUIElements import FCFileSaveDialog, FCEntry, FCTextAreaExtended, FCTextAreaLineNumber, FCButton, \
+from flatcam_plus.appGUI.GUIElements import FCFileSaveDialog, FCEntry, FCTextAreaExtended, FCTextAreaLineNumber, FCButton, \
     FCCheckBox, FCMessageBox
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph

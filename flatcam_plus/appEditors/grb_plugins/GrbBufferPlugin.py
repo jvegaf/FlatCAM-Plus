@@ -2,7 +2,7 @@
 from PyQt6 import QtWidgets
 from flatcam_plus.appTool import AppToolEditor
 from flatcam_plus.appEditors.grb_plugins.GrbCommon import DrawToolShape
-from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCDoubleSpinner, FCComboBox
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCDoubleSpinner, FCComboBox
 
 from copy import deepcopy
 import traceback

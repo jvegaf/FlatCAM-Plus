@@ -3,7 +3,7 @@ from typing import Union, Sequence, List
 from PyQt6 import QtWidgets, QtGui
 from PyQt6.QtCore import QSettings
 
-from appGUI.GUIElements import RadioSet, FCCheckBox, FCButton, FCComboBox, FCEntry, FCSpinner, FCColorEntry, \
+from flatcam_plus.appGUI.GUIElements import RadioSet, FCCheckBox, FCButton, FCComboBox, FCEntry, FCSpinner, FCColorEntry, \
     FCSliderWithSpinner, FCDoubleSpinner, FloatEntry, FCTextArea, FCLabel, GLay
 
 import gettext

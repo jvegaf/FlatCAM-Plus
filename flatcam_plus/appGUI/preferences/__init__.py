@@ -1,4 +1,4 @@
-from appGUI.GUIElements import *
+from flatcam_plus.appGUI.GUIElements import *
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

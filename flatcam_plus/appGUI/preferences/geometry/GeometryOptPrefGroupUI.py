@@ -2,7 +2,7 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 
-from appGUI.GUIElements import FCDoubleSpinner, FCLabel, GLay, FCFrame
+from flatcam_plus.appGUI.GUIElements import FCDoubleSpinner, FCLabel, GLay, FCFrame
 from flatcam_plus.appGUI.preferences.OptionsGroupUI import OptionsGroupUI
 
 import gettext

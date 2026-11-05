@@ -7,7 +7,7 @@ import gettext
 
 from PyQt6 import QtWidgets
 
-from appGUI.GUIElements import FCLabel
+from flatcam_plus.appGUI.GUIElements import FCLabel
 
 from flatcam_plus import appTranslation as fcTranslate
 

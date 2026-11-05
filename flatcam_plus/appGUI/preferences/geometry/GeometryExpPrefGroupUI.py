@@ -1,7 +1,7 @@
 
 from PyQt6 import QtWidgets, QtCore
 
-from appGUI.GUIElements import FCLabel, FCComboBox, GLay, FCFrame, FCCheckBox
+from flatcam_plus.appGUI.GUIElements import FCLabel, FCComboBox, GLay, FCFrame, FCCheckBox
 from flatcam_plus.appGUI.preferences.OptionsGroupUI import OptionsGroupUI
 
 import gettext

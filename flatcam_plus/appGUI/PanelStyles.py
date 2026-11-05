@@ -60,7 +60,7 @@ def _normalize_preference_label_colors(widget):
         return
 
     try:
-        from appGUI.GUIElements import FCLabel
+        from flatcam_plus.appGUI.GUIElements import FCLabel
     except ImportError:
         return
 
@@ -728,7 +728,7 @@ def apply_modern_panel_style(widget, app=None):
     widget.style().polish(widget)
 
     try:
-        from appGUI.GUIElements import FCFrame
+        from flatcam_plus.appGUI.GUIElements import FCFrame
     except ImportError:
         FCFrame = None
 

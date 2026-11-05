@@ -7,7 +7,7 @@ from flatcam_plus.appGUI.preferences.geometry.GeometryExpPrefGroupUI import Geom
 from flatcam_plus.appGUI.preferences.geometry.GeometryOptPrefGroupUI import GeometryOptPrefGroupUI
 from flatcam_plus.appGUI.preferences.geometry.GeometryGenPrefGroupUI import GeometryGenPrefGroupUI
 
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate

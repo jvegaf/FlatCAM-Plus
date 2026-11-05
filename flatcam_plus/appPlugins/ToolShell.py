@@ -11,7 +11,7 @@ from PyQt6.QtCore import QSettings
 from PyQt6.QtGui import QTextCursor, QPixmap
 from PyQt6.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout
 
-from appGUI.GUIElements import _BrowserTextEdit, _ExpandableTextEdit, FCLabel
+from flatcam_plus.appGUI.GUIElements import _BrowserTextEdit, _ExpandableTextEdit, FCLabel
 
 import html
 import sys

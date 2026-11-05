@@ -12,7 +12,7 @@ import threading
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtCore import pyqtSignal
 
-from appGUI.GUIElements import VerticalScrollArea
+from flatcam_plus.appGUI.GUIElements import VerticalScrollArea
 from flatcam_plus.appTool import AppTool
 from flatcam_plus.appPlugins.ai_assistant.dialogs import AIAssistantSettingsDialog
 from flatcam_plus.appPlugins.ai_assistant.providers import default_settings, provider_spec, request_completion, test_connection

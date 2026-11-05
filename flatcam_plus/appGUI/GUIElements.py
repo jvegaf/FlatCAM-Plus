@@ -15,7 +15,7 @@ from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal, QDate, QDateTime
 from PyQt6.QtWidgets import QTextEdit, QCompleter
 from PyQt6.QtGui import QKeySequence, QTextCursor, QAction
-from appGUI.PanelStyles import modern_panel_frame_stylesheet
+from flatcam_plus.appGUI.PanelStyles import modern_panel_frame_stylesheet
 
 from copy import copy
 import re

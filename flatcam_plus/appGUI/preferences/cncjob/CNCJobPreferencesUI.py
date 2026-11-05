@@ -7,7 +7,7 @@ from flatcam_plus.appGUI.preferences.cncjob.CNCJobGenPrefGroupUI import CNCJobGe
 from flatcam_plus.appGUI.preferences.cncjob.CNCJobEditorPrefGroupUI import CNCJobEditorPrefGroupUI
 from flatcam_plus.appGUI.preferences.cncjob.CNCJobPPGroupUI import CNCJobPPGroupUI
 
-from appGUI.ColumnarFlowLayout import ColumnarFlowLayout
+from flatcam_plus.appGUI.ColumnarFlowLayout import ColumnarFlowLayout
 
 
 class CNCJobPreferencesUI(QtWidgets.QWidget):
