@@ -213,7 +213,9 @@ build_app() {
         --workpath "$ROOT_DIR/build/pyinstaller/macos"
         --specpath "$ROOT_DIR/build/pyinstaller/macos"
         --osx-bundle-identifier "com.flatcamplus.app"
-        --add-data "$ROOT_DIR/pyproject.toml:pyproject.toml"
+        # PyInstaller 6 treats the destination as a directory and appends the basename,
+        # so a file is placed with "." as its destination.
+        --add-data "$ROOT_DIR/pyproject.toml:."
         --add-data "$ROOT_DIR/assets:assets"
         --add-data "$ROOT_DIR/config:config"
         --add-data "$ROOT_DIR/locale:locale"
