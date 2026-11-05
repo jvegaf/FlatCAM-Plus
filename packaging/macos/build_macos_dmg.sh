@@ -213,11 +213,11 @@ build_app() {
         --workpath "$ROOT_DIR/build/pyinstaller/macos"
         --specpath "$ROOT_DIR/build/pyinstaller/macos"
         --osx-bundle-identifier "com.flatcamplus.app"
-        --add-data "pyproject.toml:pyproject.toml"
-        --add-data "assets:assets"
-        --add-data "config:config"
-        --add-data "locale:locale"
-        --add-data "preprocessors:preprocessors"
+        --add-data "$ROOT_DIR/pyproject.toml:pyproject.toml"
+        --add-data "$ROOT_DIR/assets:assets"
+        --add-data "$ROOT_DIR/config:config"
+        --add-data "$ROOT_DIR/locale:locale"
+        --add-data "$ROOT_DIR/preprocessors:preprocessors"
         # ``libs`` is not shipped as data: it is a subpackage of ``flatcam_plus``, so
         # ``--collect-submodules flatcam_plus`` below already collects it as code.
         --collect-submodules flatcam_plus

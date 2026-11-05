@@ -55,5 +55,4 @@ svgtrace>=2023.0.1
 darkdetect>=0.8.0
 
 # Native dependencies: platform-specific wheels required
-gdal>=3.13.3
 rasterio>=1.5.2

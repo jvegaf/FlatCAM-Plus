@@ -85,16 +85,21 @@ jobs:
       - name: Build the bundle against the old glibc
         run: |
           set -euo pipefail
+          # The interpreter this image ships is built without --enable-shared and PyInstaller
+          # refuses it, so the build asks uv for a managed CPython (standalone, shared library).
           docker run --rm \
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
+            -e UV_PYTHON_PREFERENCE=only-managed \
             -v "$PWD:/work" -w /work "${MANYLINUX_IMAGE}" /bin/bash -lc '
             set -euo pipefail
             curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/tmp/uv sh
             export PATH="/tmp/uv:$PATH"
+            uv python install 3.14
             uv sync --frozen
             # python3 in this image is not the project interpreter: the build script must be told.
             export PYTHON_BIN="$PWD/.venv/bin/python"
+            "$PYTHON_BIN" -c "import sysconfig; assert sysconfig.get_config_var(\"Py_ENABLE_SHARED\"), \"not bundleable\""
             bash packaging/linux/build_linux_portable.sh
           '
 

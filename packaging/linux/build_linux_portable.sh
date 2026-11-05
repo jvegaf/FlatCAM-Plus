@@ -188,11 +188,11 @@ build_portable() {
         --workpath "$ROOT_DIR/build/pyinstaller/linux"
         --specpath "$ROOT_DIR/build/pyinstaller/linux"
         --icon "$ROOT_DIR/assets/resources/app256.png"
-        --add-data "pyproject.toml:pyproject.toml"
-        --add-data "assets:assets"
-        --add-data "config:config"
-        --add-data "locale:locale"
-        --add-data "preprocessors:preprocessors"
+        --add-data "$ROOT_DIR/pyproject.toml:pyproject.toml"
+        --add-data "$ROOT_DIR/assets:assets"
+        --add-data "$ROOT_DIR/config:config"
+        --add-data "$ROOT_DIR/locale:locale"
+        --add-data "$ROOT_DIR/preprocessors:preprocessors"
         # ``libs`` is not shipped as data: it is a subpackage of ``flatcam_plus``, so
         # ``--collect-submodules flatcam_plus`` below already collects it as code.
         --collect-submodules flatcam_plus
@@ -219,7 +219,21 @@ build_portable() {
         exit 1
     fi
 
+    prune_system_libraries
     write_desktop_launcher
+}
+
+prune_system_libraries() {
+    # PyInstaller copies libgcc_s from the build host, and that copy pins the whole bundle to a
+    # newer glibc than the target distributions have: on a manylinux_2_34 base it was the only
+    # file asking for GLIBC_2.35. Every glibc system already provides this library, and the
+    # loader finds it, so shipping it only raises the floor. check_glibc_floor.py verifies the
+    # result is under the promised one.
+    local candidate
+    while IFS= read -r candidate; do
+        echo "[INFO] Pruning host library: ${candidate#"$APP_DIR"/}"
+        rm -f "$candidate"
+    done < <(find "$APP_DIR" -name 'libgcc_s.so*' -type f)
 }
 
 create_archive() {
