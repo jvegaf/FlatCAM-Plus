@@ -300,7 +300,19 @@ The package installs the bundle under `/opt/flatcam-plus` and puts a launcher at
 
 **The bundle must be built against an old glibc.** glibc is forward-compatible only, so a bundle built on a recent distribution starts there and fails on older ones. `packaging/linux/check_glibc_floor.py` reads the bundle's own symbol requirements and fails when they exceed the declared floor (2.28 by default: the tag every native wheel in `uv.lock` requires, and the glibc of RHEL/Alma/Rocky 9). The release workflow builds inside `quay.io/pypa/manylinux_2_28_x86_64` for that reason, and packaging on a modern host would silently raise the floor.
 
-`.github/workflows/release.yml` runs this on a `v*` tag: it refuses a tag that disagrees with `pyproject.toml`, builds the bundle in the manylinux container, packages deb and rpm on the runner, builds the Windows installer, and publishes the artifacts.
+`.github/workflows/release.yml` runs this on a `v*` tag: it refuses a tag that disagrees with `pyproject.toml`, builds the bundle in the manylinux container, packages deb and rpm on the runner, builds the Windows installer, builds the Flatpak, and publishes the artifacts.
+
+### Flatpak
+
+The release also carries a `.flatpak` bundle built from `packaging/flatpak/`:
+
+```bash
+packaging/flatpak/build_flatpak.sh --skip-bundle   # bundles an existing dist/linux/FlatCAM-Plus
+```
+
+It wraps the same PyInstaller payload as the packages above, so there is one bundle to build and three formats to publish. The manifest asks for X11 through XWayland (`--socket=fallback-x11`, `QT_QPA_PLATFORM=xcb`) because the bundled Qt ships no Wayland plugin, and it points the same launcher at the sandbox path with `--env=FLATCAM_PLUS_HOME=/app/lib/flatcam-plus`.
+
+This is **not** a Flathub submission. Flathub forbids shipping a prebuilt binary payload, so publishing there would mean building PyQt6 and the application against `org.kde.Sdk` as real modules; the self-hosted bundle is unsigned and installs with `flatpak install --user FlatCAMPlus-<version>-linux-x86_64.flatpak`. Application state lands in `~/.var/app/io.github.thebestgoodguy.FlatCAMPlus/`, which the sandbox owns, so the hardcoded `~/.FlatCAM` directory keeps working and persists.
 
 ## Packaging Notes
 

@@ -1,0 +1,44 @@
+# Flatpak manifest for the self-hosted bundle published in the GitHub release.
+#
+# This is not a Flathub submission: Flathub forbids shipping a prebuilt binary payload, which is
+# exactly what a PyInstaller bundle is. The runtime supplies Qt for the desktop integration, while
+# the payload carries its own Qt for the application, so the session plugin comes from the payload
+# and the platform is pinned to xcb on purpose.
+app-id: io.github.thebestgoodguy.FlatCAMPlus
+runtime: org.kde.Platform
+runtime-version: "6.9"
+sdk: org.kde.Sdk
+command: flatcam-plus
+
+finish-args:
+  # X11 through XWayland while the bundled Qt ships no Wayland plugin.
+  - --socket=fallback-x11
+  - --share=ipc
+  - --env=QT_QPA_PLATFORM=xcb
+  - --device=dri
+  - --talk-name=org.freedesktop.Notifications
+  # The same launcher the deb and the rpm install, pointed at the sandbox path.
+  - --env=FLATCAM_PLUS_HOME=/app/lib/flatcam-plus
+
+modules:
+  - name: flatcam-plus
+    buildsystem: simple
+    build-commands:
+      - install -d /app/lib/flatcam-plus
+      - cp -a payload/FlatCAM-Plus/. /app/lib/flatcam-plus/
+      - install -Dm755 flatcam-plus.sh /app/bin/flatcam-plus
+      - install -Dm644 flatcam-plus.desktop /app/share/applications/flatcam-plus.desktop
+      - install -Dm644 app256.png /app/share/icons/hicolor/256x256/apps/flatcam-plus.png
+      - install -Dm644 flatcam-plus.metainfo.xml /app/share/metainfo/flatcam-plus.metainfo.xml
+    sources:
+      - type: dir
+        path: ../../dist/linux
+        dest: payload
+      - type: file
+        path: ../linux/flatcam-plus.sh
+      - type: file
+        path: ../linux/flatcam-plus.desktop
+      - type: file
+        path: ../linux/flatcam-plus.metainfo.xml
+      - type: file
+        path: ../../assets/resources/app256.png

@@ -98,6 +98,7 @@ jobs:
           path: |
             dist/installer/*.deb
             dist/installer/*.rpm
+            dist/installer/*.tar.gz
           if-no-files-found: error
 
   windows-installer:
@@ -121,8 +122,46 @@ jobs:
           path: dist/installer/*.exe
           if-no-files-found: error
 
+  flatpak:
+    needs: [linux-packages, meta]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-packages
+          path: dist/installer
+
+      - name: Install flatpak-builder and the runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub \
+            https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user --noninteractive --yes flathub \
+            org.kde.Platform//6.9 org.kde.Sdk//6.9
+
+      # The Flatpak wraps the same PyInstaller bundle as the deb and the rpm, so it reuses the
+      # artifact instead of building a second one.
+      - name: Build the Flatpak from the released bundle
+        run: |
+          set -euo pipefail
+          mkdir -p dist/linux
+          tar -C dist/linux -xzf dist/installer/FlatCAMPlus-*-linux-*.tar.gz
+          bash packaging/flatpak/build_flatpak.sh --skip-bundle
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak
+          path: dist/installer/*.flatpak
+          if-no-files-found: error
+
   publish:
-    needs: [linux-packages, windows-installer, meta]
+    needs: [linux-packages, windows-installer, flatpak, meta]
     runs-on: ubuntu-24.04
     # A workflow_dispatch can run from a branch; publishing is tag-only, whatever triggered the run.
     if: startsWith(github.ref, 'refs/tags/v')
