@@ -11,14 +11,14 @@ metadata:
 
 ## Activation Contract
 
-Load when adding or changing a tool/plugin under `flatcam_plus/appPlugins/`, its menu action, its panel, or its registration in `appMain.py`.
+Load when adding or changing a tool/plugin under `flatcam_plus/appPlugins/`, its menu action, its panel, or its registration in `flatcam_plus/appMain.py`.
 
 ## Hard Rules
 
 - Subclass `AppTool` for panels; subclass `AppToolEditor` for editing tools. Import from `flatcam_plus.appTool`.
 - Keep the tool class and its `...UI` class in one `flatcam_plus/appPlugins/Tool<Name>.py` file. Build the UI on `self.layout` using widgets from `flatcam_plus.appGUI.GUIElements`.
 - Override `install()` and call `AppTool.install(self, icon, separator, shortcut=..., **kwargs)`; pass menu placement through `pos=`, `before=`, `separator=`, `icon=`, `shortcut=`.
-- Register the instance in BOTH `App.install_tools` (instantiate + `install()`) and the `self.app_plugins` list in `appMain.py`. `App.init_tools` rebuilds tools after layout changes by calling `install_tools`.
+- Register the instance in BOTH `App.install_tools` (instantiate + `install()`) and the `self.app_plugins` list in `flatcam_plus/appMain.py`. `App.init_tools` rebuilds tools after layout changes by calling `install_tools`.
 - Persist user-editable values as `tools_<tool>_*` keys in `flatcam_plus/defaults.py`; read them via `self.app.options[...]`. Use `self.default_data` for per-job parameters.
 - Report to the user with `self.app.inform.emit(...)` using `[success]`, `[warning]`, or `[ERROR]` prefixes; log with `self.app.log`.
 - Never run heavy geometry or file work in a UI slot; dispatch through `self.app.worker_task` or `FCProcess`.
@@ -49,5 +49,5 @@ Report: new or edited files, class names, menu placement, defaults added, regist
 
 - `flatcam_plus/appTool.py` — `AppTool` and `AppToolEditor` contracts.
 - `flatcam_plus/appPlugins/ToolDistance.py` — minimal panel plus UI example.
-- `appMain.py` — `install_tools` registration and `app_plugins` list.
+- `flatcam_plus/appMain.py` — `install_tools` registration and `app_plugins` list.
 - `flatcam_plus/defaults.py` — option key naming.

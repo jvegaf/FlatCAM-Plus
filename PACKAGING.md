@@ -65,8 +65,8 @@ For both GitHub release installers, prepare a 64-bit Python environment and a 32
 If both Python launchers are registered, install PyInstaller in each environment:
 
 ```powershell
-py -3.11-64 -m pip install pyinstaller
-py -3.11-32 -m pip install pyinstaller
+py -3.14-64 -m pip install pyinstaller
+py -3.11-32 -m pip install pyinstaller   # 32-bit stays on 3.11: CPython publishes no 32-bit 3.14
 ```
 
 Then build each installer from its own batch file:

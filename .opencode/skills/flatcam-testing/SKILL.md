@@ -17,9 +17,9 @@ Load when running tests, adding a regression test, or verifying a change in this
 
 - Run tests with `uv run --with pytest pytest tests -q`. `pytest` is NOT a project dependency; never assume it is installed.
 - Run one file with `uv run --with pytest pytest tests/test_<name>.py -v`.
-- `python flatcam.py` requires a real display. Do not assume or invent headless support; gate display-dependent checks or leave them as manual smoke tests.
+- Launching `python flatcam.py` interactively requires a real display. The suite itself is headless: `tests/conftest.py` sets `QT_QPA_PLATFORM=offscreen` and provides the session-scoped `fc_app` fixture, which boots the real application under a throwaway `HOME`. Do not invent other headless flags; if a check needs a display, gate it or keep it manual.
+- CI exists at `.github/workflows/tests.yml` (`uv sync --frozen` plus the suite). There is no linter, formatter, or type-check configuration. Do not invent those commands or claim they pass.
 - Importing `flatcam_plus.appPlugins`/`flatcam_plus.appObjects` pulls in PyQt6 and a live `App`. Keep pure logic in importable functions and test those; the existing `tests/test_classify_contours.py` deliberately duplicates logic for this reason.
-- There is no CI, linter, formatter, or type-check configuration. Do not invent commands or claim they pass.
 - Put scratch state outside the worktree in a `mktemp -d` directory; remove it after use.
 - Verify behavior changes with a focused test first, then the full suite once.
 - Follow ODD's test-first policy: observe RED before implementation, then GREEN, then refactor. Never invent or assume test evidence.
