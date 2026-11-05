@@ -228,3 +228,25 @@ every commit, that it still runs from a bundle is not.
   layout guard, and by the parent on the combined tree (190 tests, the boot test, the Tcl registry
   test). Whether to spend eight more review transactions on them is the human's call, and it is the
   only outstanding question this feature leaves.
+- **L15 — The eight slices reviewed one by one, seven approved and the last one pending**: because a
+  native review always compares base..HEAD of the *current worktree*, each slice had to be reviewed
+  with its own tip checked out (detached), in order. Seven of the eight closed **approved** with no
+  severe finding, so no slice needed a refuter or a correction; the advisories are all
+  informational and none was fixed, because every one of them points at the task document or at a
+  test threshold rather than at code: T1 `review-59bee28f11872d09` (R2-001, this document's S2
+  block), T2 `review-0306909096bf363e` (none), T3 `review-6e8a2da0caf5d695` (R2-001, this
+  document's T3 line), T4 `review-fdf7f1b887f70ad7` (R2-001, this document's T4 line), T5
+  `review-671d7a047c3f0281` (none), T6 `review-8fd6d486289a04b3` (R2-001 the `try/except ImportError`
+  block in `appPlugins/__init__.py`, R2-002 this document's T6 line) and T7
+  `review-0f5b918982c5ea47` (R2-001 and R3-001 on `tests/test_tcl_registry.py:35`, the `>= 100`
+  lower bound, and R2-002 on the guard entries). **T8 (`appGUI`, base `d5ba3f0`, 268 changed paths)
+  was not reviewed**: the session reached its context budget before the transaction, and a
+  half-run review would have left the authority `reviewing` instead of closing it. Run it in a
+  fresh session with `git checkout 48bb3c8` and START on `d5ba3f0c7c2116412361dc8339a0f72316dae349`,
+  the same way the other seven ran; then `git checkout dev`.
+- **L16 — A guard artefact worth fixing**: `tests/test_package_layout.py`'s
+  `test_no_root_copy_of_the_app_package_is_left_behind` asserts the root directory is gone, and a
+  `git checkout` back to an older commit leaves the moved directory behind as soon as it holds
+  nothing but an ignored `__pycache__`. That false failure hit four of the eight checkouts and had
+  to be cleared by hand with `rm -rf <package>` before the suite was green. The assertion should
+  ignore a directory that contains no tracked file, which is a one-test change.
