@@ -24,6 +24,15 @@ if '_' not in builtins.__dict__:
     _ = gettext.gettext
 
 
+def should_self_update():
+    """A frozen build was installed by a package manager, and that manager owns its files.
+
+    PyInstaller sets ``sys.frozen`` inside a bundle. Updating there would write into ``/opt`` and
+    leave the package database describing a version that is no longer on disk.
+    """
+    return not getattr(sys, "frozen", False)
+
+
 class UpdateDialog(QtWidgets.QDialog):
     def __init__(self, update_info, parent=None):
         super().__init__(parent=parent)

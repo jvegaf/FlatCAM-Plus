@@ -70,7 +70,7 @@ from flatcam_plus.appGUI.themes import dark_style_sheet, light_style_sheet
 from flatcam_plus.appCommon.Common import color_variant
 from flatcam_plus.appCommon.Common import ExclusionAreas
 from flatcam_plus.appCommon.Common import AppLogging
-from flatcam_plus.appCommon.AutoUpdater import AutoUpdater
+from flatcam_plus.appCommon.AutoUpdater import AutoUpdater, should_self_update
 from flatcam_plus.appCommon.RegisterFileKeywords import RegisterFK, Extensions, KeyWords
 
 from flatcam_plus.appHandlers.appIO import appIO
@@ -153,13 +153,15 @@ class App(QtCore.QObject):
 
     cmd_line_help = "FlatCam.py --shellfile=<cmd_line_shellfile>\n" \
                     "FlatCam.py --shellvar=<1,'C:\\path',23>\n" \
-                    "FlatCam.py --headless=1"
+                    "FlatCam.py --headless=1\n" \
+                    "FlatCam.py --version"
     try:
         # Multiprocessing pool will spawn additional processes with 'multiprocessing-fork' flag
-        cmd_line_options, args = getopt.getopt(sys.argv[1:], "h:", ["shellfile=",
+        cmd_line_options, args = getopt.getopt(sys.argv[1:], "h", ["shellfile=",
                                                                     "shellvar=",
                                                                     "headless=",
-                                                                    "multiprocessing-fork="])
+                                                                    "multiprocessing-fork=",
+                                                                    "version"])
     except getopt.GetoptError:
         print(cmd_line_help)
         sys.exit(2)
@@ -167,6 +169,9 @@ class App(QtCore.QObject):
     for opt, arg in cmd_line_options:
         if opt == '-h':
             print(cmd_line_help)
+            sys.exit()
+        elif opt == '--version':
+            print("FlatCAM Plus {} ({})".format(APP_VERSION, APP_VERSION_DATE))
             sys.exit()
         elif opt == '--shellfile':
             cmd_line_shellfile = arg
@@ -979,7 +984,7 @@ class App(QtCore.QObject):
 
         self.worker_task.connect(self.workers.add_task)
         self.log.debug("Finished creating Workers crew.")
-        self.auto_updater = AutoUpdater(self)
+        self.auto_updater = AutoUpdater(self) if should_self_update() else None
 
         # ###########################################################################################################
         # ############################################# Activity Monitor ############################################
@@ -7276,6 +7281,11 @@ class App(QtCore.QObject):
         :return: None
         """
         self.log.debug("version_check()")
+        if self.auto_updater is None:
+            self.inform.emit(
+                "[warning] This build is installed and updated by its package manager."
+            )
+            return
         self.auto_updater.check_for_updates(silent=False)
 
     def on_plotcanvas_setup(self):
