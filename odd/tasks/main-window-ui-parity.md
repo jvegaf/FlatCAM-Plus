@@ -205,3 +205,38 @@ the last commit and discarded the uncommitted slice A edits. They were re-applie
 nothing was lost, but the correct order is to commit the unit before sabotaging it. Slice B must not
 repeat this.
 
+
+## T3 slice B: what the object model already gives us
+
+Discovery changed the plan: **each object class already owns `convert_units(units)`** and does its own
+bookkeeping, so project conversion reuses it instead of reimplementing a per-type traversal.
+
+| Type | Entry point | What it converts |
+| --- | --- | --- |
+| Gerber | `GerberObject.py:887` -> `ParseGerber.py:1954` | `solid_geometry`, `follow_geometry`, per-aperture `geometry` plus `width/height/diam/size`, `file_units_factor` |
+| Excellon | `ExcellonObject.py:1193` -> `ParseExcellon.py:1168` | each tool's `drills`/`slots`/`solid_geometry`, **plus `tooldia`** (`scale()` alone does not), then `create_geometry()`, Z/feed options and `toolchangexy` |
+| Geometry | `GeometryObject.py:1378` -> `camlib.py:2281` | `solid_geometry` (and per-tool geometry when multigeo), then `cutz/depthperpass/travelz/feedrate*/endz/toolchangez` |
+| CNCJob | `CNCJobObject.py:1515` -> `camlib.py:2914` | Z/feed/rapid/tooldia, `xy_toolchange`, `xy_end`, and the `tools_mill_*`/`tools_drill_*` options |
+
+Post-mutation sequence, taken from `ToolMove.move_handler` (`ToolMove.py:204-254`): `replotApertures` for
+Gerber, then recompute `obj_options['xmin'/'ymin'/'xmax'/'ymax']` from `bounds()`, then `replot_signal`,
+then `inform`; `AppObject.on_object_changed` (`:383-407`) also sets `should_we_save`.
+
+### The two hazards
+
+**A silent refusal.** `Gerber.convert_units` returns early when `self.conversion_done` is set, i.e. when
+the file declared its own units. One object can therefore refuse while the rest convert, leaving a
+project half in millimetres while the application reports inches. `units.convert_objects` now
+fingerprints each object's geometry around the call and rolls everything back on the first refusal.
+
+**CNCJob keeps no source.** It stores generated G-code as text (`self.gcode`, and per tool for multitool
+jobs), with no reference to the object that produced it — only `obj_options['type']` as a string. Its
+`scale` rewrites that text by regex (`camlib.py:7620-7637`) using the configured decimals, so the rewrite
+is formatting-bound and lossy. Regeneration is only possible from the producing tool plugin, which is not
+reachable from the object's stored state.
+
+**Open product decision:** when the units change, does an existing CNCJob have its G-code text rewritten,
+or is it marked stale so the user regenerates it? The conservative answer (never rewrite generated text)
+would skip CNCJobs and report them, which is a behaviour change the user must choose. Wiring the UI waits
+on that.
+
