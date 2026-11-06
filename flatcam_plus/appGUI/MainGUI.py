@@ -1106,6 +1106,52 @@ class MainGUI(QtWidgets.QMainWindow):
         self.toolbar_center_widget = None
         self.toolbar_center_layout = None
 
+    def add_shell_tab(self, widget, label):
+        """Put a widget in the bottom dock's tab bar, replacing any tab with the same label.
+
+        The Tcl shell registers itself from its own constructor and is reinitialized when the
+        Tcl tool is reopened, so this has to be idempotent: otherwise every reinit would leave
+        another stale shell behind in the tab bar.
+        """
+        target = None
+        for index in range(self.shell_tabs.count()):
+            if self.shell_tabs.tabText(index) == label:
+                target = index
+                break
+
+        if target is None:
+            target = self.shell_tabs.addTab(widget, label)
+        else:
+            stale = self.shell_tabs.widget(target)
+            self.shell_tabs.removeTab(target)
+            self.shell_tabs.insertTab(target, widget, label)
+            if stale is not None and stale is not widget:
+                stale.deleteLater()
+
+        self.shell_tabs.setCurrentIndex(target)
+        return target
+
+    def shell_terminal(self):
+        """The terminal widget to focus, wherever the tabs currently put it.
+
+        The dock no longer holds the shell directly, so the old ``shell_dock.widget()._edit``
+        assumption no longer holds; this finds the shell among the tabs instead.
+        """
+        current = self.shell_tabs.currentWidget()
+        if current is not None and hasattr(current, "_edit"):
+            return current
+
+        for index in range(self.shell_tabs.count()):
+            candidate = self.shell_tabs.widget(index)
+            if hasattr(candidate, "_edit"):
+                return candidate
+        return None
+
+    def shell_focus_terminal(self):
+        terminal = self.shell_terminal()
+        if terminal is not None:
+            terminal._edit.setFocus()
+
     def _toolbar_label_style(self, compact=False):
         """The button style a command toolbar should use, read from the saved preference.
 
@@ -3035,6 +3081,13 @@ class MainGUI(QtWidgets.QMainWindow):
                                     QtWidgets.QDockWidget.DockWidgetFeature.DockWidgetFloatable |
                                     QtWidgets.QDockWidget.DockWidgetFeature.DockWidgetClosable)
         self.addDockWidget(QtCore.Qt.DockWidgetArea.BottomDockWidgetArea, self.shell_dock)
+
+        # The dock hosts a tab bar rather than one widget, so the Tcl shell, the log and any
+        # console a plugin contributes share the same bottom area instead of competing for it.
+        self.shell_tabs = QtWidgets.QTabWidget()
+        self.shell_tabs.setObjectName("shell_tabs")
+        self.shell_tabs.setDocumentMode(True)
+        self.shell_dock.setWidget(self.shell_tabs)
         self.shell_dock.hide()
 
         # ########################################################################
@@ -4721,7 +4774,7 @@ class MainGUI(QtWidgets.QMainWindow):
 
             # I want to take the focus and give it to the Tcl Shell when the Tcl Shell is run
             # self.shell._edit.setFocus()
-            QtCore.QTimer.singleShot(0, lambda: self.shell_dock.widget()._edit.setFocus())
+            QtCore.QTimer.singleShot(0, self.shell_focus_terminal)
 
             # HACK - simulate a mouse click - alternative
             # no_km = QtCore.Qt.KeyboardModifier(QtCore.Qt.KeyboardModifier.NoModifier)    # no KB modifier

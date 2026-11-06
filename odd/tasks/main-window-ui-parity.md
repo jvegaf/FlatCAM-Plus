@@ -85,3 +85,24 @@ because `origin/main` has no `flatcam_plus/` package — this work references pa
 `dev` after the 100-commit restructure. Review becomes usable again when that base moves, i.e. when the
 restructure reaches `main`.
 
+
+## T2 first slice
+
+Done: the bottom dock hosts a `QTabWidget` instead of one widget. `FCShell` registers itself
+through `MainGUI.add_shell_tab()`, which replaces a tab carrying the same label, so reopening the Tcl
+tool cannot leave a stale second shell behind. The old focus path
+`shell_dock.widget()._edit.setFocus()` (MainGUI.py:4724) assumed the dock's widget *was* the shell and
+would have raised once tabs existed; it now goes through `shell_focus_terminal()`, which finds the
+shell among the tabs.
+
+Verified offscreen: dock widget is `QTabWidget`, one tab `Tcl Shell`, `shell_terminal()` returns the
+`FCShell`, show/hide still toggles, and re-registering keeps the count at one.
+
+**Open decision on the CNC console (S2).** The plugin's console is not a loose widget: it is
+`self.console`, added to the plugin's own layout (`appPlugins/cnc_control/ui.py:1353`) and the reason
+its terminal panel sets a 450px minimum (`:1355-1357`). Only `append()` and `moveCursor()` use it
+(`:1866-1870`). Moving it into the dock therefore leaves a hole in the plugin's layout and invalidates
+that minimum height — the user chose "move it" without that evidence, so this waits on a re-decision:
+keep the plugin console where it is, mirror its lines into a dock-owned console, or accept the
+plugin panel changing shape.
+

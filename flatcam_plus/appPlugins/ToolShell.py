@@ -325,7 +325,12 @@ class FCShell(TermWidget):
         self._append_to_browser('in', "FlatCAM Plus %s - " % version)
         self.append_output('%s\n\n' % _("Type >help< to get started"))
 
-        self.app.ui.shell_dock.setWidget(self)
+        # The dock hosts a tab bar now, so register as a tab instead of claiming the whole dock.
+        # The fallback keeps this working if the dock is ever driven by an older host.
+        if hasattr(self.app.ui, "add_shell_tab"):
+            self.app.ui.add_shell_tab(self, _("Tcl Shell"))
+        else:
+            self.app.ui.shell_dock.setWidget(self)
 
         # first try to disconnect the signals since within the app the Tcl Tool can be reinitialized
         try:
