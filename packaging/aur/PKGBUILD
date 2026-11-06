@@ -5,7 +5,7 @@
 # python-* modules. Building from source here would produce a package that cannot resolve, so this
 # repackages the official Linux tarball instead.
 pkgname=flatcam-plus-bin
-pkgver=1.3.1
+pkgver=1.3.2
 pkgrel=1
 pkgdesc="PCB CAM and CNC workflow (prebuilt bundle)"
 arch=('x86_64')
