@@ -1122,29 +1122,102 @@ class MainGUI(QtWidgets.QMainWindow):
         else:
             self.units_label.setToolTip(_("The application dimensional units is millimeter."))
 
+    def _collect_project_objects(self):
+        objects = []
+        for group in self.app.collection.group_items.values():
+            for item in group.child_items:
+                obj = getattr(item, "obj", None)
+                if obj is not None:
+                    objects.append(obj)
+        return objects
+
+    def _confirm_unit_conversion(self, objects, current, target):
+        msgbox = FCMessageBox(parent=self)
+        title = _("Change units")
+        msgbox.setWindowTitle(title)
+        msgbox.setWindowIcon(QtGui.QIcon(self.app.resource_location + '/app128.png'))
+        msgbox.setText('<b>%s</b>' % title)
+        msgbox.setInformativeText(
+            _("Convert %(n)d object(s) from %(src)s to %(dst)s?\n"
+              "Their geometry and generated G-code will be rewritten.")
+            % {'n': len(objects), 'src': current, 'dst': target}
+        )
+        msgbox.setIcon(QtWidgets.QMessageBox.Icon.Question)
+
+        bt_convert = msgbox.addButton(_('Convert'), QtWidgets.QMessageBox.ButtonRole.YesRole)
+        msgbox.addButton(_('Cancel'), QtWidgets.QMessageBox.ButtonRole.NoRole)
+        msgbox.setDefaultButton(bt_convert)
+        msgbox.exec()
+        return msgbox.clickedButton() == bt_convert
+
+    def _refresh_after_geometry_change(self, obj):
+        """The bookkeeping the application expects after an object's geometry moved.
+
+        Mirrors the sequence ``ToolMove.move_handler`` performs: aperture markers first, then the
+        cached bounds in ``obj_options``, which several panels read directly.
+        """
+        replot_apertures = getattr(obj, "replotApertures", None)
+        if replot_apertures is not None:
+            try:
+                replot_apertures.emit()
+            except TypeError:
+                pass
+
+        try:
+            xmin, ymin, xmax, ymax = obj.bounds()
+            obj.obj_options["xmin"] = xmin
+            obj.obj_options["ymin"] = ymin
+            obj.obj_options["xmax"] = xmax
+            obj.obj_options["ymax"] = ymax
+        except (AttributeError, TypeError, ValueError):
+            pass
+
     def on_toggle_units(self):
-        """Switch the application units, refusing while the project holds objects.
+        """Convert the whole project between units, all or nothing.
 
         Changing ``app_units`` is not cosmetic: it reinterprets every coordinate the application
-        reads and writes. Existing geometry is not converted yet, so switching with objects loaded
-        would silently rescale the numbers the user is working with by 25.4x. Until the conversion
-        lands, the only safe behaviour is to refuse and say why.
+        reads and writes. The conversion therefore runs first and the application is only told
+        about the new unit once every object actually converted; a single object that refuses
+        rolls the rest back and leaves the application reporting the unit it really is in.
         """
-        count = self._project_object_count()
-        if count:
+        from flatcam_plus.appCommon import units as unit_utils
+
+        current = str(self.app.app_units).upper()
+        target = 'IN' if current == 'MM' else 'MM'
+        objects = self._collect_project_objects()
+
+        if objects and not self._confirm_unit_conversion(objects, current, target):
+            return False
+
+        ok, refused = unit_utils.convert_objects(objects, current, target)
+        if not ok:
             self.app.inform.emit(
-                '[WARNING_NOTCL] %s' % _(
-                    "Units cannot be changed while the project holds %d object(s).\n"
-                    "Remove them or start a new project first." % count
+                '[ERROR_NOTCL] %s' % _(
+                    "Units were not changed: %s could not be converted.\n"
+                    "Nothing was modified." % ", ".join(refused)
                 )
             )
             return False
 
-        new_units = 'IN' if str(self.app.app_units).upper() == 'MM' else 'MM'
-        self.app.app_units = new_units
-        self.app.options['units'] = new_units
-        self.app.defaults['units'] = new_units
+        self.app.app_units = target
+        self.app.options['units'] = target
+        self.app.defaults['units'] = target
         self.update_units_label()
+
+        for obj in objects:
+            self._refresh_after_geometry_change(obj)
+
+        if objects:
+            self.app.should_we_save = True
+            try:
+                self.app.app_obj.replot_signal.emit(objects)
+            except (AttributeError, TypeError):
+                pass
+
+        self.app.inform.emit(
+            '[success] %s' % _("Units changed to %(dst)s (%(n)d object(s) converted).")
+            % {'dst': target, 'n': len(objects)}
+        )
         return True
 
     def attach_log_view(self):

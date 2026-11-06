@@ -1,32 +1,55 @@
-"""Switching units is only allowed while the geometry is not in the way.
+"""Changing units converts the project, and never leaves it half converted.
 
-This is slice A of the unit toggle: the control exists, but it refuses to switch while the
-project holds objects. Changing ``app_units`` alone would reinterpret every existing
-coordinate by 25.4x, because conversion is not implemented yet, so the refusal is the
-feature here — not an accident to be removed later without the conversion behind it.
+Slice A refused to switch while objects existed. Now the switch asks for confirmation and converts
+everything; what replaces the old refusal is an all-or-nothing guarantee, because a single object
+that silently refuses conversion would leave a project half in millimetres while the application
+reports inches.
 """
 
+import pytest
+from shapely.geometry import box
+
+from flatcam_plus.appCommon import units
 from flatcam_plus.appObjects.ObjectCollection import TreeItem
 
 
-class _StubObject:
-    def __init__(self, name, kind):
+class _ConvertibleObject:
+    """Stands in for a project object, with the parts the toggle actually touches."""
+
+    def __init__(self, name, kind="gerber", refuses=False, side=25.4):
         self.kind = kind
+        self.refuses = refuses
         self.obj_options = {"name": name, "plot": True}
+        self.units = "MM"
+        self._box = box(0.0, 0.0, side, side)
+        self.solid_geometry = [self._box]
+
+    def convert_units(self, target):
+        if self.refuses:
+            return
+        factor = units.conversion_factor(self.units, target)
+        from shapely import transform as rebase
+
+        self._box = rebase(self._box, lambda coords: coords * factor)
+        self.solid_geometry = [self._box]
+        self.units = target
+
+    def bounds(self):
+        return self.solid_geometry[0].bounds
 
 
-def _add_object(fc_app, kind="gerber"):
+def _insert(fc_app, obj, kind=None):
     model = fc_app.collection
-    group = model.group_items[kind]
+    group = model.group_items[kind or obj.kind]
     index = model.item_index(group)
     row = group.child_count()
     model.beginInsertRows(index, row, row)
-    TreeItem(None, model.icons[kind], _StubObject("stub_object", kind), group)
+    TreeItem(None, model.icons[kind or obj.kind], obj, group)
     model.endInsertRows()
     return group
 
 
-def _remove_last_object(fc_app, group):
+def _remove_last(fc_app, group):
     model = fc_app.collection
     index = model.item_index(group)
     row = group.child_count() - 1
@@ -35,53 +58,87 @@ def _remove_last_object(fc_app, group):
     model.endRemoveRows()
 
 
-def test_units_toggle_round_trip_without_objects(fc_app):
+@pytest.fixture
+def restore_units(fc_app):
+    original = fc_app.app_units
+    yield
+    fc_app.app_units = original
+    fc_app.options["units"] = original
+    fc_app.defaults["units"] = original
+    fc_app.ui.update_units_label()
+
+
+def test_units_toggle_round_trip_without_objects(fc_app, restore_units):
     ui = fc_app.ui
-    original_units = fc_app.app_units
-    original_label = ui.units_label.text()
+    assert ui._project_object_count() == 0
 
-    try:
-        assert ui._project_object_count() == 0, "the test project should start empty"
+    assert ui.on_toggle_units() is True
+    assert fc_app.app_units == "IN"
+    assert fc_app.options["units"] == "IN"
+    assert ui.units_label.text() == "[in]"
 
-        assert ui.on_toggle_units() is True
-        flipped = "IN" if str(original_units).upper() == "MM" else "MM"
-        assert fc_app.app_units == flipped
-        assert fc_app.options["units"] == flipped
-        assert ui.units_label.text() == "[%s]" % flipped.lower()
-
-        assert ui.on_toggle_units() is True
-        assert fc_app.app_units == original_units
-        assert ui.units_label.text() == original_label
-    finally:
-        fc_app.app_units = original_units
-        fc_app.options["units"] = original_units
-        fc_app.defaults["units"] = original_units
-        ui.update_units_label()
-
-
-def test_units_toggle_is_refused_while_the_project_holds_objects(fc_app):
-    """The whole point of slice A: no silent 25.4x reinterpretation of live geometry."""
-    ui = fc_app.ui
-    original_units = fc_app.app_units
-    original_label = ui.units_label.text()
-
-    group = _add_object(fc_app)
-    try:
-        assert ui._project_object_count() == 1
-
-        assert ui.on_toggle_units() is False
-        assert fc_app.app_units == original_units, "units changed while objects were present"
-        assert ui.units_label.text() == original_label
-    finally:
-        _remove_last_object(fc_app, group)
-        fc_app.app_units = original_units
-        fc_app.options["units"] = original_units
-        fc_app.defaults["units"] = original_units
-        ui.update_units_label()
+    assert ui.on_toggle_units() is True
+    assert fc_app.app_units == "MM"
+    assert ui.units_label.text() == "[mm]"
 
 
 def test_object_count_ignores_the_kind_groups(fc_app):
     """A fresh project holds six kind groups, and none of them is an object."""
-    collection = fc_app.collection
-    assert len(collection.group_items) == 6
+    assert len(fc_app.collection.group_items) == 6
     assert fc_app.ui._project_object_count() == 0
+
+
+def test_declining_the_confirmation_changes_nothing(fc_app, restore_units, monkeypatch):
+    ui = fc_app.ui
+    obj = _ConvertibleObject("top_copper")
+    group = _insert(fc_app, obj)
+
+    try:
+        monkeypatch.setattr(ui, "_confirm_unit_conversion", lambda *a, **k: False)
+
+        assert ui.on_toggle_units() is False
+        assert fc_app.app_units == "MM"
+        assert obj.units == "MM"
+        assert obj.solid_geometry[0].bounds == pytest.approx((0.0, 0.0, 25.4, 25.4))
+    finally:
+        _remove_last(fc_app, group)
+
+
+def test_accepting_the_confirmation_converts_the_object(fc_app, restore_units, monkeypatch):
+    ui = fc_app.ui
+    obj = _ConvertibleObject("top_copper")
+    group = _insert(fc_app, obj)
+
+    try:
+        monkeypatch.setattr(ui, "_confirm_unit_conversion", lambda *a, **k: True)
+
+        assert ui.on_toggle_units() is True
+        assert fc_app.app_units == "IN"
+        assert obj.units == "IN"
+        assert obj.solid_geometry[0].bounds == pytest.approx((0.0, 0.0, 1.0, 1.0))
+        # The cached bounds other panels read must agree with the new geometry.
+        assert obj.obj_options["xmax"] == pytest.approx(1.0)
+    finally:
+        _remove_last(fc_app, group)
+
+
+def test_a_refusing_object_aborts_the_whole_conversion(fc_app, restore_units, monkeypatch):
+    """No half-converted project, and the application must not claim the new unit."""
+    ui = fc_app.ui
+    willing = _ConvertibleObject("top_copper")
+    refusing = _ConvertibleObject("declared_units", kind="excellon", refuses=True)
+
+    group_a = _insert(fc_app, willing)
+    group_b = _insert(fc_app, refusing)
+
+    try:
+        monkeypatch.setattr(ui, "_confirm_unit_conversion", lambda *a, **k: True)
+
+        assert ui.on_toggle_units() is False
+        assert fc_app.app_units == "MM", "the application reported a unit it is not in"
+        assert willing.units == "MM", "the converted object was not rolled back"
+        assert willing.solid_geometry[0].bounds == pytest.approx((0.0, 0.0, 25.4, 25.4))
+        assert ui.units_label.text() == "[mm]"
+    finally:
+        _remove_last(fc_app, group_b)
+        _remove_last(fc_app, group_a)
