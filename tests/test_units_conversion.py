@@ -147,3 +147,20 @@ def test_an_empty_project_converts_trivially():
     ok, refused = units.convert_objects([], "MM", "IN")
     assert ok is True
     assert refused == []
+
+
+def test_an_object_without_convert_units_counts_as_a_refusal():
+    """Crashing here would strand the project in whatever state earlier objects reached."""
+
+    class _NoConversion:
+        def __init__(self):
+            self.obj_options = {"name": "legacy_object"}
+
+    willing = _StubObject("top_copper")
+    legacy = _NoConversion()
+
+    ok, refused = units.convert_objects([willing, legacy], "MM", "IN")
+
+    assert ok is False
+    assert refused == ["legacy_object"]
+    assert willing.units == "MM", "the converted object was not rolled back"

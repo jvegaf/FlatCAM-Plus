@@ -101,7 +101,14 @@ def convert_objects(objects, from_units, to_units):
 
         # ``convert_units`` owns setting ``obj.units``. Assigning it here would mark an object
         # that refused as converted, which is the exact failure this function exists to catch.
-        obj.convert_units(to_units)
+        # An object that does not implement the conversion at all counts as a refusal: crashing
+        # inside this function would leave the project in whatever state the earlier objects
+        # reached.
+        try:
+            obj.convert_units(to_units)
+        except (AttributeError, TypeError):
+            refused.append(getattr(obj, "obj_options", {}).get("name") or repr(obj))
+            continue
 
         after = geometry_fingerprint(obj)
         if before is not None and after == before:

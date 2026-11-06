@@ -7,9 +7,32 @@ the second column is covered here at model level.
 
 from PyQt6 import QtCore
 
+import pytest
+
 from flatcam_plus.appObjects.ObjectCollection import ObjectCollection, TreeItem
 
 DISPLAY = QtCore.Qt.ItemDataRole.DisplayRole
+
+
+@pytest.fixture(autouse=True)
+def clean_collection(fc_app):
+    """Put the shared project tree back after each test.
+
+    These tests build stub rows by appending to the real group items, and the application is
+    session-scoped: without this, every row they add stays in the tree for every later test file.
+    """
+    model = fc_app.collection
+    before = {kind: group.child_count() for kind, group in model.group_items.items()}
+
+    yield
+
+    for kind, group in model.group_items.items():
+        while group.child_count() > before[kind]:
+            index = model.item_index(group)
+            row = group.child_count() - 1
+            model.beginRemoveRows(index, row, row)
+            group.child_items.pop()
+            model.endRemoveRows()
 
 
 class _StubObject:
