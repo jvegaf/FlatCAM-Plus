@@ -4,10 +4,10 @@ T4.2b moved the modules that only ``appMain`` and the preferences manager import
 deleted the pool module nothing referenced; T4.3 moved ``camlib``, the geometry and G-code core;
 T4.4 moved ``appTool``, the base class of every tool and editor plugin, T4.4b moved
 ``appPreProcessor``, whose contract the path-loaded preprocessors import, T4.6 moved
-``appMain``, the application controller ``flatcam.py`` instantiates, and T4.7 moved the two
+``appMain``, the application controller the launcher instantiates, and T4.7 moved the two
 vendored dependency packages, ``descartes`` and ``libs``. T1 of the package consolidation
 started the application packages moving, beginning with ``appCommon``, the shared helpers,
-updater and recent-project loader the controller, the GUI, the tools and ``flatcam.py`` import.
+updater and recent-project loader the controller, the GUI, the tools and the launcher import.
 T7 moved ``tclCommands``, the Tcl shell command package, whose own discovery walks
 ``sys.modules`` for its package path. T8, the last and largest slice, moved ``appGUI``, the plot
 canvases, main window, themes and preferences tree the controller and every tool plugin import.

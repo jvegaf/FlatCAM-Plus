@@ -1,23 +1,24 @@
 # FlatCAM Plus — Agent Guide
 
-Legacy PyQt6 desktop CAM application for PCB/CNC manufacturing. The working
-application lives at the repository root (legacy layout); it is not an
-installable package.
+Legacy PyQt6 desktop CAM application for PCB/CNC manufacturing. The whole
+application — code and runtime data — lives in the `flatcam_plus/` package, which
+is installable and exposes the `flatcam-plus` console script.
 
 ## Run and test
 
 ```bash
 uv sync                                   # environment from uv.lock / .python-version
-.venv/bin/python flatcam.py               # launch the app (needs a display)
+.venv/bin/python -m flatcam_plus          # launch the app (needs a display)
 uv run --with pytest pytest tests -q      # run the test suite
 uv run --with pytest pytest tests/test_classify_contours.py -v
 ```
 
-- `python flatcam.py` is the real entrypoint; the app is one process-wide
-  `App` object created in `flatcam.py`.
-- There is **no** `flatcam-plus` package or console script. `pyproject.toml`
-  declares `[tool.uv] package = false`, so `uv sync` installs dependencies only:
-  `uv build` has nothing to package and `uv run flatcam-plus` does not exist.
+- `python -m flatcam_plus` and the `flatcam-plus` console script both call
+  `flatcam_plus.launcher.main`; the app is one process-wide `App` object built by
+  `flatcam_plus.appMain`. `pyproject.toml` uses the `uv_build` backend, so
+  `uv sync` installs the project itself in editable mode and `uv build` produces a
+  wheel that carries `assets/`, `config/`, `locale/` and `preprocessors/` as
+  package data.
 - Python is **3.14** (`.python-version`, `pyproject.toml`, `uv.lock`, and the
   `Makefile` guard). `pyproject.toml` is the only authoritative dependency list:
   `uv.lock` pins the resolved set, and `requirements.txt` mirrors its
@@ -94,40 +95,42 @@ follow its native lifecycle without treating it as delivery approval.
 (~160–350 KB).
 Search targeted symbols instead of reading them whole.
 
-The runnable entry point stays at the repository root: `flatcam.py` imports
-`flatcam_plus.appMain` and owns the `if __name__ == '__main__'` block. `App.app_home`
-(and therefore `os.chdir`, `assets/`, `locale/` and `preprocessors/`) is anchored to that
-root directory, not to the package.
+The entry point is `flatcam_plus/launcher.py`: it owns `main()`, the Windows PyQt6 DLL
+bootstrap, the global exception hook and the `QApplication`. `flatcam_plus/__main__.py`
+exposes the same function to `python -m flatcam_plus`. `App.app_home` — and therefore
+`os.chdir`, `assets/`, `locale/` and `preprocessors/` — is the package directory, so the
+checkout, an installed wheel and a frozen bundle all resolve the same paths.
 
 ## Conventions and gotchas
 
 - **Tool plugins**: subclass `AppTool`/`AppToolEditor` (`flatcam_plus/appTool.py`), implement
   `install()`, then instantiate and add the tool to `App.app_plugins` in
   `flatcam_plus/appMain.py` (~line 1965). The tool UI class usually lives in the same file.
-- **G-code preprocessors**: every `.py` file in `preprocessors/` is imported at
+- **G-code preprocessors**: every `.py` file in `flatcam_plus/preprocessors/` is imported at
   startup and each `PreProc` subclass registers itself by class name. No central
   registry edit is required.
 - **Tcl commands**: after adding a command module, append its import to the
   explicit alphabetical list in `flatcam_plus/tclCommands/__init__.py` (it is not autodiscovered).
 - **The application version has one source.** `pyproject.toml`'s `[project] version` is it;
-  `flatcam_plus/version.py` reads that file at import time (from the checkout, or from
-  `sys._MEIPASS` in a bundle) and exposes `APP_VERSION`. The build scripts read the same file, and
-  every bundle must ship it with `--add-data pyproject.toml`, or the frozen app raises on import.
+  `flatcam_plus/version.py` reads that file at import time when it sits beside the package, falls
+  back to `sys._MEIPASS` in a bundle, and falls back to the installed distribution metadata in a
+  wheel that ships no manifest. The build scripts read the same file, and every bundle must ship it
+  with `--add-data pyproject.toml`, or the frozen app has nothing to read before it can import.
   `flatcam_plus/defaults.py`'s `version` (`8.992`) is the preferences-file format version; it is
   not the app version. Do not sync them. `packaging/windows/update_version.ps1` bumps
   `pyproject.toml` and the release date in `version.py` together.
 - **Persisted state**: QSettings organization/application is
   `"Open Source"` / `"FlatCAM_Plus"`. User data and `log.txt` go to `~/.FlatCAM`
   on Linux/macOS and `%APPDATA%\FlatCAM` on Windows.
-- **`config/configuration.txt`** (`portable`, `headless`) is read only on Windows;
+- **`flatcam_plus/config/configuration.txt`** (`portable`, `headless`) is read only on Windows;
   Linux/macOS ignore it and always use `~/.FlatCAM`.
-- **Windows-first code**: `flatcam.py` contains a PyQt6 DLL bootstrap, and some
+- **Windows-first code**: `flatcam_plus/launcher.py` contains a PyQt6 DLL bootstrap, and some
   path handling hardcodes backslashes. Verify Linux behavior instead of assuming
   it works when touching startup/config code.
 - **Translations**: source strings use `_()` (gettext domain `strings`) and live
-  in `locale/<lang>/LC_MESSAGES/strings.po`. No `.mo` files are committed, so
+  in `flatcam_plus/locale/<lang>/LC_MESSAGES/strings.po`. No `.mo` files are committed, so
   translations are inactive until compiled:
-  `find locale -name "strings.po" -exec sh -c 'msgfmt "$1" -o "${1%.po}.mo"' sh {} \;`
+  `find flatcam_plus/locale -name "strings.po" -exec sh -c 'msgfmt "$1" -o "${1%.po}.mo"' sh {} \;`
 - **Packaging**: follow `PACKAGING.md` and the platform scripts under
   `packaging/`. Build on the target OS; the scripts use `--collect-all` for PyQt6,
   vispy, shapely, rasterio, OpenGL, and matplotlib, plus ortools via

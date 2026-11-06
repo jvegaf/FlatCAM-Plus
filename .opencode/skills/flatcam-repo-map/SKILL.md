@@ -15,9 +15,9 @@ Load for any non-trivial change, code-location question, architecture decision, 
 
 ## Hard Rules
 
-- The runtime entrypoint is `flatcam.py`; the app is one process-wide `App`. The repository root IS the application (legacy layout). There is no installable package and no `src/` tree: `pyproject.toml` sets `[tool.uv] package = false`.
+- The runtime entrypoint is `flatcam_plus/launcher.py` (`main()`), reached through the `flatcam-plus` console script or `python -m flatcam_plus`; the app is one process-wide `App`. Everything the app loads at runtime lives inside `flatcam_plus/` (`assets/`, `config/`, `locale/`, `preprocessors/`). `pyproject.toml` uses the `uv_build` backend with a flat layout (`module-root = ""`) and no `src/` tree.
 - All implementation follows ODD (`AGENTS.md` § Development workflow). Load `flatcam-odd-workflow`; for tracked work, read the feature document before editing.
-- Python is `3.14` via `uv`. Use `uv sync`, then `.venv/bin/python flatcam.py`. There is no `flatcam-plus` console script to launch.
+- Python is `3.14` via `uv`. Use `uv sync`, then `.venv/bin/python -m flatcam_plus` (or the installed `.venv/bin/flatcam-plus` console script).
 - `flatcam_plus/appMain.py`, `flatcam_plus/camlib.py`, and `flatcam_plus/appDatabase.py` are 160–350 KB. Never read them whole; grep exact symbols or use CodeGraph.
 - PyQt6 widgets stay on the GUI thread. Move long work to `self.app.worker_task.emit({'fcn': ..., 'params': [...]})` or `FCProcess`; never block the event loop.
 - Do not sync `flatcam_plus/version.py` (`APP_VERSION`) with `flatcam_plus/defaults.py` `version` (the preferences-file format).

@@ -1,11 +1,11 @@
 """Shared setup for the FlatCAM Plus test suite.
 
-The application is one process-wide ``App`` object built by ``flatcam.py``. Tests that need
+The application is one process-wide ``App`` object built by ``flatcam_plus.launcher``. Tests that need
 the real wiring build it once, headless and offline, under an isolated ``HOME`` so a test
 run never reads or writes the developer's ``~/.FlatCAM`` settings.
 
 The repository root is on ``sys.path`` through the ``pythonpath`` setting in
-``pyproject.toml``, not through an insert here: the application packages live beside
+``pyproject.toml``, not through an insert here: the application lives inside the ``flatcam_plus`` package
 ``flatcam_plus`` at the root and are imported by name.
 """
 

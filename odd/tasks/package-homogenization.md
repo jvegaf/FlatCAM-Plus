@@ -100,3 +100,52 @@ package, make the project a real installable package, then release as `1.3.2`.
   `tests/test_frozen_layout.py:36-40,62-90`,
   `tests/test_cli_options.py:20-21` and `tests/test_app_boot.py:33-36` pin the
   current layout and must move with it.
+- **L9 — Evidence, wheel contents (S4).** `uv build --wheel` with the `uv_build`
+  backend produced a 1149-entry wheel carrying `flatcam_plus/assets/resources` (694 files),
+  `flatcam_plus/assets/examples` (12), `flatcam_plus/config` (1),
+  `flatcam_plus/locale` (31) and `flatcam_plus/preprocessors` (30), with no
+  `__pycache__` and no `pyproject.toml`. The absent manifest is why S5 needed
+  the distribution-metadata fallback.
+- **L10 — Evidence, frozen entry script (S2, S11).** PyInstaller runs the entry
+  script as `__main__`, so a launcher that anchors on its own `__file__` would
+  resolve `_MEIPASS` instead of `_MEIPASS/flatcam_plus`. `flatcam_plus/launcher.py`
+  therefore anchors `_PACKAGE_DIR` on `flatcam_plus.__file__`, which is correct in
+  a checkout, an installed wheel and a frozen bundle.
+- **L11 — Evidence, T5 guard discriminates.** The updated
+  `tests/test_frozen_layout.py` destination rule rejects the pre-change scripts:
+  running it against `git show HEAD:packaging/{linux,macos}/...` flags four
+  destinations per script (`assets`, `config`, `locale`, `preprocessors`).
+- **L12 — Evidence, T1 RED/GREEN.** RED: `tests/test_app_paths.py` and
+  `tests/test_locale_resolution.py` updated first, 4 failures for exactly the new
+  expectations. GREEN after the move and the anchor changes: 16 passed including
+  `tests/test_app_boot.py`. Committed as `1e4ae8f`.
+- **L13 — Evidence, T2 RED/GREEN.** `tests/test_cli_options.py` repointed at
+  `python -m flatcam_plus` with `PYTHONPATH` on the repository root; 2 passed.
+  Committed as `defdd5f`, together with the removal of the root launcher.
+- **L14 — Evidence, T3/T4.** `uv sync` builds and installs `flatcam-plus==1.3.1`
+  in editable mode; `importlib.metadata.version("flatcam-plus")` answers, and the
+  15 cases in `tests/test_version_module.py` pass, including the new
+  installed-distribution fallback and the neither-source-answers error.
+- **L15 — Review lineage opened (S6–S8 evidence).** Full suite green at 255 passed.
+  `review.start` created lineage `review-f9e25ded857d6f61` (tier high, 382 changed
+  lines, correction budget 191) with lenses risk, resilience, readability and
+  reliability. The group forecast was 4 model runs; the refuter forecast was 1.
+- **L16 — CRITICAL finding R1-001, accepted as correct.**
+  `flatcam_plus/assets/linux/flatcam-beta:8` ran `python3 -m flatcam_plus` from the
+  caller's cwd, so a same-named package in that directory shadowed the application
+  through `sys.path[0]`. Reproduced: without `-P` the cwd package wins; with `-P`
+  the real package resolves. Corrected with `python3 -P -m flatcam_plus`.
+- **L17 — Self-reported discrepancy.** The correction plan declared 3 diff lines;
+  the delivered correction is 4 diff lines (3 insertions, 1 deletion), because the
+  two explanatory comment lines were not counted. Still far inside the frozen
+  budget of 191, but the plan was under-declared by one line.
+- **L18 — Blocker, validator capture rejected.** After the correction, STATUS moved
+  to `targeted_validation_required` and issued one `provider_targeted_validator`
+  collect input. `gentle_review_capture` rejected it three times as
+  "collectBinding is missing or stale for current STATUS": once as the parsed inner
+  binding, once as the provider-serialized string, once as the complete entry
+  including `validationRequest`. The STATUS is stable across queries (same
+  request_hash, expected_revision and correction target), so the binding is not
+  being regenerated. No provider token was altered and no fourth attempt was made.
+  The validator produced no verdict, so the lineage cannot close without a human
+  decision.

@@ -1,6 +1,6 @@
 """Headless startup smoke test.
 
-Boots the real application the way ``flatcam.py`` does, without a display: a broken import,
+Boots the real application the way ``flatcam_plus.launcher`` does, without a display: a broken import,
 an unregistered tool plugin, a preprocessor that fails to load or a main window that never
 appears all surface here.
 """

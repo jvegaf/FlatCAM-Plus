@@ -28,7 +28,7 @@ uv sync
 Verify that the application starts before packaging:
 
 ```bash
-python flatcam.py
+python -m flatcam_plus
 ```
 
 Install PyInstaller in the same environment:
@@ -40,7 +40,7 @@ python -m pip install pyinstaller
 Compile translation catalogs before building. The source repository keeps `.po` files, while runtime translation loading uses `.mo` files:
 
 ```bash
-find locale -name "strings.po" -exec sh -c 'msgfmt "$1" -o "${1%.po}.mo"' sh {} \;
+find flatcam_plus/locale -name "strings.po" -exec sh -c 'msgfmt "$1" -o "${1%.po}.mo"' sh {} \;
 ```
 
 If `msgfmt` is not available, install GNU gettext first. On Ubuntu-like systems use `sudo apt install gettext`. On macOS, install it with Homebrew:
@@ -168,17 +168,17 @@ APPLE_DEVELOPER_ID="Developer ID Application: YOUR NAME" ./FlatCAMPlus_macos_dmg
 Manual build of the `.app` bundle:
 
 ```bash
-python -m PyInstaller flatcam.py \
+python -m PyInstaller flatcam_plus/launcher.py \
   --name "FlatCAM-Plus" \
   --windowed \
   --clean \
   --noconfirm \
-  --icon "assets/resources/app256.png" \
-  --add-data "pyproject.toml:pyproject.toml" \
-  --add-data "assets:assets" \
-  --add-data "config:config" \
-  --add-data "locale:locale" \
-  --add-data "preprocessors:preprocessors" \
+  --icon "flatcam_plus/assets/resources/app256.png" \
+  --add-data "pyproject.toml:." \
+  --add-data "flatcam_plus/assets:flatcam_plus/assets" \
+  --add-data "flatcam_plus/config:flatcam_plus/config" \
+  --add-data "flatcam_plus/locale:flatcam_plus/locale" \
+  --add-data "flatcam_plus/preprocessors:flatcam_plus/preprocessors" \
   --collect-submodules flatcam_plus \
   --collect-all PyQt6 \
   --collect-all vispy \
@@ -256,16 +256,16 @@ PYTHON_BIN=/path/to/python3 ./FlatCAMPlus_linux_portable_generator.sh
 Manual build of the Linux folder distribution:
 
 ```bash
-python -m PyInstaller flatcam.py \
+python -m PyInstaller flatcam_plus/launcher.py \
   --name "FlatCAM-Plus" \
   --windowed \
   --clean \
   --noconfirm \
-  --add-data "pyproject.toml:pyproject.toml" \
-  --add-data "assets:assets" \
-  --add-data "config:config" \
-  --add-data "locale:locale" \
-  --add-data "preprocessors:preprocessors" \
+  --add-data "pyproject.toml:." \
+  --add-data "flatcam_plus/assets:flatcam_plus/assets" \
+  --add-data "flatcam_plus/config:flatcam_plus/config" \
+  --add-data "flatcam_plus/locale:flatcam_plus/locale" \
+  --add-data "flatcam_plus/preprocessors:flatcam_plus/preprocessors" \
   --collect-submodules flatcam_plus \
   --collect-all PyQt6 \
   --collect-all vispy \
@@ -285,7 +285,7 @@ Create a compressed archive for sharing:
 tar -C dist -czf FlatCAM-Plus-linux-x86_64.tar.gz FlatCAM-Plus
 ```
 
-The repository also includes a basic Linux install helper in `Makefile` and desktop launcher files in `assets/linux/`. Those are useful for source-based Linux installs.
+The repository also includes a basic Linux install helper in `Makefile` and desktop launcher files in `flatcam_plus/assets/linux/`. Those are useful for source-based Linux installs.
 
 ### Debian and RPM packages
 

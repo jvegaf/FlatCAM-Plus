@@ -331,14 +331,14 @@ The AI assistant feature is organized under `flatcam_plus/appPlugins/ai_assistan
 
 3. **Launch FlatCAM Plus:**
    ```bash
-   .venv/bin/python flatcam.py     # Windows: .venv\Scripts\python flatcam.py
+   .venv/bin/python -m flatcam_plus     # Windows: .venv\Scripts\python -m flatcam_plus
    ```
 
 ### Manual Installation (pip)
 If you prefer not to use uv, `requirements.txt` mirrors the pip-installable dependencies:
 ```bash
 pip install -r requirements.txt
-python flatcam.py
+python -m flatcam_plus
 ```
 
 ### 3. Desktop Packaging
