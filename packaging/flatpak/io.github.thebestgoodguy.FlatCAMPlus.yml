@@ -23,6 +23,10 @@ finish-args:
 modules:
   - name: flatcam-plus
     buildsystem: simple
+    build-options:
+      # The payload is a frozen application: stripping it buys nothing and the .Debug
+      # runtime it generates is never published.
+      strip: false
     build-commands:
       - install -d /app/lib/flatcam-plus
       - cp -a payload/FlatCAM-Plus/. /app/lib/flatcam-plus/

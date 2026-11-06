@@ -213,7 +213,7 @@ jobs:
             ubuntu:24.04 /bin/bash -lc '
             set -euo pipefail
             apt-get update -qq
-            DEBIAN_FRONTEND=noninteractive apt-get install -y -qq flatpak flatpak-builder dbus >/dev/null
+            DEBIAN_FRONTEND=noninteractive apt-get install -y -qq flatpak flatpak-builder dbus elfutils >/dev/null
             flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
             flatpak install --user --noninteractive -y flathub \
               "org.kde.Platform//${KDE_RUNTIME_VERSION}" "org.kde.Sdk//${KDE_RUNTIME_VERSION}"
