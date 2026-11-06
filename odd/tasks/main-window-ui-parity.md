@@ -158,3 +158,29 @@ That is **pre-existing**, not introduced here: with icons only the toolbars alre
 labelling them raises it to 1468px, about 6% more. So the labels neither caused the overflow nor fixed
 it, and the commands were already behind the overflow menu before this change.
 
+
+## T1 default confirmed
+
+With the toolbar already clipped before the change, the user chose to **keep labels on by default**:
+the artboard governs, and anyone who wants icons turns them off. No code change; `c077ef9` stands as it
+is.
+
+## T3 plan (not started)
+
+Decision on record: the toggle **converts objects and output**, not just the display.
+
+Explicitly forbidden half-state: shipping the toggle so that `app.app_units` and `units_label` change
+while the geometry stays put. That silently reinterprets every existing coordinate — a 25.4x error the
+user cannot see — and it is worse than having no toggle at all. So T3 lands in two slices and the first
+one may not leave the app in that state either:
+
+1. **Slice A — the control exists but is safe.** Toggle, label, `app_units`, `decimals`, and a guard that
+   refuses to switch while the project holds objects, with a message saying why. Nothing is
+   reinterpreted because nothing switches mid-project yet.
+2. **Slice B — conversion.** Converting every object's geometry plus the exported G-code, behind an
+   explicit confirmation, with tests for both directions and for a round trip that must return the
+   original coordinates within precision.
+
+T3 is the only item left in this feature, and the only one that can corrupt user work. It needs its own
+review attention even though native review is stood down on `dev`.
+
