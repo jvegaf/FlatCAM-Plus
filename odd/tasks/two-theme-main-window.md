@@ -148,3 +148,21 @@ Consequence for delivery: native review of this work requires the feature on its
 `origin/main`, where the base is near and the candidate is ~700 lines. On `dev` it cannot fit, whatever
 the local slicing.
 
+
+**L10** (follow-up, option 3 of the closing decision): added `tests/test_theme_render.py` plus the
+`tests/theme_probe.py` helper, to turn the one manual offscreen render into a guard. Two layers,
+because they catch different regressions:
+
+- A fast layer hands the generated stylesheets to real Qt widgets and samples painted pixels. Breaking
+  a token, selector or rule leaves the strings plausible while the colour stops reaching the screen;
+  `test_theme_tokens` cannot see that, painting can.
+- A slow layer boots the application in a real subprocess, twice, and asserts a persisted dark theme
+  survives the restart and switches the resource set. That is the exact bug class the user hit, and the
+  wiring lives in `appMain` before any widget exists, so the session fixture cannot reach it.
+
+The guard was verified by sabotage, not by assumption: forcing the `modernPanelRoot` background to
+magenta makes the render test fail with `light panel root painted #ff00ff, expected surface #ffffff`.
+The first sabotage attempt missed — it patched an earlier rule with the same text and the test kept
+passing — which is exactly why the RED check was worth doing: it distinguishes "the guard works" from
+"the guard has the same text in it".
+
