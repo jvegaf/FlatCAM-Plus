@@ -53,10 +53,14 @@ shell dock (`ToolShell.py:297` is one widget). No layout restructuring, no new t
 
 | ID | Spec | Route | Unit |
 | --- | --- | --- | --- |
-| T1 | S1 | writer → verify | Re-enable dark as a selectable, persisted theme; remove the forced-light gate | <!-- commit: --> |
-| T2 | S4 | writer → verify | Object tree: readable kind column without breaking the model | <!-- commit: --> |
-| T3 | S2,S3,S5,S6 | inline | Theme parity: focus ring, hint contrast, selection accent bar, density | <!-- commit: --> |
-| T4 | all | inline | Verification: headless boot in both themes, full suite, contrast audit | <!-- commit: --> |
+| T1 | S1 | writer → verify | Re-enable dark as a selectable, persisted theme; remove the forced-light gate | `3e2e45f` |
+| T2 | S4 | writer → verify | Object tree: readable kind column without breaking the model | `442b13a` |
+| T3 | S2,S3,S5,S6 | inline | Theme parity: focus ring, hint contrast, colour-independent selection, density | `943dcac`, corrected in `f15f539` |
+| T4 | all | inline | Verification: full suite, both-theme offscreen render, contrast audit | evidence only |
+
+Delivery slice for this feature: `943dcac..f15f539` (six commits, docs included). Everything
+committed before `943dcac` on `dev` belongs to other features; this feature's slice must be
+split from them if the branch is ever delivered as one PR.
 
 ## Log
 
@@ -90,3 +94,19 @@ manual look — which is why each unit gets a boot check.
 **L4** (decision): scope is three work units (T1, T2, T3). The mm/in toggle, the console tabs and any
 layout restructuring are declared non-goals rather than deferred half-work, because they are features
 the artboard merely depicts.
+
+**L5** (verification, 2026-11-05): full suite `285 passed` (exit 0), plus a 31-test focused re-run after
+the final edit. Rendering the app offscreen in both themes (`QWidget.grab()`, `QT_QPA_PLATFORM=offscreen`)
+confirmed the Kind column renders per object and the header renders muted and right-aligned. It also
+caught a defect no test had: `border-left` on `QTreeView::item:selected` painted once per column, giving
+a second stray bar before the Kind cell. `f15f539` removes it, keeps font weight as the non-colour cue,
+and flips the test to assert its absence.
+
+**L6** (limits, stated not glossed): the offscreen harness switches `global_theme` after `App` is
+constructed, so per-widget toolbar and status sheets keep their startup styling — the dark render shows
+a light toolbar for that reason, not because of a product bug. The dark theme end-to-end at startup
+(persisted theme read before `MainGUI` is built) was therefore **not** rendered and remains visually
+unverified, as does every panel the harness did not open. Also corrected here: two contrast figures
+quoted earlier were arithmetically wrong — `hint #6f7b8e` is 4.29:1 on white (not 3.97:1) and
+`#0081db` is 4.07:1 (not 4.6:1). The AA defect and its fix hold, but `design/system.md` now carries
+the right numbers.
