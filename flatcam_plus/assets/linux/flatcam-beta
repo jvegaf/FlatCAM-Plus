@@ -5,4 +5,6 @@
 # module is what runs.
 script_path=$(readlink -f "$0")
 python_script_path=$(dirname "$script_path")/../../../
-PYTHONPATH="$python_script_path${PYTHONPATH:+:$PYTHONPATH}" python3 -m flatcam_plus "$@"
+# ``-P`` keeps the caller's current directory off ``sys.path``: ``-m`` would otherwise put it ahead
+# of the PYTHONPATH entry, letting a ``flatcam_plus`` package there shadow this one.
+PYTHONPATH="$python_script_path${PYTHONPATH:+:$PYTHONPATH}" python3 -P -m flatcam_plus "$@"

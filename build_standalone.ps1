@@ -74,15 +74,15 @@ Set-Location $RootDir
 
 # Use absolute paths for --add-data (source;dest format on Windows)
 $pyprojectPath = Join-Path $RootDir "pyproject.toml"
-$assetsPath = Join-Path $RootDir "assets"
-$configPath = Join-Path $RootDir "config"
-$localePath = Join-Path $RootDir "locale"
-$preprocessorsPath = Join-Path $RootDir "preprocessors"
+$assetsPath = Join-Path $RootDir "flatcam_plus\assets"
+$configPath = Join-Path $RootDir "flatcam_plus\config"
+$localePath = Join-Path $RootDir "flatcam_plus\locale"
+$preprocessorsPath = Join-Path $RootDir "flatcam_plus\preprocessors"
 
 # "libs" is not shipped as data: it is a subpackage of "flatcam_plus", so the
 # --collect-submodules entries below already collect it as code.
 $pyInstallerArgs = @(
-    "-m", "PyInstaller", "flatcam.py",
+    "-m", "PyInstaller", "flatcam_plus/launcher.py",
     "--name", "FlatCAMPlus",
     "--windowed",
     "--clean",
@@ -91,10 +91,10 @@ $pyInstallerArgs = @(
     "--workpath", (Join-Path $RootDir "build\pyinstaller"),
     "--specpath", (Join-Path $RootDir "build\pyinstaller"),
     "--add-data", "${pyprojectPath};pyproject.toml",
-    "--add-data", "${assetsPath};assets",
-    "--add-data", "${configPath};config",
-    "--add-data", "${localePath};locale",
-    "--add-data", "${preprocessorsPath};preprocessors",
+    "--add-data", "${assetsPath};flatcam_plus/assets",
+    "--add-data", "${configPath};flatcam_plus/config",
+    "--add-data", "${localePath};flatcam_plus/locale",
+    "--add-data", "${preprocessorsPath};flatcam_plus/preprocessors",
     # "appCommon" is a "flatcam_plus" subpackage now; the entries below collect it.
     "--collect-submodules", "flatcam_plus",
     "--collect-all", "PyQt6",

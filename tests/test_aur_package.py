@@ -62,7 +62,7 @@ def test_the_metadata_files_come_from_the_tag_that_ships_them():
     assert '_assets="${url}/raw/v${pkgver}/packaging/linux"' in pkgbuild
     assert "flatcam-plus.desktop::${_assets}/flatcam-plus.desktop" in pkgbuild
     assert "flatcam-plus.metainfo.xml::${_assets}/flatcam-plus.metainfo.xml" in pkgbuild
-    assert "raw/v${pkgver}/assets/resources/app256.png" in pkgbuild
+    assert "raw/v${pkgver}/flatcam_plus/assets/resources/app256.png" in pkgbuild
 
 
 def test_the_srcinfo_matches_the_pkgbuild():

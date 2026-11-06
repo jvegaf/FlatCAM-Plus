@@ -67,6 +67,7 @@ except ImportError as exc:
             "python -m pip install --upgrade --force-reinstall -r requirements.txt"
         )
     raise
+import flatcam_plus
 from flatcam_plus import appTranslation as fcTranslate
 from flatcam_plus.appMain import App
 from flatcam_plus.appGUI import VisPyPatches
@@ -76,6 +77,12 @@ from flatcam_plus.appCommon.recent_projects import load_recent_project_paths
 from flatcam_plus.appGUI.GUIElements import FCMessageBox
 
 from multiprocessing import freeze_support
+
+# The data directories ship inside the package. This module's own ``__file__`` cannot anchor them:
+# as a PyInstaller entry script it resolves to the bundle root rather than to the package, so the
+# package object's own file is the one place that is correct in a checkout, in an installed wheel
+# and in a frozen bundle alike.
+_PACKAGE_DIR = os.path.dirname(os.path.realpath(flatcam_plus.__file__))
 
 MIN_VERSION_MAJOR = 3
 MIN_VERSION_MINOR = 6
@@ -92,7 +99,7 @@ class StartupProjectLauncher(QtWidgets.QDialog):
 
         self.data_path = data_path
         self.selection = None
-        self.base_path = os.path.dirname(os.path.realpath(__file__))
+        self.base_path = _PACKAGE_DIR
         self.resource_location = os.path.join(self.base_path, "assets", "resources")
 
         self.setWindowFlags(
@@ -406,7 +413,7 @@ def main():
         # #######################################################################################################
         # ####### CONFIG FILE WITH PARAMETERS REGARDING PORTABILITY #############################################
         # #######################################################################################################
-        config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config',
+        config_file = os.path.join(_PACKAGE_DIR, 'config',
                                    'configuration.txt')
 
         with open(config_file, 'r') as f:
@@ -423,7 +430,7 @@ def main():
             # data_path = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, None, 0) + '\\FlatCAM'
             data_path = os.path.join(os.getenv('appdata'), 'FlatCAM')
         else:
-            data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config')
+            data_path = os.path.join(_PACKAGE_DIR, 'config')
     else:
         data_path = os.path.expanduser('~') + '/.FlatCAM'
 

@@ -1,9 +1,9 @@
-"""A frozen build must find its data next to the package, not next to the executable.
+"""A frozen build must find its data inside the package, not beside the executable.
 
 PyInstaller 6 lays an onedir bundle out as ``<app>/FlatCAM-Plus`` plus ``<app>/_internal/``, and
-``--add-data`` puts every data directory inside ``_internal`` too. ``_APP_ROOT`` is
-``dirname(dirname(__file__))``, so the package and the data have to stay siblings: this probe builds
-that shape and asserts the application resolves the data from it.
+``--add-data`` puts every data directory inside ``_internal`` too. The application resolves its data
+from the package directory, so the bundle has to place them at ``_internal/flatcam_plus/``: this
+probe builds that shape and asserts the application resolves the data from it.
 
 The source checkout is covered by ``tests/test_app_paths.py``; this is the frozen half, which no
 packaging script could prove before.
@@ -16,19 +16,18 @@ import subprocess
 import sys
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIRECTORIES = ("assets", "preprocessors")
+PACKAGE_DIR = os.path.join(REPO_ROOT, "flatcam_plus")
+DATA_DIRECTORIES = ("assets", "config", "locale", "preprocessors")
 
 
-def test_a_frozen_tree_resolves_the_data_beside_the_package(tmp_path):
+def test_a_frozen_tree_resolves_the_data_inside_the_package(tmp_path):
     internal = tmp_path / "FlatCAM-Plus" / "_internal"
     internal.mkdir(parents=True)
     shutil.copytree(
-        os.path.join(REPO_ROOT, "flatcam_plus"),
+        PACKAGE_DIR,
         internal / "flatcam_plus",
         ignore=shutil.ignore_patterns("__pycache__"),
     )
-    for name in DATA_DIRECTORIES:
-        (internal / name).mkdir()
     # The bundle ships the manifest here too: the version module reads it at import.
     shutil.copy(os.path.join(REPO_ROOT, "pyproject.toml"), internal / "pyproject.toml")
 
@@ -50,7 +49,7 @@ def test_a_frozen_tree_resolves_the_data_beside_the_package(tmp_path):
 
     assert finished.returncode == 0, finished.stderr
     resolved, data_found = finished.stdout.split()
-    assert resolved == os.path.realpath(str(internal))
+    assert resolved == os.path.realpath(str(internal / "flatcam_plus"))
     assert data_found == "True"
 
 
@@ -59,9 +58,13 @@ BUILD_SCRIPTS = (
     os.path.join("packaging", "macos", "build_macos_dmg.sh"),
 )
 
+# ``pyproject.toml`` is the one file that has to stay at the bundle root: the version module reads it
+# from ``sys._MEIPASS``. Everything else has to land inside the package.
+MANIFEST_DESTINATION = "."
 
-def test_the_build_scripts_keep_the_data_inside_the_bundle_root():
-    """PyInstaller puts ``--add-data`` under ``<_internal>/<dest>``, which is what ``_APP_ROOT`` is."""
+
+def test_the_build_scripts_ship_the_data_into_the_package():
+    """PyInstaller puts ``--add-data`` under ``<_internal>/<dest>``, which must be the package."""
     pattern = re.compile(r'--add-data\s+"([^"]+)"')
     for script in BUILD_SCRIPTS:
         with open(os.path.join(REPO_ROOT, script), encoding="utf-8") as handle:
@@ -74,14 +77,21 @@ def test_the_build_scripts_keep_the_data_inside_the_bundle_root():
             assert ".." not in destination, (script, destination)
             assert ";" not in destination, (script, destination)
             assert not destination.startswith("_internal"), (
-                "PyInstaller already nests --add-data under _internal, so this would put the "
-                "data one level below _APP_ROOT",
+                "PyInstaller already nests --add-data under _internal",
+                script,
+                destination,
+            )
+            assert destination == MANIFEST_DESTINATION or destination.startswith(
+                "flatcam_plus/"
+            ), (
+                "the data directories live inside the package, so the bundle destination has to "
+                "match; anything else leaves _APP_ROOT pointing at an empty directory",
                 script,
                 destination,
             )
 
 
-def test_the_windows_helper_keeps_the_data_at_the_bundle_root():
+def test_the_windows_helper_ships_the_data_into_the_package():
     """The Windows script builds its data arguments differently, so it needs its own guard."""
     with open(
         os.path.join(REPO_ROOT, "packaging", "windows", "build_windows_installer.ps1"),
@@ -93,3 +103,7 @@ def test_the_windows_helper_keeps_the_data_at_the_bundle_root():
     for source, destination in pairs:
         assert destination and not destination.startswith("_internal"), (source, destination)
         assert "\\" not in destination and ":" not in destination, (source, destination)
+        assert destination == "pyproject.toml" or destination.startswith("flatcam_plus/"), (
+            source,
+            destination,
+        )

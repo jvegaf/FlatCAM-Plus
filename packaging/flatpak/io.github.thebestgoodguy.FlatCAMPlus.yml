@@ -45,4 +45,4 @@ modules:
       - type: file
         path: ../linux/flatcam-plus.metainfo.xml
       - type: file
-        path: ../../assets/resources/app256.png
+        path: ../../flatcam_plus/assets/resources/app256.png

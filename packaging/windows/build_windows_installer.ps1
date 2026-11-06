@@ -193,7 +193,7 @@ function Compile-Translations {
         return
     }
 
-    Get-ChildItem -Path (Join-Path $RootDir "locale") -Filter "strings.po" -Recurse | ForEach-Object {
+    Get-ChildItem -Path (Join-Path $RootDir "flatcam_plus\locale") -Filter "strings.po" -Recurse | ForEach-Object {
         $output = Join-Path $_.DirectoryName "strings.mo"
         & $msgfmt.Source $_.FullName -o $output
     }
@@ -256,8 +256,8 @@ function New-AppIcon {
 
     $iconDir = Join-Path $RootDir "build\icons"
     $iconPath = Join-Path $iconDir "FlatCAMPlus.ico"
-    $app32Path = Join-Path $RootDir "assets\resources\app32.png"
-    $app48Path = Join-Path $RootDir "assets\resources\app48.png"
+    $app32Path = Join-Path $RootDir "flatcam_plus\assets\resources\app32.png"
+    $app48Path = Join-Path $RootDir "flatcam_plus\assets\resources\app48.png"
 
     New-Item -ItemType Directory -Force -Path $iconDir | Out-Null
 
@@ -330,7 +330,7 @@ function Build-PyInstallerTarget {
     $ortoolsBinaryArgs = Get-OrToolsBinaryArgs $python
 
     $pyInstallerArgs = @(
-        "-m", "PyInstaller", "flatcam.py",
+        "-m", "PyInstaller", "flatcam_plus/launcher.py",
         "--name", "FlatCAMPlus",
         "--windowed",
         "--clean",
@@ -340,10 +340,10 @@ function Build-PyInstallerTarget {
         "--workpath", $workPath,
         "--specpath", $specPath,
         "--add-data", (New-PyInstallerDataArg "pyproject.toml" "pyproject.toml"),
-        "--add-data", (New-PyInstallerDataArg "assets" "assets"),
-        "--add-data", (New-PyInstallerDataArg "config" "config"),
-        "--add-data", (New-PyInstallerDataArg "locale" "locale"),
-        "--add-data", (New-PyInstallerDataArg "preprocessors" "preprocessors"),
+        "--add-data", (New-PyInstallerDataArg "flatcam_plus\assets" "flatcam_plus/assets"),
+        "--add-data", (New-PyInstallerDataArg "flatcam_plus\config" "flatcam_plus/config"),
+        "--add-data", (New-PyInstallerDataArg "flatcam_plus\locale" "flatcam_plus/locale"),
+        "--add-data", (New-PyInstallerDataArg "flatcam_plus\preprocessors" "flatcam_plus/preprocessors"),
         # "libs" is not shipped as data: it is a subpackage of "flatcam_plus", so
         # "--collect-submodules flatcam_plus" below already collects it as code.
         # "appCommon" is a "flatcam_plus" subpackage now; the entry below collects it.

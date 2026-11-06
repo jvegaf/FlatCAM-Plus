@@ -15,7 +15,7 @@ usage() {
 Usage: packaging/macos/build_macos_dmg.sh [options]
 
 Options:
-  --skip-translations   Do not compile locale/*.po files into .mo files.
+  --skip-translations   Do not compile flatcam_plus/locale/*.po files into .mo files.
   --skip-app            Reuse an existing dist/macos/FlatCAM-Plus.app.
   --no-dmg              Build only the .app bundle.
   --no-sign             Do not codesign the .app bundle.
@@ -155,7 +155,7 @@ compile_translations() {
     fi
 
     echo "[INFO] Compiling translations..."
-    find locale -name "strings.po" -print0 |
+    find flatcam_plus/locale -name "strings.po" -print0 |
         while IFS= read -r -d '' po_file; do
             msgfmt "$po_file" -o "${po_file%.po}.mo"
         done
@@ -165,7 +165,7 @@ create_macos_icon() {
     local icon_dir="$ROOT_DIR/build/icons"
     local iconset="$icon_dir/FlatCAMPlus.iconset"
     local icns="$icon_dir/FlatCAMPlus.icns"
-    local source_png="$ROOT_DIR/assets/resources/app256.png"
+    local source_png="$ROOT_DIR/flatcam_plus/assets/resources/app256.png"
 
     if ! command -v sips >/dev/null 2>&1 || ! command -v iconutil >/dev/null 2>&1; then
         return 0
@@ -204,7 +204,7 @@ build_app() {
     icon_path="$(create_macos_icon || true)"
 
     local args=(
-        -m PyInstaller flatcam.py
+        -m PyInstaller flatcam_plus/launcher.py
         --name "$APP_NAME"
         --windowed
         --clean
@@ -216,10 +216,10 @@ build_app() {
         # PyInstaller 6 treats the destination as a directory and appends the basename,
         # so a file is placed with "." as its destination.
         --add-data "$ROOT_DIR/pyproject.toml:."
-        --add-data "$ROOT_DIR/assets:assets"
-        --add-data "$ROOT_DIR/config:config"
-        --add-data "$ROOT_DIR/locale:locale"
-        --add-data "$ROOT_DIR/preprocessors:preprocessors"
+        --add-data "$ROOT_DIR/flatcam_plus/assets:flatcam_plus/assets"
+        --add-data "$ROOT_DIR/flatcam_plus/config:flatcam_plus/config"
+        --add-data "$ROOT_DIR/flatcam_plus/locale:flatcam_plus/locale"
+        --add-data "$ROOT_DIR/flatcam_plus/preprocessors:flatcam_plus/preprocessors"
         # ``libs`` is not shipped as data: it is a subpackage of ``flatcam_plus``, so
         # ``--collect-submodules flatcam_plus`` below already collects it as code.
         --collect-submodules flatcam_plus

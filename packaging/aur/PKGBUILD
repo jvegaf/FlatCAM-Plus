@@ -26,7 +26,7 @@ source=(
     "FlatCAMPlus-${pkgver}-linux-x86_64.tar.gz::${_release}/FlatCAMPlus-${pkgver}-linux-x86_64.tar.gz"
     "flatcam-plus.desktop::${_assets}/flatcam-plus.desktop"
     "flatcam-plus.metainfo.xml::${_assets}/flatcam-plus.metainfo.xml"
-    "flatcam-plus.png::${url}/raw/v${pkgver}/assets/resources/app256.png"
+    "flatcam-plus.png::${url}/raw/v${pkgver}/flatcam_plus/assets/resources/app256.png"
 )
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 
