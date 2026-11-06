@@ -127,3 +127,24 @@ throwaway harness rather than in the product: mutating `app.defaults` directly, 
 startup. Only driving `on_save_button` with the modal restart stubbed produced a trustworthy result.
 Lesson: reproduce with the real entry point, not with an imitation of it. `bfdcf48` now pins that path.
 
+
+**L9** (user decision, verbatim: "2"): native review of this candidate is **declined**. The user is
+recorded as having explicitly left this candidate unreviewed; no review authority was ever created for
+it, so nothing is abandoned, reset or repaired.
+
+Why the review could not run, stated so a future session does not repeat the attempt:
+`gentle_review inspect` returns `review.start` with `base-ref=6e4e7e33` — the point where `dev`
+diverges from `origin/main` — and **that base-ref is not overridable**. START was attempted three times:
+the offered candidate (102 commits, 15 180 lines), with an explicit lens selection (rejected
+`lenses-invalid`, no lineage), and with `baseRef=944cbf5` scoped to this feature (2 713 lines). The two
+valid attempts both stopped at `lens_context_budget_exceeded`: provider-owned reviewer evidence exceeds
+the lens context budget and immutable candidate evidence is never truncated.
+
+A detached worktree at `3e2e45f` was also tried, on the assumption that `baseRef` narrowed the range.
+It does not: the worktree's candidate still resolved to base `6e4e7e33` with the whole-repo path
+inventory, so the attempt was abandoned and the worktree removed. `dev` is unchanged.
+
+Consequence for delivery: native review of this work requires the feature on its own branch off
+`origin/main`, where the base is near and the candidate is ~700 lines. On `dev` it cannot fit, whatever
+the local slicing.
+
