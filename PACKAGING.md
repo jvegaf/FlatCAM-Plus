@@ -2,9 +2,8 @@
 
 This document is for users who clone the repository and want to create their own local distributable build.
 
-FlatCAM Plus is a Python/PyQt application. Build on the target operating system whenever possible:
+FlatCAM Plus is a Python/PyQt application. Windows and Linux are the supported targets; macOS is not supported and its packaging scripts are not maintained. Build on the target operating system whenever possible:
 
-- build macOS packages on macOS;
 - build Linux packages on Linux;
 - build Windows packages on Windows.
 
@@ -43,12 +42,7 @@ Compile translation catalogs before building. The source repository keeps `.po` 
 find flatcam_plus/locale -name "strings.po" -exec sh -c 'msgfmt "$1" -o "${1%.po}.mo"' sh {} \;
 ```
 
-If `msgfmt` is not available, install GNU gettext first. On Ubuntu-like systems use `sudo apt install gettext`. On macOS, install it with Homebrew:
-
-```bash
-brew install gettext
-export PATH="$(brew --prefix gettext)/bin:$PATH"
-```
+If `msgfmt` is not available, install GNU gettext first. On Ubuntu-like systems use `sudo apt install gettext`.
 
 The platform-specific generator scripts below run the translation compilation step automatically when `msgfmt` is available.
 
@@ -124,91 +118,6 @@ To only build the PyInstaller folders without creating installers:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File packaging\windows\build_windows_installer.ps1 -SkipInstaller
-```
-
-## macOS
-
-Install Apple command line tools first:
-
-```bash
-xcode-select --install
-```
-
-Run the one-step DMG generator from the repository root:
-
-```bash
-chmod +x FlatCAMPlus_macos_dmg_generator.command packaging/macos/build_macos_dmg.sh
-./FlatCAMPlus_macos_dmg_generator.command
-```
-
-The script builds the `.app` bundle, creates a local `.icns` icon from the bundled PNG assets, ad-hoc signs the app, and creates a DMG.
-
-The automated outputs are created at:
-
-```text
-dist/macos/FlatCAM-Plus.app
-dist/installer/FlatCAMPlus-<version>-macOS-<arch>.dmg
-```
-
-Useful options:
-
-```bash
-./FlatCAMPlus_macos_dmg_generator.command --no-dmg
-./FlatCAMPlus_macos_dmg_generator.command --no-sign
-./FlatCAMPlus_macos_dmg_generator.command --skip-app
-PYTHON_BIN=/path/to/python3 ./FlatCAMPlus_macos_dmg_generator.command
-```
-
-For Developer ID signing, set `APPLE_DEVELOPER_ID` before running the generator:
-
-```bash
-APPLE_DEVELOPER_ID="Developer ID Application: YOUR NAME" ./FlatCAMPlus_macos_dmg_generator.command
-```
-
-Manual build of the `.app` bundle:
-
-```bash
-python -m PyInstaller flatcam_plus/launcher.py \
-  --name "FlatCAM-Plus" \
-  --windowed \
-  --clean \
-  --noconfirm \
-  --icon "flatcam_plus/assets/resources/app256.png" \
-  --add-data "pyproject.toml:." \
-  --add-data "flatcam_plus/assets:flatcam_plus/assets" \
-  --add-data "flatcam_plus/config:flatcam_plus/config" \
-  --add-data "flatcam_plus/locale:flatcam_plus/locale" \
-  --add-data "flatcam_plus/preprocessors:flatcam_plus/preprocessors" \
-  --collect-submodules flatcam_plus \
-  --collect-all PyQt6 \
-  --collect-all vispy \
-  --collect-all shapely \
-  --collect-all rasterio
-```
-
-The app bundle is created at:
-
-```text
-dist/FlatCAM-Plus.app
-```
-
-For a local unsigned package, ad-hoc sign the bundle and create a DMG:
-
-```bash
-codesign --force --deep --sign - "dist/FlatCAM-Plus.app"
-hdiutil create -volname "FlatCAM Plus" \
-  -srcfolder "dist/FlatCAM-Plus.app" \
-  -ov \
-  -format UDZO \
-  "FlatCAM-Plus-macOS.dmg"
-```
-
-For public macOS distribution, use an Apple Developer ID certificate and notarize the DMG with Apple:
-
-```bash
-codesign --force --deep --options runtime --sign "Developer ID Application: YOUR NAME" "dist/FlatCAM-Plus.app"
-xcrun notarytool submit "FlatCAM-Plus-macOS.dmg" --apple-id "you@example.com" --team-id "TEAMID" --wait
-xcrun stapler staple "FlatCAM-Plus-macOS.dmg"
 ```
 
 ## Linux

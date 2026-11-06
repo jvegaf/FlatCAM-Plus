@@ -2,7 +2,8 @@
 
 Legacy PyQt6 desktop CAM application for PCB/CNC manufacturing. The whole
 application — code and runtime data — lives in the `flatcam_plus/` package, which
-is installable and exposes the `flatcam-plus` console script.
+is installable and exposes the `flatcam-plus` console script. Windows and Linux
+are the supported targets; macOS is not supported.
 
 ## Run and test
 
@@ -121,9 +122,9 @@ checkout, an installed wheel and a frozen bundle all resolve the same paths.
   `pyproject.toml` and the release date in `version.py` together.
 - **Persisted state**: QSettings organization/application is
   `"Open Source"` / `"FlatCAM_Plus"`. User data and `log.txt` go to `~/.FlatCAM`
-  on Linux/macOS and `%APPDATA%\FlatCAM` on Windows.
+  on Linux and `%APPDATA%\FlatCAM` on Windows.
 - **`flatcam_plus/config/configuration.txt`** (`portable`, `headless`) is read only on Windows;
-  Linux/macOS ignore it and always use `~/.FlatCAM`.
+  Linux ignores it and always uses `~/.FlatCAM`.
 - **Windows-first code**: `flatcam_plus/launcher.py` contains a PyQt6 DLL bootstrap, and some
   path handling hardcodes backslashes. Verify Linux behavior instead of assuming
   it works when touching startup/config code.
@@ -136,7 +137,7 @@ checkout, an installed wheel and a frozen bundle all resolve the same paths.
   vispy, shapely, rasterio, OpenGL, and matplotlib, plus ortools via
   `$ortoolsBinaryArgs`.
 - **Root build wrappers**: `FlatCAMPlus_linux_portable_generator.sh`,
-  `FlatCAMPlus_macos_dmg_generator.command`, `FlatCAMPlus_x32_installer_generator.bat`,
+  `FlatCAMPlus_x32_installer_generator.bat`,
   `FlatCAMPlus_x64_installer_generator.bat` and `run_flatcam.bat` are the
   double-click entry points. They resolve `dirname $0` and delegate into
   `packaging/`, so they must stay at the repository root. Build logic belongs in

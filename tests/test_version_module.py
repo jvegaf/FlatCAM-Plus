@@ -18,7 +18,6 @@ import pytest
 # Scripts that only consume the version: they must get it from pyproject.toml.
 VERSION_READERS = (
     os.path.join("packaging", "linux", "build_linux_portable.sh"),
-    os.path.join("packaging", "macos", "build_macos_dmg.sh"),
     os.path.join("packaging", "windows", "build_windows_installer.ps1"),
     "FlatCAMPlus_x64_installer_generator.bat",
 )
@@ -30,7 +29,6 @@ VERSION_WRITER = os.path.join("packaging", "windows", "update_version.ps1")
 # wrapper only drives the Windows installer script, so it builds nothing itself.
 BUNDLE_SCRIPTS = (
     os.path.join("packaging", "linux", "build_linux_portable.sh"),
-    os.path.join("packaging", "macos", "build_macos_dmg.sh"),
     os.path.join("packaging", "windows", "build_windows_installer.ps1"),
     "build_standalone.ps1",
 )

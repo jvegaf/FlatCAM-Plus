@@ -55,7 +55,6 @@ def test_a_frozen_tree_resolves_the_data_inside_the_package(tmp_path):
 
 BUILD_SCRIPTS = (
     os.path.join("packaging", "linux", "build_linux_portable.sh"),
-    os.path.join("packaging", "macos", "build_macos_dmg.sh"),
 )
 
 # ``pyproject.toml`` is the one file that has to stay at the bundle root: the version module reads it

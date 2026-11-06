@@ -347,7 +347,6 @@ Every tagged release publishes ready-to-install artifacts: a Windows installer, 
 
 Packaging should be done on the target operating system because PyQt, OpenGL/VisPy, GDAL, Rasterio, and other native dependencies are platform-specific.
 
-- macOS users can run `FlatCAMPlus_macos_dmg_generator.command` to build a `.app` bundle and `.dmg`.
 - Linux users can run `FlatCAMPlus_linux_portable_generator.sh` to build a portable folder and `.tar.gz` archive.
 - Windows users can build x32 and x64 Inno Setup installers from the separate `FlatCAMPlus_x32_installer_generator.bat` and `FlatCAMPlus_x64_installer_generator.bat` files.
 
