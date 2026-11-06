@@ -147,3 +147,14 @@ def test_a_new_process_boots_with_the_persisted_theme(tmp_path):
     assert set(second["readout_toolbar_styles"]) == {"ToolButtonIconOnly"}, (
         "readout toolbars should stay icon-only: %r" % (second["readout_toolbar_styles"],)
     )
+
+    # The bottom dock hosts tabs, and the Log tab is actually wired to the logging system:
+    # a record written through logging must reach the view, not just the file log.
+    assert second["dock_widget"] == "QTabWidget", (
+        "the dock still holds a single widget: %r" % (second["dock_widget"],)
+    )
+    assert "Log" in second["shell_tabs"], "no Log tab: %r" % (second["shell_tabs"],)
+    assert second["shell_terminal"] == "FCShell", (
+        "the Tcl shell is not reachable through the tabs: %r" % (second["shell_terminal"],)
+    )
+    assert second["log_captured"] is True, "the Log tab did not receive a logging record"

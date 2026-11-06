@@ -1106,6 +1106,20 @@ class MainGUI(QtWidgets.QMainWindow):
         self.toolbar_center_widget = None
         self.toolbar_center_layout = None
 
+    def attach_log_view(self):
+        """Feed the Log tab from the application logger, once per window.
+
+        ``AppLogging`` writes to ``logging.getLogger('base')``, so attaching a handler there
+        mirrors the same records the file log receives.
+        """
+        import logging
+
+        if getattr(self, "_log_handler", None) is not None:
+            return
+
+        self._log_handler = AppLogHandler(self.log_view, logging.INFO)
+        logging.getLogger("base").addHandler(self._log_handler)
+
     def add_shell_tab(self, widget, label):
         """Put a widget in the bottom dock's tab bar, replacing any tab with the same label.
 
@@ -3088,6 +3102,11 @@ class MainGUI(QtWidgets.QMainWindow):
         self.shell_tabs.setObjectName("shell_tabs")
         self.shell_tabs.setDocumentMode(True)
         self.shell_dock.setWidget(self.shell_tabs)
+
+        self.log_view = AppLogView()
+        self.add_shell_tab(self.log_view, _("Log"))
+        self.attach_log_view()
+
         self.shell_dock.hide()
 
         # ########################################################################

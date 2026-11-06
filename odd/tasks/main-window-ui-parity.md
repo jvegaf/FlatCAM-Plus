@@ -106,3 +106,17 @@ that minimum height — the user chose "move it" without that evidence, so this 
 keep the plugin console where it is, mirror its lines into a dock-owned console, or accept the
 plugin panel changing shape.
 
+
+## T2 second slice
+
+Done: the dock's **Log** tab. `AppLogView` (GUIElements.py) is a bounded read-only view
+(`setMaximumBlockCount(2000)`) fed by `AppLogHandler`, which attaches to `logging.getLogger('base')`
+— the logger `AppLogging` already writes to — at INFO and above. Records cross threads through a queued
+signal, because worker threads produce them and a handler must never touch a widget directly.
+
+Verified offscreen: tabs are `['Log', 'Tcl Shell']`, a record sent through `logging` reaches the view,
+the view grows, DEBUG is filtered by the handler level, and `shell_terminal()` still finds the FCShell.
+
+Both are now pinned by the existing subprocess boot probe, so a regression in the dock wiring or in the
+log attachment fails a test rather than waiting to be noticed.
+

@@ -6549,3 +6549,55 @@ def remove_duplicate_properties(css_string):
             unique_rules.append(unique_rule)
 
     return "}".join(unique_rules)
+
+
+class AppLogView(QTextEdit):
+    """Read-only view of the application log, fed from the logging system.
+
+    Log records are produced from worker threads, so they are marshalled through a queued
+    signal: a logging handler must never touch a widget from another thread.
+    """
+
+    record = pyqtSignal(str, int, str)
+
+    LEVEL_COLORS = {
+        logging.DEBUG: "#808080",
+        logging.INFO: "#d4d4d4",
+        logging.WARNING: "#d7ba7d",
+        logging.ERROR: "#f44747",
+        logging.CRITICAL: "#f44747",
+    }
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("app_log_view")
+        self.setReadOnly(True)
+        # A long session writes a lot of lines; keep the view bounded.
+        self.document().setMaximumBlockCount(2000)
+        self.record.connect(self._append_record, Qt.ConnectionType.QueuedConnection)
+
+    @pyqtSlot(str, int, str)
+    def _append_record(self, when, levelno, message):
+        color = self.LEVEL_COLORS.get(levelno, "#d4d4d4")
+        self.append(
+            '<span style="color:#808080;">%s</span> '
+            '<span style="color:%s;">%s</span>' % (html.escape(when), color, html.escape(message))
+        )
+        self.moveCursor(QTextCursor.MoveOperation.End)
+
+
+class AppLogHandler(logging.Handler):
+    """Feeds an :class:`AppLogView` from the logging system, safely from any thread."""
+
+    def __init__(self, view, level=logging.INFO):
+        super().__init__(level=level)
+        self._view = view
+
+    def emit(self, record):
+        import time
+
+        try:
+            when = time.strftime("%H:%M:%S", time.localtime(record.created))
+            self._view.record.emit(when, record.levelno, record.getMessage())
+        except Exception:
+            self.handleError(record)

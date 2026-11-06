@@ -40,7 +40,18 @@ def main():
     hosted = [tb for tb in ui.findChildren(QtWidgets.QToolBar) if host.isAncestorOf(tb)]
     outside = [tb for tb in ui.findChildren(QtWidgets.QToolBar) if not host.isAncestorOf(tb)]
 
+    import logging
+
+    logging.getLogger("base").info("probe-record-sentinel")
+    qapp.processEvents()
+    log_text = ui.log_view.toPlainText() if hasattr(ui, "log_view") else ""
+    terminal = ui.shell_terminal() if hasattr(ui, "shell_terminal") else None
+
     result = {
+        "shell_tabs": [ui.shell_tabs.tabText(i) for i in range(ui.shell_tabs.count())],
+        "dock_widget": type(ui.shell_dock.widget()).__name__,
+        "log_captured": "probe-record-sentinel" in log_text,
+        "shell_terminal": type(terminal).__name__ if terminal is not None else None,
         "stored_menu_show_text": QtCore.QSettings(
             "Open Source", "FlatCAM_Plus").value("menu_show_text", type=str),
         "hosted_toolbar_styles": [tb.toolButtonStyle().name for tb in hosted],
