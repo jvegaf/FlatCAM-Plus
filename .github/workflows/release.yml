@@ -84,10 +84,16 @@ jobs:
       - name: Cache the wheel downloads
         uses: actions/cache@v4
         with:
-          path: ~/.cache/uv
+          # Inside the workspace on purpose: docker creates a missing bind source as root,
+          # and the build runs as the unprivileged runner, so a $HOME cache can be
+          # unwritable whenever the cache misses.
+          path: .uv-cache
           key: uv-${{ hashFiles('uv.lock') }}
           restore-keys: |
             uv-
+
+      - name: Prepare the cache directory
+        run: mkdir -p .uv-cache
 
       - name: Build the bundle against the old glibc
         run: |
@@ -99,7 +105,7 @@ jobs:
             -e HOME=/tmp \
             -e UV_PYTHON_PREFERENCE=only-managed \
             -e UV_CACHE_DIR=/tmp/uv-cache \
-            -v "$HOME/.cache/uv:/tmp/uv-cache" \
+            -v "$PWD/.uv-cache:/tmp/uv-cache" \
             -v "$PWD:/work" -w /work "${MANYLINUX_IMAGE}" /bin/bash -lc '
             set -euo pipefail
             curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/tmp/uv sh
