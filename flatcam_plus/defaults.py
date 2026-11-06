@@ -4,10 +4,11 @@ import sys
 from copy import deepcopy
 
 
-FIXED_LIGHT_UI_DEFAULTS = {
-    "global_appearance": 'light',
+# Non-theme UI policy applied on every start and on every preferences save: the PCB canvas stays
+# dark, the layout stays standard and the selection/cursor colours stay fixed. The UI theme itself
+# is a user choice (`global_appearance` / `global_theme`) and is deliberately not listed here.
+FIXED_UI_DEFAULTS = {
     "global_dark_canvas": True,
-    "global_theme": 'light',
     "global_gui_layout": 0,
     "global_layout": "standard",
     "global_sel_fill": '#a5a5ffbf',

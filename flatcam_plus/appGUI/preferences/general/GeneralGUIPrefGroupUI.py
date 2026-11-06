@@ -36,27 +36,29 @@ class GeneralGUIPrefGroupUI(OptionsGroupUI):
         grid0 = GLay(v_spacing=5, h_spacing=3)
         par_frame.setLayout(grid0)
 
-        # Kept as non-visible compatibility fields. The application theme is fixed to Light.
-        self.appearance_label = FCLabel('%s' % _("Theme"), bold=True)
+        # Theme selection. Both choices are real: the restart applies the new resources and
+        # stylesheets, so the choice is never force-reverted to light.
+        self.appearance_label = FCLabel('%s:' % _("Theme"))
+        self.appearance_label.setToolTip(
+            _("Select the theme for the application interface.\n"
+              "The application will restart after change.")
+        )
         self.appearance_radio = RadioSet([
-            {"label": _("Light"), "value": "light"}
+            {"label": _("Light"), "value": "light"},
+            {"label": _("Dark"), "value": "dark"}
         ], compact=True)
         self.appearance_radio.set_value("light")
-        self.appearance_label.hide()
-        self.appearance_radio.hide()
+        self.appearance_radio.setToolTip(
+            _("Select the theme for the application interface.\n"
+              "The application will restart after change.")
+        )
+        grid0.addWidget(self.appearance_label, 0, 0)
+        grid0.addWidget(self.appearance_radio, 0, 1, 1, 2)
 
         # Kept as a non-visible compatibility field for older preferences code.
         # Canvas darkness is fixed to the Light theme policy.
         self.dark_canvas_cb = FCCheckBox('%s' % _('Dark Canvas'))
         self.dark_canvas_cb.hide()
-
-        # self.theme_button = FCButton(_("Apply Theme"))
-        # self.theme_button.setToolTip(
-        #     _("Select a theme for FlatCAM.\n"
-        #       "It will theme the plot area.\n"
-        #       "The application will restart after change.")
-        # )
-        # grid0.addWidget(self.theme_button, 2, 0, 1, 3)
 
         # Kept as a non-visible compatibility field. The application layout is fixed to standard.
         self.layout_combo = FCComboBox()

@@ -4,7 +4,7 @@ from PyQt6.QtCore import QSettings
 
 import os
 
-from flatcam_plus.defaults import AppDefaults, FIXED_LIGHT_UI_DEFAULTS
+from flatcam_plus.defaults import AppDefaults, FIXED_UI_DEFAULTS
 from flatcam_plus.appGUI.PanelStyles import apply_modern_preferences_style
 from flatcam_plus.appGUI.GUIElements import FCMessageBox
 
@@ -88,6 +88,7 @@ class PreferencesUIManager(QtCore.QObject):
 
             # General GUI Preferences
             "global_appearance": self.ui.general_pref_form.general_gui_group.appearance_radio,
+            "global_theme": self.ui.general_pref_form.general_gui_group.appearance_radio,
             "global_layout": self.ui.general_pref_form.general_gui_group.layout_combo,
             "global_hover_shape": self.ui.general_pref_form.general_gui_group.hover_cb,
             "global_selection_shape": self.ui.general_pref_form.general_gui_group.selection_cb,
@@ -721,8 +722,8 @@ class PreferencesUIManager(QtCore.QObject):
             except Exception as e:
                 self.ui.app.log.error("App.defaults_read_form() --> %s" % str(e))
 
-    def apply_fixed_light_ui_defaults(self):
-        for option, value in FIXED_LIGHT_UI_DEFAULTS.items():
+    def apply_fixed_ui_defaults(self):
+        for option, value in FIXED_UI_DEFAULTS.items():
             self.defaults[option] = value
             self.ui.app.options[option] = value
 
@@ -794,7 +795,7 @@ class PreferencesUIManager(QtCore.QObject):
 
         self.pref_connect()
 
-        self.apply_fixed_light_ui_defaults()
+        self.apply_fixed_ui_defaults()
 
         # Initialize hidden color boxes used by the defaults compatibility layer.
         self.__init_color_pickers()
@@ -1098,6 +1099,24 @@ class PreferencesUIManager(QtCore.QObject):
             self.defaults['tools_film_color'])
 
 
+    def _confirm_restart(self):
+        """Ask for confirmation on a change that only takes effect after an application restart."""
+        msgbox = FCMessageBox(parent=self.ui)
+        title = _("Application will restart")
+        txt = _("Are you sure you want to continue?")
+        msgbox.setWindowTitle(title)  # taskbar still shows it
+        msgbox.setWindowIcon(QtGui.QIcon(self.ui.app.resource_location + '/app128.png'))
+        msgbox.setText('<b>%s</b>' % title)
+        msgbox.setInformativeText(txt)
+        msgbox.setIcon(QtWidgets.QMessageBox.Icon.Question)
+
+        bt_yes = msgbox.addButton(_('Yes'), QtWidgets.QMessageBox.ButtonRole.YesRole)
+        msgbox.addButton(_('Cancel'), QtWidgets.QMessageBox.ButtonRole.NoRole)
+
+        msgbox.setDefaultButton(bt_yes)
+        msgbox.exec()
+        return msgbox.clickedButton() == bt_yes
+
     def on_save_button(self, save_to_file=True):
         self.ui.app.log.debug("on_save_button() --> Applying preferences to file.")
 
@@ -1121,51 +1140,38 @@ class PreferencesUIManager(QtCore.QObject):
         # make sure we update the self.current_defaults dict used to undo changes to self.defaults
         self.defaults.current_defaults.update(self.defaults)
 
-        # Theme/canvas are fixed to Light. Keep QSettings normalized without exposing a preference.
-        appearance_settings = QtCore.QSettings("Open Source", "FlatCAM_Plus")
-        appearance_settings.setValue('appearance', 'light')
-        appearance_settings.setValue('theme', 'light')
-        appearance_settings.setValue('dark_canvas', False)
-        should_restart = False
-        self.ui.general_pref_form.general_gui_group.appearance_radio.set_value('light')
-
+        # The theme and the graphic engine are only read once at startup, so changing either one
+        # asks for the restart that will actually apply it.
         ge = self.defaults["global_graphic_engine"]
         ge_val = self.ui.general_pref_form.general_app_group.ge_radio.get_value()
 
-        if ge != ge_val:
-            msgbox = FCMessageBox(parent=self.ui)
-            title = _("Application will restart")
-            txt = _("Are you sure you want to continue?")
-            msgbox.setWindowTitle(title)  # taskbar still shows it
-            msgbox.setWindowIcon(QtGui.QIcon(self.ui.app.resource_location + '/app128.png'))
-            msgbox.setText('<b>%s</b>' % title)
-            msgbox.setInformativeText(txt)
-            msgbox.setIcon(QtWidgets.QMessageBox.Icon.Question)
+        theme = self.defaults["global_theme"]
+        theme_val = self.ui.general_pref_form.general_gui_group.appearance_radio.get_value()
+        if theme_val is None:
+            # A preferences file written before the two-theme control may hold a value the radio
+            # does not list; treat it as unchanged instead of prompting a bogus restart.
+            theme_val = theme
 
-            bt_yes = msgbox.addButton(_('Yes'), QtWidgets.QMessageBox.ButtonRole.YesRole)
-            msgbox.addButton(_('Cancel'), QtWidgets.QMessageBox.ButtonRole.NoRole)
-
-            msgbox.setDefaultButton(bt_yes)
-            msgbox.exec()
-            response = msgbox.clickedButton()
-
-            # This will write the setting to the platform specific storage.
-            del appearance_settings
-
-            if response == bt_yes:
-                self.defaults["global_graphic_engine"] = ge_val
+        should_restart = False
+        if ge != ge_val or theme != theme_val:
+            if self._confirm_restart():
+                if ge != ge_val:
+                    self.defaults["global_graphic_engine"] = ge_val
+                if theme != theme_val:
+                    self.defaults["global_theme"] = theme_val
                 should_restart = True
             else:
-                self.ui.general_pref_form.general_app_group.ge_radio.set_value(ge)
-        else:
-            del appearance_settings
+                if ge != ge_val:
+                    self.ui.general_pref_form.general_app_group.ge_radio.set_value(ge)
+                if theme != theme_val:
+                    self.ui.general_pref_form.general_gui_group.appearance_radio.set_value(theme)
 
         # #############################################################################################################
         # ############################  Here is done the actual preferences updates  ##################################
         # #############################################################################################################
         # update the `defaults` dict from the Preferences UI form
         self.defaults_read_form()
-        self.apply_fixed_light_ui_defaults()
+        self.apply_fixed_ui_defaults()
         # Apply the `defaults` dict to project options
         self.ui.app.options.update(self.defaults)
         # #############################################################################################################
@@ -1219,7 +1225,7 @@ class PreferencesUIManager(QtCore.QObject):
         """
         self.ui.app.log.debug("on_restore_defaults_preferences()")
         self.defaults.reset_to_factory_defaults()
-        self.apply_fixed_light_ui_defaults()
+        self.apply_fixed_ui_defaults()
         self.defaults_write_form()
         self.on_preferences_edited()
         self.ui.units_label.setText("[mm]")
@@ -1243,7 +1249,7 @@ class PreferencesUIManager(QtCore.QObject):
         if data_path is None:
             data_path = self.data_path
 
-        self.apply_fixed_light_ui_defaults()
+        self.apply_fixed_ui_defaults()
         self.defaults.propagate_defaults()
 
         # Save the options to disk
@@ -1373,7 +1379,7 @@ class PreferencesUIManager(QtCore.QObject):
         self.defaults_write_form(source_dict=self.defaults.current_defaults)
 
         self.defaults.update(self.defaults.current_defaults)
-        self.apply_fixed_light_ui_defaults()
+        self.apply_fixed_ui_defaults()
 
         # Preferences save, update the color of the Preferences Tab text
         for idx in range(self.ui.plot_tab_area.count()):

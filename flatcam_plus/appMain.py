@@ -79,7 +79,7 @@ from flatcam_plus.appHandlers.appEdit import appEditor
 from flatcam_plus.appDatabase import ToolsDB2
 
 # App defaults (preferences)
-from flatcam_plus.defaults import AppDefaults, FIXED_LIGHT_UI_DEFAULTS
+from flatcam_plus.defaults import AppDefaults, FIXED_UI_DEFAULTS
 from flatcam_plus.defaults import AppOptions
 
 # App Objects
@@ -607,11 +607,13 @@ class App(QtCore.QObject):
 
         # self.preferencesUiManager.show_preferences_gui()
 
-        # GUI theme/layout policy: light UI, dark PCB-style canvas and standard layout only.
-        theme = 'light'
-        for opt_key, opt_val in FIXED_LIGHT_UI_DEFAULTS.items():
+        # GUI canvas/layout policy: dark PCB-style canvas and standard layout.
+        for opt_key, opt_val in FIXED_UI_DEFAULTS.items():
             self.options[opt_key] = deepcopy(opt_val)
             self.defaults[opt_key] = deepcopy(opt_val)
+
+        # The UI theme is the user's choice; honour the persisted one instead of forcing it.
+        theme = self.options["global_theme"]
 
         gui_settings = QSettings("Open Source", "FlatCAM_Plus")
         gui_settings.setValue('layout', self.options["global_layout"])
