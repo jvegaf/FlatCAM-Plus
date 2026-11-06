@@ -1,10 +1,11 @@
 """FlatCAM Plus package.
 
-The modules that used to live at the repository root move in here phase by phase, together with
-the two vendored dependency packages, ``descartes`` and ``libs``, and then the application
-packages, starting with ``appCommon``. ``appMain`` is the application controller the root
-``flatcam.py`` launcher instantiates; the data directories it resolves for itself (``assets/``,
-``locale/``, ``preprocessors/``, ``config/``) stay beside the package, so ``App.app_home`` is
-anchored to the package's parent.
-See ``odd/tasks/repo-structure-cleanup.md`` and ``odd/tasks/package-consolidation.md``.
+Everything the application needs at runtime lives in here: the modules that used to sit at the
+repository root, the two vendored dependency packages (``descartes`` and ``libs``), the
+application packages, and the data directories (``assets/``, ``locale/``, ``preprocessors/``,
+``config/``). ``flatcam_plus.launcher`` is the process entry point the ``flatcam-plus`` console
+script and ``python -m flatcam_plus`` both call; it instantiates ``App`` from ``appMain``. The
+package is installable, so ``App.app_home`` is the package directory and resolves the same way in
+a checkout, in an installed wheel and in a frozen bundle.
+See ``odd/tasks/package-homogenization.md``.
 """

@@ -1,11 +1,11 @@
-"""The locale directory must resolve from the application root, not from the module file.
+"""The locale directory must resolve from the package directory, not from the process CWD.
 
 ``appTranslation.load_languages()`` used to derive ``locale/`` from
-``os.path.dirname(os.path.abspath(__file__))`` with a silent ``parents[1]`` fallback. That
-worked only while the module sat at the repository root: one level deeper the first candidate
-points at ``flatcam_plus/locale``, which does not exist, and the failure is invisible because an
-empty language list simply leaves the UI in English. T4.5 moves the module, so the lookup is
-anchored to the directory that actually holds ``locale/`` and pinned here.
+``os.path.dirname(os.path.abspath(__file__))`` with a silent ``parents[1]`` fallback, which only
+worked while ``locale/`` sat beside the package. The translation tree now ships inside the
+package, so the first candidate is the package's own ``locale/`` and it resolves in a checkout,
+in an installed wheel and in a frozen bundle alike. An empty language list would be invisible:
+it just leaves the UI in English.
 """
 
 import os
@@ -13,10 +13,11 @@ import os
 import flatcam_plus.appTranslation as app_translation
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PACKAGE_DIR = os.path.join(REPO_ROOT, "flatcam_plus")
 
 
-def test_languages_dir_is_anchored_to_the_application_root():
-    assert app_translation.languages_dir() == os.path.join(REPO_ROOT, "locale")
+def test_languages_dir_is_anchored_to_the_package_directory():
+    assert app_translation.languages_dir() == os.path.join(PACKAGE_DIR, "locale")
 
 
 def test_languages_dir_is_absolute_and_survives_a_cwd_change(tmp_path, monkeypatch):
@@ -33,17 +34,18 @@ def test_load_languages_finds_every_shipped_translation():
 
 
 def test_a_frozen_library_layout_still_finds_the_shipped_translations(tmp_path, monkeypatch):
-    """A frozen build that unpacks the package inside ``lib/`` keeps ``locale/`` at the app root.
+    """A frozen build that unpacks the package inside ``lib/`` keeps ``locale/`` inside it.
 
-    The pre-move module reached it with ``Path(__file__).parents[1]``; the module now sits one
-    level deeper, so the same directory is one level further up.
+    The translation tree ships as package data, so it travels with the package rather than
+    staying at the application root of whatever directory the bundle unpacks into.
     """
 
     app_root = tmp_path / "app"
-    (app_root / "lib" / "flatcam_plus").mkdir(parents=True)
+    package = app_root / "lib" / "flatcam_plus"
+    package.mkdir(parents=True)
     for code in app_translation.languages_dict:
-        (app_root / "locale" / code).mkdir(parents=True)
-    frozen_module = app_root / "lib" / "flatcam_plus" / "appTranslation.py"
+        (package / "locale" / code).mkdir(parents=True)
+    frozen_module = package / "appTranslation.py"
     frozen_module.write_text("", encoding="utf-8")
 
     monkeypatch.setattr(app_translation, "__file__", str(frozen_module))

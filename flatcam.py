@@ -81,7 +81,7 @@ class StartupProjectLauncher(QtWidgets.QDialog):
 
         self.data_path = data_path
         self.selection = None
-        self.base_path = os.path.dirname(os.path.realpath(__file__))
+        self.base_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "flatcam_plus")
         self.resource_location = os.path.join(self.base_path, "assets", "resources")
 
         self.setWindowFlags(
@@ -394,12 +394,14 @@ if __name__ == '__main__':
         # #######################################################################################################
         # ####### CONFIG FILE WITH PARAMETERS REGARDING PORTABILITY #############################################
         # #######################################################################################################
-        config_file = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '\\config\\configuration.txt'
+        config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'flatcam_plus',
+                                   'config', 'configuration.txt')
         try:
             with open(config_file, 'r'):
                 pass
         except FileNotFoundError:
-            config_file = os.path.dirname(os.path.realpath(__file__)) + '\\config\\configuration.txt'
+            config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'flatcam_plus',
+                                       'config', 'configuration.txt')
 
         with open(config_file, 'r') as f:
             for line in f:
@@ -415,7 +417,7 @@ if __name__ == '__main__':
             # data_path = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, None, 0) + '\\FlatCAM'
             data_path = os.path.join(os.getenv('appdata'), 'FlatCAM')
         else:
-            data_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '\\config'
+            data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'flatcam_plus', 'config')
     else:
         data_path = os.path.expanduser('~') + '/.FlatCAM'
 

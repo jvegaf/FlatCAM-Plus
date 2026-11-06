@@ -122,12 +122,12 @@ import gettext
 from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
-# ``flatcam_plus/`` is a package: the data directories the application reads at startup
-# (``assets/``, ``locale/``, ``preprocessors/``, ``config/``) sit beside the package, not inside
-# it, so every path this module resolves for itself is anchored to the package's parent. Using
-# this module's own directory would silently repoint them at ``flatcam_plus/``, and the only
-# symptom would be a logged preprocessor load failure.
-_APP_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+# ``flatcam_plus/`` is a package and it ships everything the application reads at startup
+# (``assets/``, ``locale/``, ``preprocessors/``, ``config/``) as package data, so every path this
+# module resolves for itself is anchored to its own directory. That anchor holds unchanged in a
+# source checkout, in an installed wheel and in a frozen bundle, where PyInstaller lays the data
+# out under ``<_internal>/flatcam_plus/``.
+_APP_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 
 fcTranslate.apply_language('strings')
@@ -485,13 +485,7 @@ class App(QtCore.QObject):
             # #######################################################################################################
             # ####### CONFIG FILE WITH PARAMETERS REGARDING PORTABILITY #############################################
             # #######################################################################################################
-            config_file = os.path.dirname(_APP_ROOT) + '\\config\\configuration.txt'
-            try:
-                with open(config_file, 'r'):
-                    pass
-            except FileNotFoundError:
-                config_file = _APP_ROOT + '\\config\\configuration.txt'
-
+            config_file = os.path.join(_APP_ROOT, 'config', 'configuration.txt')
             try:
                 with open(config_file, 'r') as f:
                     try:
@@ -517,7 +511,7 @@ class App(QtCore.QObject):
                 # self.data_path = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, None, 0) + '\\FlatCAM'
                 self.data_path = os.path.join(os.getenv('appdata'), 'FlatCAM')
             else:
-                self.data_path = os.path.dirname(_APP_ROOT) + '\\config'
+                self.data_path = os.path.join(_APP_ROOT, 'config')
 
             self.os = 'windows'
         else:  # Linux/Unix/MacOS
@@ -3930,12 +3924,10 @@ class App(QtCore.QObject):
             return
 
         # test if the app was frozen and choose the path for the configuration file
-        if getattr(sys, "frozen", False) is True:
-            current_data_path = os.path.dirname(_APP_ROOT) + '\\config'
-        else:
-            current_data_path = _APP_ROOT + '\\config'
+        # ``config/`` ships inside the package, so the checkout and the frozen bundle agree.
+        current_data_path = os.path.join(_APP_ROOT, 'config')
 
-        config_file = current_data_path + '\\configuration.txt'
+        config_file = os.path.join(current_data_path, 'configuration.txt')
         try:
             with open(config_file, 'r') as f:
                 try:

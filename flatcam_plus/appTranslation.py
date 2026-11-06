@@ -63,11 +63,11 @@ def isAdmin():
 def _application_dir():
     """The directory that holds the application's data directories (``locale``, ``assets``).
 
-    Anchored to the file location instead of the process CWD, and one level above this module
-    because the module lives inside the ``flatcam_plus`` package. In a build that unpacks the
-    package beside ``locale/`` (PyInstaller onefile), the same depth holds.
+    Anchored to the file location instead of the process CWD. The translation tree ships as
+    package data, so the module's own directory is the one that holds ``locale/`` in a checkout,
+    in an installed wheel and in a frozen bundle alike.
     """
-    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 def _locale_candidates():
@@ -76,7 +76,7 @@ def _locale_candidates():
     The second candidate covers frozen builds that unpack the package inside a library directory
     (``<app>/lib/flatcam_plus/...``) and keep ``locale/`` at the application root: while this
     module lived at the repository root, ``Path(__file__).parents[1]`` reached that directory, and
-    after the move the same place is one level further up.
+    it stays as a fallback for bundles built before the data moved into the package.
     """
     application_dir = _application_dir()
     return [

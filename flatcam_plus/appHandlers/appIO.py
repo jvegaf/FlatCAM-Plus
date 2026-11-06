@@ -1208,11 +1208,9 @@ class appIO(QtCore.QObject):
         _filter_ = "TCL script .FlatScript (*.FlatScript);;TCL script .tcl (*.TCL);;TCL script .txt (*.TXT);;" \
                    "All Files (*.*)"
 
-        # test if the app was frozen and choose the path for the configuration file
-        if getattr(sys, "frozen", False) is True:
-            example_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '\\assets\\examples'
-        else:
-            example_path = os.path.dirname(os.path.realpath(__file__)) + '\\assets\\examples'
+        # ``assets/examples`` ships as package data, so the frozen and source layouts agree.
+        example_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'assets', 'examples')
 
         if name:
             filenames = [name]
