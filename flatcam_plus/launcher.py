@@ -1,4 +1,15 @@
 
+"""Process entry point for FlatCAM Plus.
+
+``main()`` owns everything that belongs to the process rather than to the application controller:
+the Windows PyQt6 DLL bootstrap, translation activation, the global exception hook and its log
+file, the ``QApplication`` with its style and font, the ``StartupProjectLauncher`` dialog, and the
+``App`` instance from :mod:`flatcam_plus.appMain`.
+
+Reached through the ``flatcam-plus`` console script, through ``python -m flatcam_plus``, and as the
+PyInstaller entry point for the frozen bundles.
+"""
+
 import sys
 import os
 import traceback
@@ -81,7 +92,7 @@ class StartupProjectLauncher(QtWidgets.QDialog):
 
         self.data_path = data_path
         self.selection = None
-        self.base_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "flatcam_plus")
+        self.base_path = os.path.dirname(os.path.realpath(__file__))
         self.resource_location = os.path.join(self.base_path, "assets", "resources")
 
         self.setWindowFlags(
@@ -382,7 +393,8 @@ def debug_trace():
     # set_trace()
 
 
-if __name__ == '__main__':
+def main():
+    """Start the application: bootstrap Qt, build the ``App`` and enter the Qt event loop."""
     # All X11 calling should be thread safe otherwise we have strange issues
     # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)
     # NOTE: Never talk to the GUI from threads! This is why I commented the above.
@@ -394,14 +406,8 @@ if __name__ == '__main__':
         # #######################################################################################################
         # ####### CONFIG FILE WITH PARAMETERS REGARDING PORTABILITY #############################################
         # #######################################################################################################
-        config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'flatcam_plus',
-                                   'config', 'configuration.txt')
-        try:
-            with open(config_file, 'r'):
-                pass
-        except FileNotFoundError:
-            config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'flatcam_plus',
-                                       'config', 'configuration.txt')
+        config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config',
+                                   'configuration.txt')
 
         with open(config_file, 'r') as f:
             for line in f:
@@ -417,7 +423,7 @@ if __name__ == '__main__':
             # data_path = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, None, 0) + '\\FlatCAM'
             data_path = os.path.join(os.getenv('appdata'), 'FlatCAM')
         else:
-            data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'flatcam_plus', 'config')
+            data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config')
     else:
         data_path = os.path.expanduser('~') + '/.FlatCAM'
 
@@ -544,3 +550,7 @@ if __name__ == '__main__':
     except SystemError:
         pass
     # app.exec()
+
+
+if __name__ == '__main__':
+    main()

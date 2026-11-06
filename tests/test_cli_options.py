@@ -4,6 +4,9 @@ A packaged build is verified without a display: the installer runs the binary, a
 version and compares it with the package metadata. The application parses ``sys.argv`` with
 ``getopt`` at import time and exits 2 on an unknown option, so before this flag existed there was
 no way to ask a bundle what it was.
+
+The entry point is ``python -m flatcam_plus``; the repository root stays on ``PYTHONPATH`` so the
+probe works in a plain checkout as well as in an environment that installed the project.
 """
 
 import os
@@ -15,9 +18,9 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def run_cli(*arguments):
-    environment = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    environment = dict(os.environ, QT_QPA_PLATFORM="offscreen", PYTHONPATH=REPO_ROOT)
     return subprocess.run(
-        [sys.executable, "flatcam.py", *arguments],
+        [sys.executable, "-m", "flatcam_plus", *arguments],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
