@@ -78,6 +78,68 @@ def test_save_defaults_keeps_light_theme(fc_app):
         settings.sync()
 
 
+def test_applying_dark_then_shutting_down_keeps_dark(fc_app, monkeypatch):
+    """The path a user actually takes: pick Dark, press Apply, then quit.
+
+    ``App.quit_application`` (appMain.py:3787) copies ``options`` over ``defaults`` before
+    saving. A theme the user just applied must survive that copy: applying a preference
+    that reaches ``defaults`` but not ``options`` would be reverted at shutdown, which
+    looks exactly like "I chose dark and nothing changed".
+    """
+    from flatcam_plus.appGUI.preferences import PreferencesUIManager as PUM
+
+    class _AutoConfirm:
+        """Stands in for the modal restart dialog so Apply can run unattended."""
+
+        def __init__(self, *args, **kwargs):
+            self._first = None
+
+        def addButton(self, *args, **kwargs):
+            token = object()
+            if self._first is None:
+                self._first = token
+            return token
+
+        def exec(self):
+            return 0
+
+        def clickedButton(self):
+            return self._first
+
+        def __getattr__(self, name):
+            return lambda *args, **kwargs: None
+
+    previous_settings = _settings().value("theme", type=str)
+    radio = fc_app.ui.general_pref_form.general_gui_group.appearance_radio
+    original = radio.get_value()
+
+    monkeypatch.setattr(PUM, "FCMessageBox", _AutoConfirm)
+    monkeypatch.setattr(fc_app, "on_app_restart", lambda *args, **kwargs: None, raising=False)
+
+    try:
+        radio.set_value("dark")
+        fc_app.preferencesUiManager.on_save_button(save_to_file=True)
+
+        # Then the shutdown path that follows, in the shape quit_application uses.
+        fc_app.defaults.update(fc_app.options)
+        fc_app.preferencesUiManager.save_defaults(silent=True)
+
+        # What the next launch loads, which is what decides the theme it renders.
+        assert fc_app.options[THEME_OPTION] == "dark"
+        assert _persisted_default(fc_app, THEME_OPTION) == "dark"
+        # ``QSettings`` is only refreshed at startup from ``options`` (appMain:621-622), so it
+        # legitimately still holds the old value here; the option above is what it will be
+        # written from.
+    finally:
+        radio.set_value(original)
+        for option in (THEME_OPTION, APPEARANCE_OPTION):
+            fc_app.defaults[option] = original
+            fc_app.options[option] = original
+        settings = _settings()
+        settings.setValue("theme", previous_settings)
+        settings.sync()
+
+
 def test_appearance_control_offers_both_themes(fc_app):
     """The appearance radio is visible, offers dark, and feeds the theme option the app reads."""
     radio = fc_app.ui.general_pref_form.general_gui_group.appearance_radio
