@@ -240,3 +240,25 @@ or is it marked stale so the user regenerates it? The conservative answer (never
 would skip CNCJobs and report them, which is a behaviour change the user must choose. Wiring the UI waits
 on that.
 
+
+## T3 closed
+
+The toggle now converts instead of refusing. Order of operations, chosen so the application can
+never report a unit it is not in: confirmation with the object count, then
+`units.convert_objects` (all-or-nothing, with rollback), and only on success `app_units`, the option,
+the defaults and the label. A refusal leaves the application in its old unit and names the offenders.
+
+Post-mutation bookkeeping follows `ToolMove.move_handler`: aperture markers, `obj_options` bounds
+recomputed from `bounds()`, `should_we_save`, then `replot_signal`. CNCJobs convert by rewriting their
+generated G-code text, which the user chose over marking them stale.
+
+**Verified on a real file, not only on stubs** (`tests/test_units_real_objects.py`): a parsed
+`square_outline.gbr` reports MM, converts to inches with bounds scaled by 1/25.4, and a round trip
+returns the original bounds within 1e-6. The declared-units case is covered too: whether the parser
+converts anyway or refuses, the test requires the outcome to be visible rather than silent.
+
+**Red checks, both real:** ignoring refusals makes the abort test fail (`assert True is False`), and the
+first implementation forced `obj.units` after conversion, marking a refusing object as converted —
+caught by the rollback test. The second red check was done with a file backup rather than `git checkout`,
+after an earlier checkout discarded uncommitted work.
+
