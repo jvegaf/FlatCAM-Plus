@@ -1106,6 +1106,47 @@ class MainGUI(QtWidgets.QMainWindow):
         self.toolbar_center_widget = None
         self.toolbar_center_layout = None
 
+    def _project_object_count(self):
+        """How many real objects the project holds.
+
+        ``project_item`` always carries one child per kind group, so counting its children would
+        always report a full project; the objects live under those groups.
+        """
+        return sum(group.child_count() for group in self.app.collection.group_items.values())
+
+    def update_units_label(self):
+        units = str(self.app.app_units).upper()
+        self.units_label.setText("[%s]" % units.lower())
+        if units == "IN":
+            self.units_label.setToolTip(_("The application dimensional units is inch."))
+        else:
+            self.units_label.setToolTip(_("The application dimensional units is millimeter."))
+
+    def on_toggle_units(self):
+        """Switch the application units, refusing while the project holds objects.
+
+        Changing ``app_units`` is not cosmetic: it reinterprets every coordinate the application
+        reads and writes. Existing geometry is not converted yet, so switching with objects loaded
+        would silently rescale the numbers the user is working with by 25.4x. Until the conversion
+        lands, the only safe behaviour is to refuse and say why.
+        """
+        count = self._project_object_count()
+        if count:
+            self.app.inform.emit(
+                '[WARNING_NOTCL] %s' % _(
+                    "Units cannot be changed while the project holds %d object(s).\n"
+                    "Remove them or start a new project first." % count
+                )
+            )
+            return False
+
+        new_units = 'IN' if str(self.app.app_units).upper() == 'MM' else 'MM'
+        self.app.app_units = new_units
+        self.app.options['units'] = new_units
+        self.app.defaults['units'] = new_units
+        self.update_units_label()
+        return True
+
     def attach_log_view(self):
         """Feed the Log tab from the application logger, once per window.
 
@@ -3730,7 +3771,7 @@ class MainGUI(QtWidgets.QMainWindow):
         self.workspace_status_layout.addWidget(self.status_toolbar)
         self.status_toolbar.setVisible(self.app.defaults["global_statusbar_show"])
 
-        self.units_label = FCLabel("[mm]")
+        self.units_label = FCLabel("[%s]" % str(self.app.app_units).lower())
         self.units_label.setToolTip(_("The application dimensional units is millimeter."))
         self.units_label.setMargin(2)
         self.workspace_status_layout.addWidget(self.units_label)
@@ -5273,7 +5314,7 @@ class MainGUI(QtWidgets.QMainWindow):
 
                 # Change Units
                 if key == QtCore.Qt.Key.Key_Q:
-                    pass
+                    self.on_toggle_units()
 
                 # Rotate Object by 90 degree CW
                 if key == QtCore.Qt.Key.Key_R:
