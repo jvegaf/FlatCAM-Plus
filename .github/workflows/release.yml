@@ -185,31 +185,40 @@ jobs:
       - name: Cache the Flatpak runtime
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.local/share/flatpak
-            ~/.cache/flatpak
+          # Inside the workspace: the build container runs as root, and docker creates a missing
+          # bind source as root, which a $HOME path under the runner user would then be unable
+          # to read back on save.
+          path: .flatpak-user
           key: flatpak-kde-${{ env.KDE_RUNTIME_VERSION }}
 
-      - name: Install flatpak-builder and the runtime
+      - name: Prepare the runtime and the payload
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install --yes --no-install-recommends -qq flatpak flatpak-builder
-          flatpak remote-add --user --if-not-exists flathub \
-            https://flathub.org/repo/flathub.flatpakrepo
-          # Already installed from the cache: this only verifies and returns.
-          # Flatpak 1.14 takes -y/--assumeyes; --yes is dnf/apt syntax and is rejected.
-          flatpak install --user --noninteractive -y flathub \
-            "org.kde.Platform//${KDE_RUNTIME_VERSION}" "org.kde.Sdk//${KDE_RUNTIME_VERSION}"
-
-      # The Flatpak wraps the same PyInstaller bundle as the deb and the rpm, so it reuses the
-      # artifact instead of building a second one.
-      - name: Build the Flatpak from the released bundle
-        run: |
-          set -euo pipefail
-          mkdir -p dist/linux
+          mkdir -p .flatpak-user dist/linux
           tar -C dist/linux -xzf dist/installer/FlatCAMPlus-*-linux-*.tar.gz
-          bash packaging/flatpak/build_flatpak.sh --skip-bundle
+          test -x dist/linux/FlatCAM-Plus/FlatCAM-Plus
+
+      # flatpak-builder needs to create user namespaces, which an unprivileged runner does not
+      # allow on this Ubuntu: the build therefore runs in a privileged container, exactly as it
+      # does on a workstation. The runtime lives on the host in .flatpak-user so the cache above
+      # keeps it between runs.
+      - name: Build the Flatpak
+        run: |
+          set -euo pipefail
+          docker run --rm --privileged \
+            -v "$PWD:/work" -w /work \
+            -e HOME=/root \
+            -e KDE_RUNTIME_VERSION \
+            -v "$PWD/.flatpak-user:/root/.local/share/flatpak" \
+            ubuntu:24.04 /bin/bash -lc '
+            set -euo pipefail
+            apt-get update -qq
+            DEBIAN_FRONTEND=noninteractive apt-get install -y -qq flatpak flatpak-builder dbus >/dev/null
+            flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+            flatpak install --user --noninteractive -y flathub \
+              "org.kde.Platform//${KDE_RUNTIME_VERSION}" "org.kde.Sdk//${KDE_RUNTIME_VERSION}"
+            bash packaging/flatpak/build_flatpak.sh --skip-bundle
+          '
 
       - uses: actions/upload-artifact@v4
         with:

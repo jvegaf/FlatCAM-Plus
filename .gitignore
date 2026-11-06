@@ -173,3 +173,4 @@ PLOTTER_TASKS.md
 # flatpak-builder cache and output
 .flatpak-builder/
 .uv-cache/
+.flatpak-user/
