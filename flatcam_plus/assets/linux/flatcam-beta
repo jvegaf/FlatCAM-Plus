@@ -1,5 +1,8 @@
 #!/bin/bash
 
-script_path=$(readlink -f $0)
-python_script_path=$(dirname $script_path)/../../
-python3 $python_script_path/FlatCAM.py $*
+# Launcher for a source checkout or a `make install` tree. The application lives in the
+# `flatcam_plus` package, so the repository (or install) root goes on PYTHONPATH and the package
+# module is what runs.
+script_path=$(readlink -f "$0")
+python_script_path=$(dirname "$script_path")/../../../
+PYTHONPATH="$python_script_path${PYTHONPATH:+:$PYTHONPATH}" python3 -m flatcam_plus "$@"

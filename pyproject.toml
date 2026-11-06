@@ -1,3 +1,7 @@
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14.0"]
+build-backend = "uv_build"
+
 [project]
 name = "flatcam-plus"
 version = "1.3.1"
@@ -42,19 +46,22 @@ dependencies = [
     "vispy>=0.9.0",
 ]
 
+[project.scripts]
+# The single entry point. `flatcam_plus/__main__.py` exposes the same `main` to `python -m flatcam_plus`.
+flatcam-plus = "flatcam_plus.launcher:main"
+
 [dependency-groups]
 # The bundle builders need it; `uv sync` installs it, so a clean checkout can build.
 dev = ["pyinstaller>=6.10"]
 
-[tool.uv]
-# The application is the repository root itself (legacy FlatCAM layout) and runs
-# with `.venv/bin/python flatcam.py`. It is not an installable package: `uv sync`
-# installs dependencies only, and there is no wheel or console script to build.
-package = false
+[tool.uv.build-backend]
+# Flat layout: `flatcam_plus/` sits at the repository root instead of under `src/`.
+# Everything inside the package directory ships in the wheel, which is how the data directories
+# (`assets`, `config`, `locale`, `preprocessors`) reach an installed copy.
+module-root = ""
 
 [tool.pytest.ini_options]
-# `flatcam_plus` is importable because it sits at the repository root, and the application's
-# data directories (`assets`, `config`, `locale`, `preprocessors`) live there too, so the suite
-# needs the root on `sys.path`. Declaring it here replaces the hand-rolled insert that used to
-# live in `tests/conftest.py`.
+# The suite imports `flatcam_plus` from the source tree even when the environment holds an
+# editable install, so a stale install can never mask a broken checkout. Declaring the root here
+# replaces the hand-rolled insert that used to live in `tests/conftest.py`.
 pythonpath = ["."]

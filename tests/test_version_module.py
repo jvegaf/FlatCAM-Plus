@@ -13,6 +13,8 @@ import subprocess
 import sys
 import tomllib
 
+import pytest
+
 # Scripts that only consume the version: they must get it from pyproject.toml.
 VERSION_READERS = (
     os.path.join("packaging", "linux", "build_linux_portable.sh"),
@@ -129,23 +131,23 @@ def test_the_windows_regex_hits_the_project_entry():
     assert hits == [declared_version()]
 
 
-def test_the_module_raises_when_the_manifest_is_missing(tmp_path):
-    package = tmp_path / "flatcam_plus"
-    package.mkdir()
-    (package / "__init__.py").write_text("", encoding="utf-8")
-    (package / "version.py").write_text(
-        read_repo_file(os.path.join("flatcam_plus", "version.py")), encoding="utf-8"
-    )
+def test_the_module_falls_back_to_the_installed_distribution(monkeypatch):
+    """An installed wheel has no manifest beside the package: the metadata carries the number."""
+    import flatcam_plus.version as version_module
 
-    finished = subprocess.run(
-        [sys.executable, "-c", "import flatcam_plus.version"],
-        cwd=tmp_path,
-        capture_output=True,
-        text=True,
-    )
+    monkeypatch.setattr(version_module, "_locate_pyproject", lambda: None)
 
-    assert finished.returncode != 0
-    assert "pyproject.toml is missing" in finished.stderr
+    assert version_module._read_app_version() == declared_version()
+
+
+def test_the_module_raises_when_neither_source_answers(monkeypatch):
+    import flatcam_plus.version as version_module
+
+    monkeypatch.setattr(version_module, "_locate_pyproject", lambda: None)
+    monkeypatch.setattr(version_module, "_installed_distribution_version", lambda: None)
+
+    with pytest.raises(RuntimeError, match="the version cannot be read"):
+        version_module._read_app_version()
 
 
 def test_the_bundle_reads_the_manifest_beside_the_executable(tmp_path):
@@ -175,9 +177,10 @@ def test_the_bundle_reads_the_manifest_beside_the_executable(tmp_path):
 def test_documented_manual_builds_ship_the_manifest():
     """Every PyInstaller recipe in PACKAGING.md must add pyproject.toml as data."""
     recipes = re.findall(
-        r"python -m PyInstaller flatcam\.py.*?```", read_repo_file("PACKAGING.md"), re.S
+        r"python -m PyInstaller flatcam_plus/launcher\.py.*?```", read_repo_file("PACKAGING.md"), re.S
     )
 
     assert recipes
     for recipe in recipes:
-        assert '--add-data "pyproject.toml:pyproject.toml"' in recipe, recipe
+        assert '--add-data "pyproject.toml:."' in recipe, recipe
+        assert '--add-data "flatcam_plus/assets:flatcam_plus/assets"' in recipe, recipe
