@@ -45,6 +45,10 @@ package, make the project a real installable package, then release as `1.3.2`.
   `.opencode/skills/*`, `flatcam_plus/__init__.py` and the `pyproject.toml`
   comments describe `python -m flatcam_plus` / `flatcam-plus` and never instruct
   `python flatcam.py`.
+- **S12 — macOS is not a target.** macOS is not supported. The repository ships
+  no macOS packaging script or wrapper, and no document advertises macOS as a
+  delivery target. Runtime comments and code branches that mention macOS stay,
+  because they describe shared Unix behaviour rather than a support promise.
 - **S11 — Observable paths unchanged.** Icons, translations, preprocessors,
   shipped examples and the Windows `config/configuration.txt` lookup resolve to
   the same files as before the move. `App.app_home` becomes the package
@@ -52,17 +56,19 @@ package, make the project a real installable package, then release as `1.3.2`.
 
 ## Tasks
 
-| ID | Task | Specs | Route | Commit |
-| --- | --- | --- | --- | --- |
-| T1 | Move `assets/`, `config/`, `locale/`, `preprocessors/` into `flatcam_plus/` and re-anchor `_APP_ROOT`, `appTranslation` and the Windows config paths | S1, S4, S11 | inline | |
-| T2 | Move the launcher to `flatcam_plus/launcher.py` + `__main__.py`, delete root `flatcam.py` | S2, S7, S11 | inline | |
-| T3 | Restore `[build-system]`, drop `package = false`, add `[project.scripts]` and package data | S3, S4 | inline | |
-| T4 | Resolve `APP_VERSION` through distribution metadata with checkout/frozen fallbacks | S5 | inline | |
-| T5 | Point the four build scripts, the spec and `run_flatcam.bat` at the package entry and destinations | S6 | inline | |
-| T6 | Update the suite: boot fixture, path guards, frozen layout, CLI options, package layout | S8 | inline | |
-| T7 | Update `AGENTS.md`, `PACKAGING.md`, the project skills and package docstrings | S10 | inline | |
-| T8 | Bump to 1.3.2, run the full suite and `uv build` proof | S9, S4 | inline | |
-| T9 | Commit work units, create and push the annotated `v1.3.2` tag | S9 | inline | |
+| ID | Task | Specs | Route | Status | Commit |
+| --- | --- | --- | --- | --- | --- |
+| T1 | Move `assets/`, `config/`, `locale/`, `preprocessors/` into `flatcam_plus/` and re-anchor `_APP_ROOT`, `appTranslation` and the Windows config paths | S1, S4, S11 | inline | done | `1e4ae8f` |
+| T2 | Move the launcher to `flatcam_plus/launcher.py` + `__main__.py`, delete root `flatcam.py` | S2, S7, S11 | inline | done | `defdd5f` |
+| T3 | Restore `[build-system]`, drop `package = false`, add `[project.scripts]` and package data | S3, S4 | inline | done | `a367ea2` |
+| T4 | Resolve `APP_VERSION` through distribution metadata with checkout/frozen fallbacks | S5 | inline | done | `a367ea2` |
+| T5 | Point the four build scripts, the spec and `run_flatcam.bat` at the package entry and destinations | S6, S11 | inline | done | `274119f` |
+| T6 | Update the suite: boot fixture, path guards, frozen layout, CLI options, package layout | S8 | inline | done | `a367ea2`, `274119f`, `9c01ea9` |
+| T7 | Update `AGENTS.md`, `PACKAGING.md`, the project skills and package docstrings | S10 | inline | done | `9c01ea9` |
+| T8 | Bump to 1.3.2, run the full suite and `uv build` proof | S9, S4 | inline | done | `669a3b9` |
+| T9 | Create the annotated `v1.3.2` tag; the human pushed `dev` and the tag after the agent could not authenticate | S9 | inline | done | `669a3b9` |
+| T10 | Close the native review lineage: refuter, bounded correction, targeted-validator retry, acknowledgement | S8 | inline | done | none (authority burned) |
+| T11 | Remove the unsupported macOS packaging surface and document the supported targets | S12 | inline | done | `0146dbc` |
 
 ## Log
 
@@ -175,3 +181,35 @@ package, make the project a real installable package, then release as `1.3.2`.
   no logged-in host, and there is no `~/.ssh`. The annotated tag `v1.3.2` exists
   locally on `669a3b9`. Publishing needs the human to authenticate; no workaround
   was attempted and no credential was requested in chat.
+- **L23 — Release closed.** Run `42278173633` finished `completed success` in
+  18m 9s and published five assets for `v1.3.2`: the Windows installer, the Linux
+  portable tarball, the `.deb`, the `.rpm` and the Flatpak bundle. No `.dmg`.
+  Checked against `v1.3.1`, which has the same five, and against
+  `.github/workflows/release.yml`, which has only `ubuntu-24.04` and
+  `windows-latest` jobs: macOS was never in CI, so the missing `.dmg` is not a
+  regression.
+- **L24 — Push needed the human.** `git push` failed twice from the agent with
+  `could not read Username for 'https://github.com'`. The agent process runs with
+  `HOME` and `XDG_CONFIG_HOME` under the Gentle Shell install tree and without
+  `DBUS_SESSION_BUS_ADDRESS`, `XDG_RUNTIME_DIR` or an SSH agent, so it cannot read
+  the keyring where `gh` stores the token. No credential was requested in chat and
+  no workaround was attempted; the human pushed both the branch and the tag.
+- **L25 — Decision, GitHub MCP rejected as a fix (L24 follow-up).** A GitHub MCP
+  server would not unblock `git push`: it speaks the REST API, `push` is a git
+  protocol operation, the API commit path synthesises new objects (which would
+  desynchronise the local history and the annotated tag), and its `env`/`headers`
+  token sources execute inside the same credential-starved process. Recorded so
+  the idea is not re-proposed as a solution to this specific blocker.
+- **L26 — Decision, macOS dropped.** The human stated macOS is not supported.
+  `packaging/macos/build_macos_dmg.sh`, `FlatCAMPlus_macos_dmg_generator.command`,
+  the whole DMG recipe in `PACKAGING.md`, the README bullet, the AGENTS.md wrapper
+  entry and the two guard entries were removed (`0146dbc`, −450/+7). The full
+  suite passed afterwards: 255. Runtime comments and the shared Unix branch stayed.
+- **L27 — Follow-up, advisory findings.** The approved review left six
+  informational findings, none blocking. Three of them (R2-002, R3-001, R4-001)
+  point at the same place, `tests/test_frozen_layout.py:106`, which is the guard
+  that now decides bundle destinations. Worth a look before that guard grows.
+- **L28 — Known deviation, published artifacts.** The `v1.3.2` tag points at
+  `669a3b9`, which still contained `packaging/macos/`. The release artifacts
+  therefore ship a script the tree no longer has. A `1.3.3` is required to reflect
+  the removal; re-tagging `v1.3.2` is not an option because that tag is consumed.
