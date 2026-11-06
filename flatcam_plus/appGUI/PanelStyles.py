@@ -32,6 +32,9 @@ def modern_panel_colors(app=None):
             "active_border": "#b9d1ff",
             "disabled": "#a8b2c1",
             "hint": "#6f7b8e",
+            # Small muted text that must clear the AA 4.5:1 floor: 5.40:1 on
+            # ``surface`` and 5.16:1 on the ``subtle`` tab background.
+            "hint_strong": "#5f6b7e",
             "console_bg": "#1e1e1e",
             "console_text": "#d4d4d4",
         }
@@ -50,9 +53,24 @@ def modern_panel_colors(app=None):
         "active_border": "#ff6900",
         "disabled": "#777777",
         "hint": "#999999",
+        # 7.54:1 on the ``subtle`` tab background and 6.36:1 on ``surface``.
+        "hint_strong": "#a8a8a8",
         "console_bg": "#171717",
         "console_text": "#f0f0f0",
     }
+
+
+def modern_accent_colors(app=None):
+    """Return the single accent that carries focus and checked state per theme.
+
+    The panel dict only knew ``active_border``, which is a pale blue tint in light
+    (``#b9d1ff``, 1.21:1 against ``border``) and the real accent in dark. Light uses
+    the vendor sheet's call-to-action blue instead, so each theme has one accent that
+    actually reads as one.
+    """
+    if _theme_name(app) in ["default", "light"]:
+        return {"accent": "#0081db"}
+    return {"accent": "#ff6900"}
 
 
 def _normalize_preference_label_colors(widget):
@@ -120,6 +138,7 @@ def _modern_tab_close_button_stylesheet(app=None):
 
 def modern_panel_stylesheet(app=None):
     c = modern_panel_colors(app)
+    accent = modern_accent_colors(app)["accent"]
     theme = _theme_name(app)
     if theme in ["default", "light"]:
         alert_bg = "#fff1f2"
@@ -147,6 +166,9 @@ def modern_panel_stylesheet(app=None):
             }}
         """
 
+    # Focus and checked state use the theme's single accent. The focus rules widen the
+    # border from 1px to 2px and take that 1px back out of the padding, so gaining focus
+    # reflows nothing; ``outline: 0px`` below only suppresses the item-view dotted rect.
     return f"""
         QWidget[modernPanelRoot="true"] {{
             background: {c["surface"]};
@@ -179,7 +201,7 @@ def modern_panel_stylesheet(app=None):
         }}
         QTabBar::tab {{
             background: {c["subtle"]};
-            color: {c["hint"]};
+            color: {c["hint_strong"]};
             border: 1px solid {c["border"]};
             border-bottom: 0px;
             border-top-left-radius: 6px;
@@ -243,7 +265,7 @@ def modern_panel_stylesheet(app=None):
         QToolButton:pressed,
         QToolButton:checked {{
             background: {c["active"]};
-            border-color: {c["active_border"]};
+            border-color: {accent};
         }}
         QPushButton:disabled,
         QToolButton:disabled {{
@@ -285,12 +307,25 @@ def modern_panel_stylesheet(app=None):
             padding-right: 28px;
         }}
         QLineEdit:focus,
-        QComboBox:focus,
         QSpinBox:focus,
         QDoubleSpinBox:focus,
         QTextEdit:focus,
         QPlainTextEdit:focus {{
-            border-color: {c["active_border"]};
+            border: 2px solid {accent};
+            padding: 3px 6px;
+        }}
+        QComboBox:focus {{
+            border: 2px solid {accent};
+            padding: 3px 27px 3px 6px;
+        }}
+        QPushButton:focus,
+        QToolButton:focus {{
+            border: 2px solid {accent};
+            padding: 4px 6px;
+        }}
+        QToolButton[popupButton="true"]:focus {{
+            border: 2px solid {accent};
+            padding: 5px 18px 5px 7px;
         }}
         QLineEdit:disabled,
         QComboBox:disabled,
@@ -360,7 +395,7 @@ def modern_panel_stylesheet(app=None):
         QCheckBox::indicator:checked,
         QRadioButton::indicator:checked {{
             background: {c["active"]};
-            border-color: {c["active_border"]};
+            border-color: {accent};
         }}
         QListWidget,
         QTableWidget,
@@ -371,7 +406,7 @@ def modern_panel_stylesheet(app=None):
             border-radius: 8px;
             gridline-color: {c["separator"]};
             alternate-background-color: {c["subtle"]};
-            selection-background-color: {c["hover"]};
+            selection-background-color: {c["active"]};
             selection-color: {c["selected_text"]};
             outline: 0px;
         }}
@@ -389,8 +424,9 @@ def modern_panel_stylesheet(app=None):
         QListWidget::item:selected,
         QTableWidget::item:selected,
         QTreeWidget::item:selected {{
-            background: {c["hover"]};
+            background: {c["active"]};
             color: {c["selected_text"]};
+            font-weight: 600;
         }}
         QListWidget::item:hover,
         QTableWidget::item:hover,
@@ -472,7 +508,7 @@ def modern_preferences_tabbar_stylesheet(app=None):
         }}
         QTabBar::tab {{
             background: {c["subtle"]};
-            color: {c["hint"]};
+            color: {c["hint_strong"]};
             border: 1px solid {c["border"]};
             border-bottom: 0px;
             border-top-left-radius: 6px;
@@ -599,7 +635,7 @@ def modern_workspace_tabbar_stylesheet(app=None, min_width=90, expanding=True):
         }}
         QTabBar::tab {{
             background: {c["subtle"]};
-            color: {c["hint"]};
+            color: {c["hint_strong"]};
             border: 1px solid {c["border"]};
             border-right: {tab_border_right};
             border-bottom: 0px;
@@ -629,6 +665,7 @@ def modern_workspace_tabbar_stylesheet(app=None, min_width=90, expanding=True):
 
 def modern_project_view_stylesheet(app=None):
     c = modern_panel_colors(app)
+    accent = modern_accent_colors(app)["accent"]
     return f"""
         QTreeView {{
             background: {c["surface"]};
@@ -637,7 +674,7 @@ def modern_project_view_stylesheet(app=None):
             border-radius: 8px;
             padding: 2px;
             outline: 0px;
-            selection-background-color: {c["hover"]};
+            selection-background-color: {c["active"]};
             selection-color: {c["selected_text"]};
         }}
         QTreeView::item {{
@@ -654,6 +691,9 @@ def modern_project_view_stylesheet(app=None):
         QTreeView::item:selected {{
             background: {c["active"]};
             color: {c["selected_text"]};
+            border-left: 3px solid {accent};
+            padding: 5px 5px 5px 2px;
+            font-weight: 600;
         }}
         QTreeView::branch {{
             background: transparent;
@@ -665,6 +705,9 @@ def modern_project_view_stylesheet(app=None):
             border-bottom: 1px solid {c["separator"]};
             padding: 6px;
             font-weight: 600;
+        }}
+        QHeaderView::section:last {{
+            color: {c["hint_strong"]};
         }}
     """
 

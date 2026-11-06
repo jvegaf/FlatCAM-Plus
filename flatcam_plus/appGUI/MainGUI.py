@@ -93,6 +93,8 @@ class MainGUI(QtWidgets.QMainWindow):
             return color
 
     def toolbar_style_sheet(self):
+        # Checked/pressed use the theme's single accent (light #0081db, dark #ff6900), so a
+        # checked toolbar button does not read as merely hovered.
         arrow_icon = (self.app.resource_location + "/down-arrow32.png").replace("\\", "/")
         if self.app.options['global_theme'] in ['default', 'light']:
             return """
@@ -143,7 +145,7 @@ class MainGUI(QtWidgets.QMainWindow):
                 QToolBar QToolButton:checked,
                 QToolBar QToolButton::menu-button:pressed {
                     background: #dfeafe;
-                    border-color: #b9d1ff;
+                    border-color: #0081db;
                 }
                 QToolBar QToolButton:disabled {
                     color: #a8b2c1;
@@ -653,6 +655,10 @@ class MainGUI(QtWidgets.QMainWindow):
             workspace_bg = "#10161b"
             surface = "#ffffff"
             border = "rgba(255, 255, 255, 72)"
+            # ``border`` sits on the translucent dark start panel, where a translucent
+            # white edge is right; the status container is on the light surface, where
+            # that same edge is invisible, so it takes the panel token instead.
+            status_border = "#dfe4ec"
             accent = "#c58b2a"
             accent_hover = "#d9a441"
             text = "#f8fafc"
@@ -663,6 +669,7 @@ class MainGUI(QtWidgets.QMainWindow):
             workspace_bg = "#10161b"
             surface = "#262626"
             border = "rgba(255, 255, 255, 64)"
+            status_border = "rgba(255, 255, 255, 64)"
             accent = "#c58b2a"
             accent_hover = "#d9a441"
             text = "#f8fafc"
@@ -677,7 +684,7 @@ class MainGUI(QtWidgets.QMainWindow):
             }}
             QFrame#workspace_status_container {{
                 background: {surface};
-                border: 1px solid {border};
+                border: 1px solid {status_border};
                 border-radius: 10px;
             }}
             QFrame#project_start_shell {{
