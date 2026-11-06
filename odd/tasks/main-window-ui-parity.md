@@ -73,3 +73,15 @@ Plugins and Shell toolbars. That is its own unit (T4), not a loose end of this o
 | ID | Spec | Route | Unit |
 | --- | --- | --- | --- |
 | T4 | S1 | pending | Give the 17 widget-based toolbar buttons label text, or decide menu groups stay icon-only |
+
+**L4** (user decision, standing): native review is **declined for every candidate on `dev`** while the
+branch's base stays at `6e4e7e33`. The user chose this over invoking `inspect` again or pausing the
+feature. Not re-asked per commit.
+
+Why it is structural, verified rather than assumed: `git merge-base HEAD origin/main` is `6e4e7e33`,
+so the provider's candidate spans 1170 files and 13314 insertions, and the lens context budget cannot
+hold it. **Correction to earlier advice:** rebasing this work onto `origin/main` is *not* a way out,
+because `origin/main` has no `flatcam_plus/` package — this work references paths that only exist on
+`dev` after the 100-commit restructure. Review becomes usable again when that base moves, i.e. when the
+restructure reaches `main`.
+
