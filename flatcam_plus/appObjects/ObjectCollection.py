@@ -240,9 +240,12 @@ class TreeItem(EventSensitiveListView):
         return len(self.child_items)
 
     def column_count(self):
-        return len(self.item_data)
+        # Object rows carry ``item_data = None``, so this must not call len() blindly.
+        return max(len(self.item_data) if self.item_data else 0, ObjectCollection.COLUMN_COUNT)
 
     def data(self, column):
+        if not self.item_data or column < 0 or column >= len(self.item_data):
+            return None
         return self.item_data[column]
 
     def row(self):
@@ -280,6 +283,15 @@ class ObjectCollection(QtCore.QAbstractItemModel):
         "script": ScriptObject,
         "document": DocumentObject
     }
+
+    #: Second column carrying the object kind as readable text.
+    KIND_COLUMN = 1
+    #: Total column count: name, then kind.
+    COLUMN_COUNT = 2
+
+    #: kind key -> translated label, reusing the group headers so the tree and the
+    #: group titles can never drift apart.
+    kind_titles = dict(groups)
 
     icon_files = {
         "gerber": "assets/resources/flatcam_icon16.png",
@@ -343,6 +355,13 @@ class ObjectCollection(QtCore.QAbstractItemModel):
         # ## View
         self.view = EventSensitiveListView(self.app)
         self.view.setModel(self)
+        self.view.setHeaderHidden(False)
+        _header = self.view.header()
+        _header.setStretchLastSection(False)
+        _header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        _header.setSectionResizeMode(ObjectCollection.KIND_COLUMN,
+                                     QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+        self.view.setTextElideMode(QtCore.Qt.TextElideMode.ElideRight)
         self.view.setExpanded(self.item_index(self.project_item), True)
 
         self.view.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
@@ -536,10 +555,23 @@ class ObjectCollection(QtCore.QAbstractItemModel):
         return parent_item.child_count()
 
     def columnCount(self, index=None, *args, **kwargs):
-        if index.isValid():
-            return index.internalPointer().column_count()
-        else:
-            return self.root_item.column_count()
+        return ObjectCollection.COLUMN_COUNT
+
+    def headerData(self, section, orientation, role=None):
+        if orientation != Qt.Orientation.Horizontal:
+            return None
+
+        if role in [Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole]:
+            if section == 0:
+                return _("Object")
+            if section == ObjectCollection.KIND_COLUMN:
+                return _("Kind")
+            return None
+
+        if role == Qt.ItemDataRole.TextAlignmentRole and section == ObjectCollection.KIND_COLUMN:
+            return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+
+        return None
 
     def data(self, index, role=None):
         if not index.isValid():
@@ -548,9 +580,18 @@ class ObjectCollection(QtCore.QAbstractItemModel):
         if role in [Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole]:
             obj = index.internalPointer().obj
             if obj:
-                return obj.obj_options["name"]
+                if index.column() == ObjectCollection.KIND_COLUMN:
+                    return ObjectCollection.kind_titles.get(obj.kind, obj.kind)
+                if index.column() == 0:
+                    return obj.obj_options["name"]
+                return None
             else:
                 return index.internalPointer().data(index.column())
+
+        if role == Qt.ItemDataRole.TextAlignmentRole:
+            if index.column() == ObjectCollection.KIND_COLUMN:
+                return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+            return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
 
         if role == Qt.ItemDataRole.ForegroundRole:
             theme_settings = QtCore.QSettings("Open Source", "FlatCAM_Plus")
@@ -565,13 +606,19 @@ class ObjectCollection(QtCore.QAbstractItemModel):
 
             obj = index.internalPointer().obj
             if obj:
+                if index.column() == ObjectCollection.KIND_COLUMN:
+                    # The kind is secondary metadata: use the muted token from the panel
+                    # palette so the column reads as annotation, not as another name.
+                    from flatcam_plus.appGUI.PanelStyles import modern_panel_colors
+                    return QtGui.QBrush(QColor(modern_panel_colors(self.app)['hint_strong']))
                 return QtGui.QBrush(color) if obj.obj_options["plot"] else QtGui.QBrush(color_disabled)
             else:
                 return index.internalPointer().data(index.column())
 
         elif role == Qt.ItemDataRole.DecorationRole:
             icon = index.internalPointer().icon
-            if icon:
+            # Only the name column carries the kind icon; the kind column is text.
+            if icon and index.column() == 0:
                 return icon
             else:
                 return QtGui.QPixmap()
@@ -591,7 +638,7 @@ class ObjectCollection(QtCore.QAbstractItemModel):
             return None
 
     def setData(self, index, data, role=None):
-        if index.isValid():
+        if index.isValid() and index.column() == 0:
             obj = index.internalPointer().obj
 
             if obj:
@@ -634,6 +681,9 @@ class ObjectCollection(QtCore.QAbstractItemModel):
         try:
             if not index.internalPointer().obj:
                 return Qt.ItemFlag.ItemIsEnabled
+            elif index.column() != 0:
+                # The kind column is display-only; renaming stays on the name column.
+                return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
             else:
                 return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable | \
                        Qt.ItemFlag.ItemIsDragEnabled | Qt.ItemFlag.ItemIsDropEnabled
