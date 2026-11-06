@@ -3107,6 +3107,11 @@ class MainGUI(QtWidgets.QMainWindow):
         self.add_shell_tab(self.log_view, _("Log"))
         self.attach_log_view()
 
+        # Mirror of the CNC control console. The plugin keeps its own, sized by its panel; this
+        # one gives the bottom dock the same traffic without reparenting a plugin widget.
+        self.cnc_console_view = CncConsoleView()
+        self.add_shell_tab(self.cnc_console_view, _("CNC console"))
+
         self.shell_dock.hide()
 
         # ########################################################################

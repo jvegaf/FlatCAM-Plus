@@ -120,3 +120,18 @@ the view grows, DEBUG is filtered by the handler level, and `shell_terminal()` s
 Both are now pinned by the existing subprocess boot probe, so a regression in the dock wiring or in the
 log attachment fails a test rather than waiting to be noticed.
 
+
+## T2 closed
+
+The user chose **B′** for the CNC console after seeing the evidence: the dock gets its own view and the
+plugin keeps the console its panel is sized around. `CncConsoleView` (GUIElements.py) accepts entries the
+plugin has **already formatted** (`append_console` builds the HTML once and appends it to both), so the
+two cannot drift and the plugin's colour rules are not duplicated.
+
+Dock tab order at boot is now `['Log', 'CNC console', 'Tcl Shell']`, which is the artboard's order.
+
+Verified offscreen and pinned by the subprocess probe: the dock widget is a `QTabWidget`, all three tabs
+exist, a record written through `logging` reaches the Log tab, the mirror accepts an entry, and the Tcl
+shell is still reachable through `shell_terminal()`. `CNCControlUI` sets `self.app` (ui.py:34), so the
+mirror call is not a silent no-op.
+

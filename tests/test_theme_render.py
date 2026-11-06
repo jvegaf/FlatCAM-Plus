@@ -158,3 +158,9 @@ def test_a_new_process_boots_with_the_persisted_theme(tmp_path):
         "the Tcl shell is not reachable through the tabs: %r" % (second["shell_terminal"],)
     )
     assert second["log_captured"] is True, "the Log tab did not receive a logging record"
+    assert "CNC console" in second["shell_tabs"], (
+        "no CNC console tab: %r" % (second["shell_tabs"],)
+    )
+    assert second["cnc_mirror_accepts"] is True, (
+        "the CNC console mirror did not accept an entry"
+    )

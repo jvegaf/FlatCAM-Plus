@@ -6601,3 +6601,22 @@ class AppLogHandler(logging.Handler):
             self._view.record.emit(when, record.levelno, record.getMessage())
         except Exception:
             self.handleError(record)
+
+
+class CncConsoleView(QTextEdit):
+    """Dock-side mirror of the CNC control console.
+
+    The CNC plugin keeps its own console inside its panel, where it belongs: that panel sizes
+    itself around it. This view receives the same already-formatted entries so the two cannot
+    drift, instead of duplicating the plugin's colour rules here.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("cnc_console_mirror")
+        self.setReadOnly(True)
+        self.document().setMaximumBlockCount(4000)
+
+    def append_entry(self, entry_html):
+        self.append(entry_html)
+        self.moveCursor(QTextCursor.MoveOperation.End)

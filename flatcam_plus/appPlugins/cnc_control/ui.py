@@ -1863,11 +1863,19 @@ class CNCControlUI:
 
         safe_text = html.escape(str(text))
         timestamp = time.strftime("%H:%M:%S")
-        self.console.append(
+        entry = (
             f'<span style="color:#808080;">[{timestamp}]</span> '
             f'<span style="color:{color};">{safe_text}</span>'
         )
+        self.console.append(entry)
         self.console.moveCursor(QtGui.QTextCursor.MoveOperation.End)
+
+        # The bottom dock shows the same traffic. Formatted once so the two views cannot drift;
+        # the plugin's console stays where it is because its panel is sized around it.
+        mirror = getattr(getattr(self, "app", None), "ui", None)
+        mirror_view = getattr(mirror, "cnc_console_view", None)
+        if mirror_view is not None:
+            mirror_view.append_entry(entry)
 
 
 class CNCPreviewModal(QtWidgets.QDialog):
