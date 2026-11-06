@@ -198,7 +198,8 @@ jobs:
           flatpak remote-add --user --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
           # Already installed from the cache: this only verifies and returns.
-          flatpak install --user --noninteractive --yes flathub \
+          # Flatpak 1.14 takes -y/--assumeyes; --yes is dnf/apt syntax and is rejected.
+          flatpak install --user --noninteractive -y flathub \
             "org.kde.Platform//${KDE_RUNTIME_VERSION}" "org.kde.Sdk//${KDE_RUNTIME_VERSION}"
 
       # The Flatpak wraps the same PyInstaller bundle as the deb and the rpm, so it reuses the

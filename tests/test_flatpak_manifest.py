@@ -107,3 +107,14 @@ def test_the_release_publishes_the_flatpak_next_to_the_packages():
     assert "packaging/flatpak/build_flatpak.sh" in release
     assert "dist/installer/*.flatpak" in release
     assert re.search(r"needs: \[linux-packages, windows-installer, flatpak, meta\]", release)
+
+
+def test_the_workflow_uses_flags_flatpak_actually_has():
+    """Flatpak 1.14 rejects --yes; the install has to use its own spelling."""
+    release = read(os.path.join(REPO_ROOT, ".github", "workflows", "release.yml"))
+    flatpak_lines = [line for line in release.splitlines() if "flatpak install" in line]
+
+    assert flatpak_lines, "the pipeline no longer installs a runtime"
+    for line in flatpak_lines:
+        assert "--yes" not in line, line
+        assert " -y " in line or "--assumeyes" in line, line
