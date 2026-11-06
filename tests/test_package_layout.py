@@ -103,6 +103,11 @@ VENDORED_MODULES = ("descartes", "descartes.patch", "libs", "libs.qdarktheme")
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Produced by a build, never part of the sources this guard is about.
+GENERATED_DIRECTORIES = {"dist", "build", ".flatpak-builder", ".uv-cache", "__pycache__"}
+GENERATED_PREFIXES = (".flatpak-user",)
+
+
 
 def root_name_import(name):
     """Match every way a module can import a root-level module called ``name``.
@@ -233,14 +238,23 @@ def test_the_vendored_theme_root_resolves_inside_the_package():
 @pytest.mark.parametrize("name", PACKAGE_MODULES + APP_PACKAGES + VENDORED_PACKAGES)
 def test_no_module_outside_the_package_imports_the_root_name(name):
     offender = root_name_import(name)
-    for directory, _, filenames in os.walk(REPO_ROOT):
+    for directory, dirnames, filenames in os.walk(REPO_ROOT):
+        # Build outputs contain third-party and generated Python: a local packaged bundle would
+        # otherwise report every vendored module as an offender.
+        dirnames[:] = [
+            name
+            for name in dirnames
+            if name not in GENERATED_DIRECTORIES
+            and not name.startswith(GENERATED_PREFIXES)
+        ]
         if os.path.join(REPO_ROOT, ".git") in directory or ".venv" in directory:
             continue
         for filename in filenames:
             if not filename.endswith(".py"):
                 continue
             path = os.path.join(directory, filename)
-            with open(path, encoding="utf-8") as handle:
+            # Only import lines matter here, and a vendored file may declare another encoding.
+            with open(path, encoding="utf-8", errors="ignore") as handle:
                 if offender.search(handle.read()):
                     pytest.fail("{} still imports the root module {}".format(path, name))
 
