@@ -110,3 +110,20 @@ unverified, as does every panel the harness did not open. Also corrected here: t
 quoted earlier were arithmetically wrong — `hint #6f7b8e` is 4.29:1 on white (not 3.97:1) and
 `#0081db` is 4.07:1 (not 4.6:1). The AA defect and its fix hold, but `design/system.md` now carries
 the right numbers.
+
+**L7** (user-confirmed, 2026-11-05): supersedes L6's "not rendered" gap for the dark theme. The
+earlier "nothing changed" report was the stale packaged bundle: `dist/linux/FlatCAM-Plus/FlatCAM-Plus`
+was built 2026-11-05 05:43, before this work, and there is no `flatcam-plus` on PATH, no system
+install and no desktop entry. Running from the repo, the user confirmed both observables: the
+`Object | Kind` header appears, and after Preferences -> Theme -> Dark -> Apply -> restart the app
+renders dark, toolbars included. That last part matters, because the offscreen harness switches
+`global_theme` after `App` is constructed and therefore never exercised the startup path that styles
+the per-widget toolbar and status sheets.
+
+**L8** (process lesson): this feature was declared verified once before the user's report, and the
+claim was too strong. Three consecutive "reproductions" of the reported failure were defects in my
+throwaway harness rather than in the product: mutating `app.defaults` directly, then calling
+`save_defaults` without the `options` update, then asserting on `QSettings`, which is only refreshed at
+startup. Only driving `on_save_button` with the modal restart stubbed produced a trustworthy result.
+Lesson: reproduce with the real entry point, not with an imitation of it. `bfdcf48` now pins that path.
+

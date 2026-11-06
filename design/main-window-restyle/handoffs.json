@@ -3,12 +3,12 @@
   "chosen": "01-dense-cad-dark.html",
   "handoffs": {
     "01-dense-cad-dark.html": {
-      "status": "in_progress",
+      "status": "implemented",
       "queued": false,
       "sentAt": "2026-11-06T20:13:39.956Z",
       "startedAt": "2026-11-06T20:14:09.427Z",
-      "implementedAt": null,
-      "note": "Mapping the artboard onto the real Qt widgets: project tree, notebook tabs, tool panels, console dock."
+      "implementedAt": "2026-11-06T21:17:00.325Z",
+      "note": "Implemented on dev in six commits (943dcac..f15f539), not pushed. Dark palette already shipped; work was making dark selectable at all, adding the Kind column, and giving both themes a single accent plus a perceivable focus state. Verified by full suite (285 passed) and offscreen renders in both themes, which also caught a doubled selection bar no test had pinned."
     }
   }
 }
