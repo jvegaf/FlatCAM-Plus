@@ -32,10 +32,22 @@ def main():
     app = App(qapp=qapp, startup_project_request=None)
 
     tree = app.collection.view
+    ui = app.ui
     horizontal = QtCore.Qt.Orientation.Horizontal
     display = QtCore.Qt.ItemDataRole.DisplayRole
 
+    host = ui.toolbar_center_host
+    hosted = [tb for tb in ui.findChildren(QtWidgets.QToolBar) if host.isAncestorOf(tb)]
+    outside = [tb for tb in ui.findChildren(QtWidgets.QToolBar) if not host.isAncestorOf(tb)]
+
     result = {
+        "stored_menu_show_text": QtCore.QSettings(
+            "Open Source", "FlatCAM_Plus").value("menu_show_text", type=str),
+        "hosted_toolbar_styles": [tb.toolButtonStyle().name for tb in hosted],
+        "readout_toolbar_styles": [
+            tb.toolButtonStyle().name for tb in outside
+            if tb.objectName() in ("Coords_TB", "Snap_TB", "Delta_Coords_TB")
+        ],
         "theme": app.options.get("global_theme"),
         "dark_resources": "dark_resources" in str(app.resource_location),
         "vendor_sheet_chars": len(qapp.styleSheet() or ""),

@@ -1106,18 +1106,33 @@ class MainGUI(QtWidgets.QMainWindow):
         self.toolbar_center_widget = None
         self.toolbar_center_layout = None
 
+    def _toolbar_label_style(self, compact=False):
+        """The button style a command toolbar should use, read from the saved preference.
+
+        Reading it here rather than only at restore time matters: the centered host is torn
+        down and rebuilt, so every toolbar is configured again after the preference was
+        applied once. A hardcoded style in this method would silently undo the user's choice.
+        """
+        if compact:
+            return Qt.ToolButtonStyle.ToolButtonIconOnly
+
+        stored = QSettings("Open Source", "FlatCAM_Plus").value("menu_show_text", "true")
+        if str(stored).strip().lower() in ("true", "1"):
+            return Qt.ToolButtonStyle.ToolButtonTextBesideIcon
+        return Qt.ToolButtonStyle.ToolButtonIconOnly
+
     def configure_toolbar(self, toolbar, compact=False):
         toolbar.setContentsMargins(0, 0, 0, 0)
         if compact:
             toolbar.setStyleSheet(self.compact_toolbar_style_sheet())
             toolbar.setIconSize(QtCore.QSize(16, 16))
-            toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+            toolbar.setToolButtonStyle(self._toolbar_label_style(compact=True))
             return
 
         toolbar.setSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         toolbar.setStyleSheet(self.toolbar_style_sheet())
         toolbar.setIconSize(QtCore.QSize(22, 22))
-        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        toolbar.setToolButtonStyle(self._toolbar_label_style())
 
     def _uses_dark_toolbar_icons(self):
         try:
@@ -3743,8 +3758,9 @@ class MainGUI(QtWidgets.QMainWindow):
         if q_settings.contains("saved_gui_state"):
             self.restoreState(q_settings.value('saved_gui_state'), 0)
         tb_lock_state = q_settings.value('toolbar_lock', "true")
-        show_text_state = "false"
-        q_settings.setValue('menu_show_text', show_text_state)
+        # The toolbar label mode is the user's choice, honoured instead of overwritten. It used
+        # to be forced to "false" here on every start, which made the menu toggle useless.
+        show_text_state = str(q_settings.value('menu_show_text', "true")).lower()
         win_geo = q_settings.value('window_geometry', (100, 100, 800, 400))
         splitter_left = max(320, int(q_settings.value('splitter_left', 320)))
 
@@ -4452,18 +4468,31 @@ class MainGUI(QtWidgets.QMainWindow):
         # This will write the setting to the platform specific storage.
         del q_settings
 
+    def _labelled_toolbars(self):
+        """The command toolbars, i.e. the ones hosted in the centered toolbar host.
+
+        The compact status toolbars (coordinates, grid, delta) are deliberately excluded: they
+        carry readouts rather than commands, so a text label there only eats width without
+        telling the user anything the value does not already say.
+        """
+        host = getattr(self, "toolbar_center_host", None)
+        if host is None:
+            return list(self.findChildren(QtWidgets.QToolBar))
+        return host.findChildren(QtWidgets.QToolBar)
+
     def show_text_under_action(self, show_text=True):
-        if show_text:
-            for widget in self.findChildren(QtWidgets.QToolBar):
-                if isinstance(widget, QtWidgets.QToolBar):
-                    widget.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-        else:
-            for widget in self.findChildren(QtWidgets.QToolBar):
-                if isinstance(widget, QtWidgets.QToolBar):
-                    widget.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        """Show a label beside each command toolbar action, or icons only.
+
+        The name is kept because the menu action is bound to it; the style is beside-the-icon
+        rather than under it, which is what the window is specified to look like.
+        """
+        style = (Qt.ToolButtonStyle.ToolButtonTextBesideIcon if show_text
+                 else Qt.ToolButtonStyle.ToolButtonIconOnly)
+        for widget in self._labelled_toolbars():
+            widget.setToolButtonStyle(style)
 
         q_settings = QSettings("Open Source", "FlatCAM_Plus")
-        q_settings.setValue('menu_show_text', show_text)
+        q_settings.setValue('menu_show_text', "true" if show_text else "false")
         # This will write the setting to the platform specific storage.
         del q_settings
 

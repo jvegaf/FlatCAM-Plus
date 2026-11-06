@@ -133,3 +133,17 @@ def test_a_new_process_boots_with_the_persisted_theme(tmp_path):
     assert second["tree_header_hidden"] is False
     assert second["tree_columns"] == 2
     assert second["kind_header"], "the Kind column has no header label"
+
+    # And it pins the toolbar label mode: startup must honour the saved preference rather than
+    # overwriting it, while the coordinate/snap/delta readouts stay icon-only.
+    assert str(second["stored_menu_show_text"]).lower() in ("true", "1"), (
+        "startup overwrote the toolbar label preference"
+    )
+    assert second["hosted_toolbar_styles"], "no command toolbars were found"
+    assert set(second["hosted_toolbar_styles"]) == {"ToolButtonTextBesideIcon"}, (
+        "command toolbars are not labelled: %r" % (second["hosted_toolbar_styles"],)
+    )
+    assert second["readout_toolbar_styles"], "the readout toolbars were not found"
+    assert set(second["readout_toolbar_styles"]) == {"ToolButtonIconOnly"}, (
+        "readout toolbars should stay icon-only: %r" % (second["readout_toolbar_styles"],)
+    )
