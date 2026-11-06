@@ -262,3 +262,17 @@ first implementation forced `obj.units` after conversion, marking a refusing obj
 caught by the rollback test. The second red check was done with a file backup rather than `git checkout`,
 after an earlier checkout discarded uncommitted work.
 
+
+## Verification
+
+Full suite: **315 passed, exit code 0** (`PYTEST_EXIT=0`, captured from pytest rather than from a pipe).
+
+An earlier run of the same suite reported "exit code 0" while four tests had failed, because the
+command ended in `| tail`, whose exit status masked pytest's. The rerun writes to a file and reports the
+real code. Worth remembering: a green number is only as good as what produced it.
+
+That failing run was useful: it exposed that `test_object_collection_columns` left fifteen stub rows in
+the session-scoped project tree, which then broke the units tests. Fixed at the polluter with an autouse
+fixture, and the same failure exposed that `convert_objects` crashed on an object without
+`convert_units`; that now counts as a refusal with rollback.
+
