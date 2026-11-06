@@ -149,3 +149,29 @@ package, make the project a real installable package, then release as `1.3.2`.
   being regenerated. No provider token was altered and no fourth attempt was made.
   The validator produced no verdict, so the lineage cannot close without a human
   decision.
+- **L19 — Review closed approved.** After the group relay died on `review-risk`
+  (transport failure), the sanctioned continuation was one-slot captures: risk,
+  resilience and readability were admitted first try, reliability failed once and
+  passed on the single reoffered retry. Final state `approved`, authority burned
+  (`gentle-ai.review-acknowledged/v1`). Six advisory findings, all informational:
+  R2-001/R2-002/R2-003 (SUGGESTION) on `tests/test_frozen_layout.py:20`,
+  `:106` and `flatcam_plus/assets/linux/flatcam-beta:7`; R3-001 (WARNING) on
+  `tests/test_frozen_layout.py:106-109`; R3-002 (SUGGESTION) on
+  `tests/test_version_module.py:143-144`; R4-001 (WARNING) on
+  `tests/test_frozen_layout.py:106`. None opens a correction.
+- **L20 — Orphaned first lineage explained.** `inspect` on the corrected tree
+  reported `applicability: unrelated` with `repair.counts.lineages: 0`, so
+  `review-f9e25ded857d6f61` was invisible to the target-scoped authority store.
+  That, not a transcription error, is why its validator binding read as "missing
+  or stale".
+- **L21 — Release verified.** `uv sync` installs `flatcam-plus==1.3.2`;
+  `APP_VERSION` and `APP_VERSION_DATE` read `1.3.2` / `2026.11.06`; the full suite
+  is 255 passed; `uv build` produces `flatcam_plus-1.3.2-py3-none-any.whl` with
+  1149 entries including `assets/resources` (694), `config/configuration.txt`,
+  `locale` (31), `preprocessors` (30), `launcher.py` and `__main__.py`.
+- **L22 — Blocker, push unauthenticated.** `git push origin dev` and
+  `git push origin v1.3.2` both fail with `could not read Username for
+  'https://github.com'`. There is no `credential.helper`, `gh auth status` reports
+  no logged-in host, and there is no `~/.ssh`. The annotated tag `v1.3.2` exists
+  locally on `669a3b9`. Publishing needs the human to authenticate; no workaround
+  was attempted and no credential was requested in chat.
