@@ -115,11 +115,13 @@ def test_project_tree_selected_row_has_a_non_colour_cue(app):
     hover = block(sheet, "QTreeView::item:hover")
 
     assert "font-weight: 600;" in selected
-    assert f"border-left: 3px solid {ACCENT[theme]};" in selected
-    # The border is compensated in the padding so the row text does not jump.
-    assert "padding: 5px 5px 5px 2px;" in selected
     assert "font-weight" not in hover
+    # A border-left on ::item:selected is applied to every column of the row, which
+    # paints a second stray bar in front of the Kind cell (seen in an offscreen render).
+    # The weight is the cue; no border belongs here.
+    assert "border-left" not in selected
     assert "border-left" not in hover
+    assert f"border-left: 3px solid {ACCENT[theme]};" not in sheet
 
 
 def test_project_tree_header_is_styled_and_kind_header_is_secondary(app):

@@ -666,6 +666,10 @@ def modern_workspace_tabbar_stylesheet(app=None, min_width=90, expanding=True):
 def modern_project_view_stylesheet(app=None):
     c = modern_panel_colors(app)
     accent = modern_accent_colors(app)["accent"]
+    # Selection carries a non-colour cue through font weight. A border-left on
+    # ``QTreeView::item`` would be applied to every column of the selected row, which
+    # paints a second stray bar in front of the Kind cell; an offscreen render confirmed
+    # it, so the weight is the cue and no border belongs on the item.
     return f"""
         QTreeView {{
             background: {c["surface"]};
@@ -691,8 +695,6 @@ def modern_project_view_stylesheet(app=None):
         QTreeView::item:selected {{
             background: {c["active"]};
             color: {c["selected_text"]};
-            border-left: 3px solid {accent};
-            padding: 5px 5px 5px 2px;
             font-weight: 600;
         }}
         QTreeView::branch {{
