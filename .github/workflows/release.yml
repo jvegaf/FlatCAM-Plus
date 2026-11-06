@@ -209,13 +209,15 @@ jobs:
             -v "$PWD:/work" -w /work \
             -e HOME=/root \
             -e KDE_RUNTIME_VERSION \
-            -v "$PWD/.flatpak-user:/root/.local/share/flatpak" \
+            -v "$PWD/.flatpak-user:/var/lib/flatpak" \
             ubuntu:24.04 /bin/bash -lc '
             set -euo pipefail
             apt-get update -qq
             DEBIAN_FRONTEND=noninteractive apt-get install -y -qq flatpak flatpak-builder dbus elfutils >/dev/null
-            flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-            flatpak install --user --noninteractive -y flathub \
+            # A system installation, because flatpak refuses a --user one as root:
+            # "Refusing to operate on a user installation as root".
+            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+            flatpak install --noninteractive -y flathub \
               "org.kde.Platform//${KDE_RUNTIME_VERSION}" "org.kde.Sdk//${KDE_RUNTIME_VERSION}"
             bash packaging/flatpak/build_flatpak.sh --skip-bundle
           '
