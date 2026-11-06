@@ -184,3 +184,24 @@ one may not leave the app in that state either:
 T3 is the only item left in this feature, and the only one that can corrupt user work. It needs its own
 review attention even though native review is stood down on `dev`.
 
+
+## T3 slice A (done, 34f1850)
+
+The `Q` shortcut, which was a `pass`, now calls `on_toggle_units()`. It flips `app_units`, the `units`
+option and the status label **only when the project holds no objects**; otherwise it emits a warning and
+changes nothing. `_project_object_count()` counts objects under the kind groups, because
+`project_item`'s children are the six always-present groups and counting those would always report a
+full project.
+
+The label is now built from `app_units` rather than a hardcoded `[mm]`, so it cannot disagree with the
+state it reports.
+
+**Guard verified in red, not assumed:** disabling the refusal makes
+`test_units_toggle_is_refused_while_the_project_holds_objects` fail with `assert True is False`.
+
+**Process note, recorded because it nearly cost the work:** the red check was performed by editing the
+guard, running the test, and restoring the file with `git checkout -- MainGUI.py` — which reverted to
+the last commit and discarded the uncommitted slice A edits. They were re-applied and committed, and
+nothing was lost, but the correct order is to commit the unit before sabotaging it. Slice B must not
+repeat this.
+
