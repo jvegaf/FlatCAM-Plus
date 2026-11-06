@@ -85,7 +85,10 @@ follow its native lifecycle without treating it as delivery approval.
 | Tcl shell commands | `flatcam_plus/tclCommands/` |
 | Persisted defaults/preferences | `flatcam_plus/defaults.py` |
 | Test suite and headless app fixture | `tests/`, `tests/conftest.py` |
-| CI workflow | `.github/workflows/tests.yml` |
+| Linux packages (deb, rpm) | `packaging/linux/` (`nfpm.yaml`, launcher, desktop, metainfo, glibc gate) |
+| Flatpak bundle | `packaging/flatpak/` (manifest and build script) |
+| AUR package | `packaging/aur/` (`PKGBUILD` for `flatcam-plus-bin`, `update_aur.sh`) |
+| CI workflows | `.github/workflows/tests.yml` (suite) and `.github/workflows/release.yml` (tag-triggered release) |
 
 `flatcam_plus/appMain.py`, `flatcam_plus/camlib.py`, and `flatcam_plus/appDatabase.py` are very large
 (~160–350 KB).

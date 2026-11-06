@@ -8,6 +8,40 @@ CHANGELOG for FlatCAM Plus beta
 
 =================================================
 
+## 2026/11/06 - v1.3.1 Packaged releases for Windows and Linux
+
+### Highlights
+
+- Every tagged release now publishes installable artifacts: a Windows installer, a `.deb`, an
+  `.rpm`, a self-hosted Flatpak bundle and the portable `.tar.gz`.
+- The application version has one source, `pyproject.toml`; the module, the lockfile, the build
+  scripts and the metadata all derive from it.
+- `flatcam.py --version` answers without a display, so an installer or a maintainer can ask a
+  package what it is.
+
+### Added
+
+- `packaging/linux/`: `nfpm` metadata, a `/usr/bin/flatcam-plus` launcher, a desktop entry,
+  AppStream metadata and a glibc floor gate, producing both `.deb` and `.rpm` from one file.
+- `packaging/flatpak/`: a manifest and build script for the published `.flatpak`.
+- `packaging/aur/`: `flatcam-plus-bin`, a PKGBUILD that repackages the release tarball, with
+  `update_aur.sh` to bump the version, the checksums and `.SRCINFO`.
+- `.github/workflows/release.yml`: a tag-triggered pipeline that refuses a tag disagreeing with the
+  version, builds the bundle against glibc 2.34 inside `manylinux_2_34`, packages, and publishes.
+
+### Changed
+
+- The in-app updater is not created in a packaged build: a package manager owns those files, and a
+  self-update would write into `/opt` and desynchronise the package database.
+- `-h` exits successfully; it used to exit 2 because the option was declared as taking an argument.
+
+### Fixed
+
+- Removed the `gdal` dependency: nothing imported it, it ships no wheels, and it made every clean
+  `uv sync` fail while trying to compile it.
+- `--add-data` paths are absolute and the manifest is placed as a file, so a bundle actually
+  contains its data and can read its own version.
+
 ## 2026/06/05 - v1.1.0 Gerber Editor Selection and App Safety Enhancements
 
 ### Highlights

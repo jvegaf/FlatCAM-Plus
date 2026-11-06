@@ -343,7 +343,7 @@ python flatcam.py
 
 ### 3. Desktop Packaging
 
-FlatCAM Plus does not currently ship with official Windows, macOS, or Linux installer artifacts in this repository. Users who clone the repository can still create local desktop packages from source.
+Every tagged release publishes ready-to-install artifacts: a Windows installer, a Debian `.deb`, an RPM, a self-hosted Flatpak bundle and a portable `.tar.gz`. They are built by `.github/workflows/release.yml` and attached to the release. Users who prefer to build from source can still create local desktop packages with the scripts below.
 
 Packaging should be done on the target operating system because PyQt, OpenGL/VisPy, GDAL, Rasterio, and other native dependencies are platform-specific.
 
@@ -351,7 +351,7 @@ Packaging should be done on the target operating system because PyQt, OpenGL/Vis
 - Linux users can run `FlatCAMPlus_linux_portable_generator.sh` to build a portable folder and `.tar.gz` archive.
 - Windows users can build x32 and x64 Inno Setup installers from the separate `FlatCAMPlus_x32_installer_generator.bat` and `FlatCAMPlus_x64_installer_generator.bat` files.
 
-See [`PACKAGING.md`](PACKAGING.md) for Windows, macOS, and Linux packaging commands.
+See [`PACKAGING.md`](PACKAGING.md) for the packaging commands, how the released artifacts are built, and what each package installs.
 
 ---
 
