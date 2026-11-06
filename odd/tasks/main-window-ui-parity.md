@@ -135,3 +135,26 @@ exist, a record written through `logging` reaches the Log tab, the mirror accept
 shell is still reachable through `shell_terminal()`. `CNCControlUI` sets `self.app` (ui.py:34), so the
 mirror call is not a silent no-op.
 
+
+## T4 closed: no action, the premise was wrong
+
+The user asked to give text to "the 17 toolbar buttons without text". That count was **my measurement
+error**: it included widget-based toolbar entries that are not buttons at all. Measured properly on the
+laid-out window (`widgetForAction` + `isVisible` + class):
+
+- several are **0x0 `QWidget` spacers**, with nothing to label;
+- several more are **invisible**, belonging to the disabled editor toolbars;
+- the visible remainder is **6-9 `QToolButton`s with `InstantPopup`**, i.e. menu launchers that already
+  carry tooltips (`Main menu`, `Plugins`, `Align`, `CNC Control`, `AI Assistant`, `Rotate`, `Skew`,
+  `Flip`).
+
+Labelling a menu launcher adds width and no information, so T4 is closed with no code change. This is
+the second time in this feature that measuring replaced a plausible assumption (the first was the CNC
+console), which is itself the argument for measuring before deciding.
+
+**Toolbar width, measured on the real window at 1440x900 with the project workspace active:** the
+centered host is 436px wide, and every command toolbar is clipped (`qt_toolbar_ext_button` visible).
+That is **pre-existing**, not introduced here: with icons only the toolbars already need 1384px;
+labelling them raises it to 1468px, about 6% more. So the labels neither caused the overflow nor fixed
+it, and the commands were already behind the overflow menu before this change.
+
