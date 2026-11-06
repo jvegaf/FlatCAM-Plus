@@ -310,3 +310,11 @@ def test_the_glibc_checker_reads_the_bootloader_that_has_no_extension(tmp_path, 
 
     assert checker.main(["check", str(tmp_path), "2.34"]) == 0
     assert checker.main(["check", str(tmp_path), "2.31"]) == 1
+
+
+def test_the_publish_job_can_find_the_repository_without_a_checkout():
+    """gh needs a repository context, and this job only downloads artifacts."""
+    publish = workflow_jobs(read(os.path.join(WORKFLOW_DIR, "release.yml")))["publish"]
+
+    assert "gh release create" in publish
+    assert "actions/checkout" in publish or "--repo" in publish

@@ -249,6 +249,9 @@ jobs:
         run: |
           set -euo pipefail
           ls -l dist
+          # No checkout in this job, so gh cannot discover the repository from a worktree;
+          # ${GITHUB_REPOSITORY} is the workflow's own owner/name.
           gh release create "${GITHUB_REF_NAME}" dist/* \
+            --repo "${GITHUB_REPOSITORY}" \
             --title "FlatCAM Plus ${VERSION}" \
             --generate-notes
