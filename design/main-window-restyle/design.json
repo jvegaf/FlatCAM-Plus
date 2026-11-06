@@ -1,0 +1,27 @@
+{
+  "title": "FlatCAM Plus main window — restyle directions",
+  "brief": "Three visual directions for restyling the existing FlatCAM Plus main window (object tree, notebook tabs, plot canvas, tool parameters), built on the color tokens that flatcam_plus/appGUI/PanelStyles.py and appGUI/themes/*_style_sheet.py actually ship.",
+  "artboards": [
+    {
+      "file": "01-dense-cad-dark.html",
+      "title": "Dense CAD dark",
+      "tradeoff": "Keeps the shipped dark palette and the shipped three-dock layout, tightened: 24px tree rows, per-object kind column, orange focus and active state, always-on console. Maximum information per pixel and no relearning for existing users, but brutal for a newcomer and it inherits the app's weak light-theme focus behaviour in reverse (orange focus is strong, everything else competes with it).",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "02-light-workbench.html",
+      "title": "Light workbench with inspector",
+      "tradeoff": "Restructures around the job instead of the widgets: objects grouped by stage (Imported / Generated / Machining), a five-step job stepper, and one selection-driven inspector that replaces three separate tool-tab docks. Far clearer hierarchy and no lost settings, but it concedes persistent canvas width, hides inactive tool parameters behind selection, and adopts the vendor #0081db accent as the single light accent — a decision, since the shipped panel dict uses #b9d1ff.",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "03-canvas-first-palette.html",
+      "title": "Canvas-first with command palette",
+      "tradeoff": "Collapses chrome to a labeled 72px rail plus a floating context toolbar and a bottom object strip, freeing most of the window for the plot, with a Ctrl+K palette for tool and object access. Best canvas-per-screen and fastest for keyboard users, but weakest discoverability of the tool set: the labeled rail is load-bearing for accessibility here, and the palette must stay a shortcut rather than the only route to any action.",
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}

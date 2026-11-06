@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>FlatCAM Plus — 02 Light workbench</title>
+<style>
+  :root{
+    /* panel dict, light (PanelStyles.py:22-36) */
+    --app-bg:#eef0f3; --surface:#ffffff; --subtle:#f8fafc; --text:#263244;
+    --selected-text:#111827; --border:#dfe4ec; --separator:#e3e8f0;
+    --hover:#eef4ff; --hover-border:#d9e6fb; --active:#dfeafe;
+    --accent-soft:#b9d1ff;
+    /* #0081db is the vendor sheet's light accent (light_style_sheet.py:17, 359) —
+       the only light accent with usable contrast, so it leads here. */
+    --accent:#0081db; --accent-ink:#005f9e; --accent-wash:#e8f2fb;
+    --hint:#6f7b8e; --hint-strong:#5f6b7e; /* hint-strong proposed: 5.39:1 */
+    --disabled:#a8b2c1;
+    --alert-bg:#fff1f2; --alert-border:#f43f5e; --alert-text:#b4233a;
+    --ok:#1f7a4d; --ok-bg:#e8f6ee;
+    --console-bg:#1e1e1e; --console-text:#d4d4d4;
+
+    --font: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+    --layer-copper:#c2410c; --layer-drill:#005f9e; --layer-outline:#94a3b8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; height:100%}
+  body{
+    width:1440px; height:900px; overflow:hidden; display:flex; flex-direction:column;
+    font-family:var(--font); font-size:13px; background:var(--app-bg); color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+  .mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+  /* ---------- app bar ---------- */
+  .appbar{display:flex; align-items:center; gap:14px; height:46px; padding:0 18px;
+          background:var(--surface); border-bottom:1px solid var(--border); flex:0 0 46px}
+  .logo{display:flex; align-items:center; gap:9px; font-weight:600; font-size:13.5px; letter-spacing:-.01em}
+  .logo__mark{width:20px; height:20px; border-radius:5px; background:var(--accent); color:#fff;
+              display:grid; place-items:center; font-family:var(--mono); font-size:11px; font-weight:700}
+  .proj{display:flex; align-items:baseline; gap:8px; padding-left:14px; border-left:1px solid var(--separator)}
+  .proj__name{font-size:12.5px; font-weight:600}
+  .proj__meta{font-size:11.5px; color:var(--hint-strong)}
+  .appbar__sp{flex:1}
+  .ghost{background:transparent; border:1px solid transparent; border-radius:6px; padding:6px 10px;
+         font-family:inherit; font-size:12.5px; color:var(--text); cursor:pointer}
+  .ghost:hover{background:var(--hover); border-color:var(--hover-border); color:var(--selected-text)}
+  .avatarbtn{width:28px; height:28px; border-radius:50%; background:var(--active); border:1px solid var(--accent-soft);
+             color:var(--accent-ink); font-size:11px; font-weight:700; cursor:pointer; font-family:inherit}
+
+  /* ---------- job stepper ---------- */
+  .stepper{display:flex; align-items:center; gap:0; height:62px; padding:0 18px; flex:0 0 62px;
+           background:var(--surface); border-bottom:1px solid var(--border)}
+  .step{display:flex; align-items:center; gap:9px; padding:7px 14px 7px 10px; border-radius:8px;
+        background:transparent; border:1px solid transparent; cursor:pointer; text-align:left;
+        font-family:inherit; color:var(--text)}
+  .step:hover{background:var(--hover); border-color:var(--hover-border)}
+  .step__n{width:20px; height:20px; border-radius:50%; display:grid; place-items:center; font-size:11px;
+           font-weight:700; font-family:var(--mono); border:1.5px solid var(--hint); color:var(--hint-strong);
+           flex:0 0 auto; background:var(--surface)}
+  .step__t{display:block; font-size:12.5px; font-weight:600; line-height:1.25}
+  .step__s{display:block; font-size:11px; color:var(--hint-strong); line-height:1.3}
+  .step--done .step__n{background:var(--ok-bg); border-color:var(--ok); color:var(--ok)}
+  .step--current{background:var(--accent-wash); border-color:var(--accent-soft)}
+  .step--current .step__n{background:var(--accent); border-color:var(--accent); color:#fff}
+  .step--current .step__t{color:var(--accent-ink)}
+  .stepper__link{width:18px; height:1.5px; background:var(--separator); flex:0 0 auto; margin:0 2px}
+
+  /* ---------- body ---------- */
+  .body{flex:1; min-height:0; display:grid; grid-template-columns:308px minmax(0,1fr) 340px; gap:14px;
+        padding:14px 18px 12px}
+
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:10px;
+        display:flex; flex-direction:column; min-height:0; overflow:hidden}
+  .card__head{display:flex; align-items:center; gap:8px; padding:11px 14px; flex:0 0 auto;
+              border-bottom:1px solid var(--separator)}
+  .card__title{font-size:11.5px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--hint-strong)}
+  .card__count{margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--hint-strong)}
+
+  /* ---------- object list, grouped by stage ---------- */
+  .objlist{overflow:auto; flex:1; min-height:0; padding:8px}
+  .stage{margin:0 0 12px}
+  .stage:last-child{margin-bottom:0}
+  .stage__t{display:flex; align-items:center; gap:7px; padding:4px 6px 8px; font-size:10.5px;
+            font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--hint-strong)}
+  .stage__t b{font-family:var(--mono); font-weight:600; color:var(--hint-strong)}
+  .obj{display:grid; grid-template-columns:34px minmax(0,1fr) auto; align-items:center; gap:10px;
+       width:100%; padding:8px 9px; border-radius:8px; border:1px solid transparent;
+       background:transparent; cursor:pointer; text-align:left; font-family:inherit; color:var(--text);
+       position:relative}
+  .obj:hover{background:var(--hover); border-color:var(--hover-border)}
+  .obj[aria-selected="true"]{background:var(--active); border-color:var(--accent-soft)}
+  .obj[aria-selected="true"]::before{content:""; position:absolute; left:0; top:9px; bottom:9px;
+       width:3px; border-radius:0 3px 3px 0; background:var(--accent)}
+  .obj__thumb{width:34px; height:26px; border-radius:4px; border:1px solid var(--border);
+              background:var(--subtle); display:grid; place-items:center; flex:0 0 auto}
+  .obj__name{display:block; font-size:12.5px; font-weight:600; line-height:1.3;
+             overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .obj__meta{display:block; font-size:11px; color:var(--hint-strong); line-height:1.35;
+             overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .obj__flag{font-family:var(--mono); font-size:9.5px; letter-spacing:.04em; padding:2px 5px;
+             border-radius:4px; border:1px solid var(--border); color:var(--hint-strong);
+             background:var(--surface); white-space:nowrap}
+  .obj__flag--ready{border-color:#bfe3cd; color:var(--ok); background:var(--ok-bg)}
+  .obj__flag--warn{border-color:#f43f5e55; color:var(--alert-text); background:var(--alert-bg)}
+
+  /* ---------- canvas ---------- */
+  .canvas{position:relative; flex:1; min-height:0; overflow:hidden; background:#fbfcfd;
+          background-image:
+            linear-gradient(to right, #2632440a 1px, transparent 1px),
+            linear-gradient(to bottom, #2632440a 1px, transparent 1px),
+            linear-gradient(to right, #26324414 1px, transparent 1px),
+            linear-gradient(to bottom, #26324414 1px, transparent 1px);
+          background-size:9px 9px, 9px 9px, 90px 90px, 90px 90px}
+  .plot{position:absolute; inset:0; display:flex; align-items:center; justify-content:center}
+  .canvas__top{position:absolute; left:14px; top:12px; display:flex; gap:6px; align-items:center}
+  .seg{display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:var(--surface)}
+  .seg button{background:transparent; border:0; border-right:1px solid var(--border); font-family:inherit;
+              font-size:11.5px; color:var(--hint-strong); padding:5px 10px; cursor:pointer}
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed="true"]{background:var(--active); color:var(--accent-ink); font-weight:600}
+  .seg button:hover:not([aria-pressed="true"]){background:var(--hover); color:var(--selected-text)}
+  .zoomchips{position:absolute; right:14px; bottom:12px; display:flex; gap:6px; align-items:center}
+  .chip{background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:5px 9px;
+        font-family:var(--mono); font-size:11px; color:var(--hint-strong); cursor:pointer}
+  .chip:hover{background:var(--hover); border-color:var(--hover-border); color:var(--selected-text)}
+  .coordtag{position:absolute; left:50%; top:50%; margin:-34px 0 0 150px; background:var(--surface);
+            border:1px solid var(--accent-soft); border-radius:6px; padding:4px 8px;
+            font-family:var(--mono); font-size:10.5px; color:var(--accent-ink); white-space:nowrap}
+  .legend{position:absolute; left:14px; bottom:12px; display:flex; gap:12px; background:var(--surface);
+          border:1px solid var(--border); border-radius:6px; padding:5px 10px}
+  .legend span{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--hint-strong)}
+  .legend i{width:9px; height:9px; border-radius:2px}
+
+  /* ---------- inspector ---------- */
+  .insp{overflow:auto; flex:1; min-height:0; padding:14px}
+  .objhead{display:flex; gap:11px; align-items:flex-start; margin-bottom:14px}
+  .objhead__thumb{width:54px; height:42px; border-radius:6px; border:1px solid var(--border);
+                  background:var(--subtle); display:grid; place-items:center; flex:0 0 auto}
+  .objhead h2{margin:0; font-size:15px; font-weight:600; letter-spacing:-.01em; line-height:1.25}
+  .objhead p{margin:3px 0 0; font-size:11.5px; color:var(--hint-strong); line-height:1.4}
+  .quick{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:16px}
+  .btn{font-family:inherit; font-size:12.5px; font-weight:600; color:var(--text); background:var(--subtle);
+       border:1px solid var(--border); border-radius:6px; min-height:30px; padding:6px 10px; cursor:pointer;
+       display:flex; align-items:center; justify-content:center; gap:7px}
+  .btn:hover{background:var(--hover); border-color:var(--hover-border); color:var(--selected-text)}
+  .btn:active{background:var(--active); border-color:var(--accent-soft)}
+  .btn--wide{grid-column:1 / -1}
+  .btn--danger{color:var(--alert-text); border-color:#f43f5e44; background:var(--alert-bg)}
+  .btn--danger:hover{background:#ffe4e6; border-color:var(--alert-border); color:var(--alert-text)}
+  .btn:disabled{background:var(--surface); color:var(--disabled); border-color:var(--separator); cursor:not-allowed}
+  .btn--primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  .btn--primary:hover{background:#0072c4; border-color:#0072c4; color:#fff}
+
+  .sectitle{display:flex; align-items:center; gap:8px; font-size:11px; font-weight:600; letter-spacing:.07em;
+            text-transform:uppercase; color:var(--hint-strong); margin:0 0 8px}
+  .sectitle::after{content:""; flex:1; height:1px; background:var(--separator)}
+  .props{margin:0 0 18px; display:grid; gap:0}
+  .prop{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:baseline;
+        padding:6px 0; border-bottom:1px solid var(--separator); font-size:12px}
+  .prop:last-child{border-bottom:0}
+  .prop dt{color:var(--hint-strong); margin:0}
+  .prop dd{margin:0; font-family:var(--mono); font-size:11.5px; font-variant-numeric:tabular-nums}
+
+  .toolcard{border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:14px}
+  .toolcard__head{display:flex; align-items:center; gap:8px; padding:9px 11px; background:var(--subtle);
+                  border-bottom:1px solid var(--separator)}
+  .toolcard__head b{font-size:12px; font-weight:600}
+  .toolcard__body{padding:11px}
+  .field{display:grid; grid-template-columns:1fr 104px; align-items:center; gap:10px; margin-bottom:8px}
+  .field:last-child{margin-bottom:10px}
+  .field label{font-size:12px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .field input, .field select{height:28px; width:100%; background:var(--surface); border:1px solid var(--border);
+      border-radius:5px; color:var(--text); font-family:var(--mono); font-size:12px; padding:0 7px; text-align:right}
+  .field select{text-align:left; font-family:var(--font); font-size:12px; padding:0 5px}
+  .field input:focus, .field select:focus{border-color:var(--accent); outline:2px solid var(--accent); outline-offset:1px}
+  .field input:disabled{color:var(--disabled); border-color:var(--separator); background:var(--subtle)}
+  .check{display:flex; align-items:center; gap:8px; font-size:12px; margin-bottom:8px}
+  .check i{width:16px; height:16px; border:1px solid var(--border); border-radius:4px; background:var(--surface);
+           display:inline-flex; align-items:center; justify-content:center; font-size:11px; color:var(--accent);
+           flex:0 0 auto; font-style:normal}
+
+  .callout{display:flex; gap:9px; align-items:flex-start; border-radius:6px; padding:9px 10px;
+           font-size:11.5px; line-height:1.45; margin-bottom:14px}
+  .callout--warn{background:var(--alert-bg); border:1px solid #f43f5e33; color:var(--alert-text)}
+  .callout--ok{background:var(--ok-bg); border:1px solid #bfe3cd; color:var(--ok)}
+  .callout b{font-weight:600}
+
+  /* ---------- bottom bar ---------- */
+  .statusbar{display:flex; align-items:center; gap:16px; height:30px; padding:0 18px; flex:0 0 30px;
+             background:var(--surface); border-top:1px solid var(--border); font-size:11.5px; color:var(--hint-strong)}
+  .statusbar .mono{color:var(--text); font-size:11px}
+  .statusbar .sep{width:1px; height:12px; background:var(--separator)}
+  .statusbar .sp{flex:1}
+  .logtoggle{display:flex; align-items:center; gap:6px; background:var(--subtle); border:1px solid var(--border);
+             border-radius:6px; padding:3px 9px; font-family:inherit; font-size:11.5px;
+             color:var(--text); cursor:pointer; height:22px}
+  .logtoggle:hover{background:var(--hover); border-color:var(--hover-border)}
+  .dot{width:6px; height:6px; border-radius:50%; background:var(--ok)}
+
+  @media (prefers-reduced-motion:no-preference){
+    .btn,.obj,.step,.seg button,.ghost,.chip,.logtoggle{transition:background-color .12s, border-color .12s, color .12s}
+  }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="logo"><span class="logo__mark">FC</span>FlatCAM Plus</div>
+  <div class="proj">
+    <span class="proj__name">ESP32 sensor node · top side</span>
+    <span class="proj__meta">9 objects · saved 14:03</span>
+  </div>
+  <div class="appbar__sp"></div>
+  <button class="ghost" type="button">Open…</button>
+  <button class="ghost" type="button">Save</button>
+  <button class="ghost" type="button">Preferences</button>
+  <button class="avatarbtn" type="button" aria-label="Units: millimetres">mm</button>
+</header>
+
+<div class="stepper" role="navigation" aria-label="Job stages">
+  <button class="step step--done" type="button">
+    <span class="step__n" aria-hidden="true">✓</span>
+    <span><span class="step__t">Input</span><span class="step__s">4 files imported</span></span>
+  </button>
+  <span class="stepper__link" aria-hidden="true"></span>
+  <button class="step step--current" type="button" aria-current="step">
+    <span class="step__n" aria-hidden="true">2</span>
+    <span><span class="step__t">Isolation</span><span class="step__s">2 passes · 0.2 mm</span></span>
+  </button>
+  <span class="stepper__link" aria-hidden="true"></span>
+  <button class="step" type="button">
+    <span class="step__n" aria-hidden="true">3</span>
+    <span><span class="step__t">Drilling</span><span class="step__s">Not generated</span></span>
+  </button>
+  <span class="stepper__link" aria-hidden="true"></span>
+  <button class="step" type="button">
+    <span class="step__n" aria-hidden="true">4</span>
+    <span><span class="step__t">Cutout</span><span class="step__s">Not generated</span></span>
+  </button>
+  <span class="stepper__link" aria-hidden="true"></span>
+  <button class="step" type="button">
+    <span class="step__n" aria-hidden="true">5</span>
+    <span><span class="step__t">Export</span><span class="step__s">Blocked by 3 and 4</span></span>
+  </button>
+</div>
+
+<div class="body">
+
+  <!-- objects, grouped by job stage -->
+  <section class="card" aria-label="Objects by stage">
+    <div class="card__head">
+      <span class="card__title">Objects</span>
+      <span class="card__count">9</span>
+    </div>
+    <div class="objlist">
+
+      <div class="stage">
+        <div class="stage__t">Imported <b>4</b></div>
+        <button class="obj" type="button">
+          <span class="obj__thumb" aria-hidden="true">
+            <svg width="22" height="16" viewBox="0 0 22 16"><g stroke="var(--layer-copper)" stroke-width="1.6" fill="none"><path d="M2 5h7l3 3h8"/><path d="M2 11h6l3-3h9"/></g></svg>
+          </span>
+          <span><span class="obj__name">top_copper.gbr</span><span class="obj__meta">Gerber · 1 284 paths</span></span>
+          <span class="obj__flag">top</span>
+        </button>
+        <button class="obj" type="button">
+          <span class="obj__thumb" aria-hidden="true">
+            <svg width="22" height="16" viewBox="0 0 22 16"><g stroke="var(--layer-drill)" stroke-width="1.6" fill="none"><path d="M3 13h6l4-4h6"/><path d="M3 6h7l4 4"/></g></svg>
+          </span>
+          <span><span class="obj__name">bottom_copper.gbr</span><span class="obj__meta">Gerber · 964 paths</span></span>
+          <span class="obj__flag">bottom</span>
+        </button>
+        <button class="obj" type="button">
+          <span class="obj__thumb" aria-hidden="true">
+            <svg width="22" height="16" viewBox="0 0 22 16"><g fill="var(--layer-drill)"><circle cx="5" cy="5" r="1.9"/><circle cx="17" cy="5" r="1.4"/><circle cx="8" cy="11" r="1.2"/><circle cx="14" cy="12" r="1.9"/></g></svg>
+          </span>
+          <span><span class="obj__name">drill_plated.drl</span><span class="obj__meta">Excellon · 38 holes · 0.8–3.2 mm</span></span>
+          <span class="obj__flag">pth</span>
+        </button>
+        <button class="obj" type="button">
+          <span class="obj__thumb" aria-hidden="true">
+            <svg width="22" height="16" viewBox="0 0 22 16"><g fill="none" stroke="var(--layer-drill)" stroke-width="1.5"><circle cx="6" cy="5" r="1.5"/><circle cx="16" cy="11" r="1.5"/></g></svg>
+          </span>
+          <span><span class="obj__name">drill_npth.drl</span><span class="obj__meta">Excellon · 4 holes · 3.2 mm</span></span>
+          <span class="obj__flag">npth</span>
+        </button>
+      </div>
+
+      <div class="stage">
+        <div class="stage__t">Generated <b>2</b></div>
+        <button class="obj" type="button" aria-selected="true">
+          <span class="obj__thumb" aria-hidden="true">
+            <svg width="22" height="16" viewBox="0 0 22 16"><g fill="none" stroke="var(--accent)" stroke-width="1.7"><path d="M3 12h6l3-3h7"/><path d="M3 7h5l4 3"/></g></svg>
+          </span>
+          <span><span class="obj__name">isolation_top</span><span class="obj__meta">Geometry · 412 paths · 8 240 points</span></span>
+          <span class="obj__flag obj__flag--ready">ready</span>
+        </button>
+        <button class="obj" type="button">
+          <span class="obj__thumb" aria-hidden="true">
+            <svg width="22" height="16" viewBox="0 0 22 16"><rect x="3" y="3" width="16" height="10" rx="1.5" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-dasharray="3 2"/></svg>
+          </span>
+          <span><span class="obj__name">cutout</span><span class="obj__meta">Geometry · 2 paths · 340 points</span></span>
+          <span class="obj__flag obj__flag--ready">ready</span>
+        </button>
+      </div>
+
+      <div class="stage">
+        <div class="stage__t">Machining <b>1</b></div>
+        <button class="obj" type="button">
+          <span class="obj__thumb" aria-hidden="true">
+            <svg width="22" height="16" viewBox="0 0 22 16"><g fill="none" stroke="var(--hint-strong)" stroke-width="1.5"><path d="M3 12h16"/><path d="M6 12V6l4-3 4 3v6"/></g></svg>
+          </span>
+          <span><span class="obj__name">iso_top_cnc</span><span class="obj__meta">CNC Job · 18 402 lines · 7:12</span></span>
+          <span class="obj__flag obj__flag--warn">Z −0.15</span>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- canvas -->
+  <section class="card" aria-label="Plot canvas">
+    <div class="canvas">
+      <div class="canvas__top">
+        <div class="seg" role="group" aria-label="View">
+          <button type="button" aria-pressed="true">Plot</button>
+          <button type="button" aria-pressed="false">2D</button>
+          <button type="button" aria-pressed="false">3D</button>
+        </div>
+      </div>
+
+      <div class="plot">
+        <svg width="500" height="360" viewBox="0 0 500 360" role="img" aria-label="Board plot: copper traces, 38 drill hits and a dashed cutout outline">
+          <title>Board plot — top copper with isolation paths and cutout</title>
+          <rect x="40" y="30" width="420" height="300" fill="none" stroke="var(--layer-outline)"
+                stroke-width="1.4" stroke-dasharray="8 5"/>
+          <rect x="48" y="38" width="404" height="284" fill="none" stroke="var(--accent)"
+                stroke-width="1.2" stroke-dasharray="3 3" opacity=".55"/>
+          <g stroke="var(--layer-copper)" stroke-width="4.6" fill="none" stroke-linecap="round" opacity=".9">
+            <path d="M104 110h84l30 30h62"/>
+            <path d="M84 196h56l36-36h74l26 26h66"/>
+            <path d="M104 262h112l40-40h84"/>
+            <path d="M222 110v48l30 30v62"/>
+            <path d="M348 88v50l-30 30v44"/>
+            <path d="M160 168v56"/>
+          </g>
+          <g fill="var(--layer-copper)" opacity=".9">
+            <rect x="97" y="103" width="14" height="14" rx="2"/>
+            <rect x="215" y="103" width="14" height="14" rx="2"/>
+            <rect x="341" y="81" width="14" height="14" rx="2"/>
+            <rect x="77" y="189" width="14" height="14" rx="2"/>
+            <rect x="363" y="179" width="14" height="14" rx="2"/>
+            <rect x="153" y="217" width="14" height="14" rx="2"/>
+            <rect x="104" y="255" width="14" height="14" rx="2"/>
+            <rect x="333" y="255" width="14" height="14" rx="2"/>
+          </g>
+          <g fill="#fbfcfd" stroke="var(--layer-drill)" stroke-width="1.8">
+            <circle cx="104" cy="110" r="4"/>
+            <circle cx="222" cy="110" r="4"/>
+            <circle cx="348" cy="88" r="4"/>
+            <circle cx="84" cy="196" r="4"/>
+            <circle cx="370" cy="186" r="4"/>
+            <circle cx="160" cy="224" r="4"/>
+            <circle cx="104" cy="262" r="4"/>
+            <circle cx="340" cy="262" r="4"/>
+            <circle cx="22" cy="22" r="5.5"/>
+            <circle cx="478" cy="22" r="5.5"/>
+            <circle cx="22" cy="338" r="5.5"/>
+            <circle cx="478" cy="338" r="5.5"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="coordtag">X 42.317 &nbsp;Y 18.902</div>
+
+      <div class="legend">
+        <span><i style="background:var(--layer-copper)"></i>Copper</span>
+        <span><i style="background:var(--accent)"></i>Isolation</span>
+        <span><i style="background:var(--layer-drill)"></i>Drills</span>
+      </div>
+
+      <div class="zoomchips">
+        <button class="chip" type="button">Fit</button>
+        <button class="chip" type="button">4.2:1</button>
+        <button class="chip" type="button">Grid 1 mm</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- inspector -->
+  <section class="card" aria-label="Inspector">
+    <div class="card__head">
+      <span class="card__title">Inspector</span>
+      <span class="card__count">isolated</span>
+    </div>
+    <div class="insp">
+
+      <div class="objhead">
+        <span class="objhead__thumb" aria-hidden="true">
+          <svg width="34" height="24" viewBox="0 0 34 24"><g fill="none" stroke="var(--accent)" stroke-width="2"><path d="M4 18h9l4-4h11"/><path d="M4 10h7l5 4"/></g></svg>
+        </span>
+        <div>
+          <h2>isolation_top</h2>
+          <p>Geometry · generated 14:02 · 412 paths</p>
+        </div>
+      </div>
+
+      <div class="callout callout--warn">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:0 0 auto; margin-top:1px"><path d="M6.5 1.5 12 11H1z"/><path d="M6.5 5v3"/><path d="M6.5 9.6h.01"/></svg>
+        <span>Cut Z <b>−0.150 mm</b> is deeper than the board thickness <b>0.100 mm</b>. Fix before export.</span>
+      </div>
+
+      <div class="quick">
+        <button class="btn" type="button">Plot</button>
+        <button class="btn" type="button">Export G-code</button>
+        <button class="btn btn--wide btn--danger" type="button">Delete object</button>
+      </div>
+
+      <div class="sectitle">Geometry</div>
+      <dl class="props">
+        <div class="prop"><dt>Paths</dt><dd>412</dd></div>
+        <div class="prop"><dt>Points</dt><dd>8 240</dd></div>
+        <div class="prop"><dt>Bounding box</dt><dd>68.4 × 48.2 mm</dd></div>
+        <div class="prop"><dt>Tool diameter</dt><dd>0.2000 mm</dd></div>
+        <div class="prop"><dt>Passes</dt><dd>2</dd></div>
+      </dl>
+
+      <div class="sectitle">Isolation tool</div>
+      <div class="toolcard">
+        <div class="toolcard__head">
+          <b>Parameters</b>
+          <span class="obj__flag" style="margin-left:auto">armed</span>
+        </div>
+        <div class="toolcard__body">
+          <div class="field"><label for="f1">Diameter</label><input id="f1" value="0.2000"></div>
+          <div class="field"><label for="f2">Passes</label><input id="f2" value="2"></div>
+          <div class="field"><label for="f3">Overlap</label><input id="f3" value="10.0"></div>
+          <label class="check" for="f4"><i>✓</i><span>Combine passes</span></label>
+          <div class="field"><label for="f5">Feed XY</label><input id="f5" value="120.0"></div>
+          <div class="field"><label for="f6">Cut Z</label><input id="f6" value="-0.150"></div>
+          <button class="btn btn--primary" type="button" style="width:100%">Regenerate geometry</button>
+        </div>
+      </div>
+
+      <div class="sectitle">Altitude</div>
+      <div class="callout callout--ok">
+        <span class="dot" style="margin-top:5px; background:var(--ok)"></span>
+        <span>Isolation matches the file dates and tool table. Nothing left to regenerate.</span>
+      </div>
+      <button class="btn btn--wide" type="button" disabled>Mark as verified</button>
+
+    </div>
+  </section>
+</div>
+
+<footer class="statusbar">
+  <span>CURSOR <span class="mono">X 42.317  Y 18.902</span></span>
+  <span class="sep"></span>
+  <span>ZOOM <span class="mono">4.2:1</span></span>
+  <span class="sep"></span>
+  <span>UNITS <span class="mono">mm</span></span>
+  <span class="sp"></span>
+  <span class="dot" aria-hidden="true"></span><span>Autosaved 14:03</span>
+  <button class="logtoggle" type="button">Show log · 1 warning</button>
+</footer>
+
+</body>
+</html>

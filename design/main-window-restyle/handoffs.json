@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "chosen": "01-dense-cad-dark.html",
+  "handoffs": {
+    "01-dense-cad-dark.html": {
+      "status": "in_progress",
+      "queued": false,
+      "sentAt": "2026-11-06T20:13:39.956Z",
+      "startedAt": "2026-11-06T20:14:09.427Z",
+      "implementedAt": null,
+      "note": "Mapping the artboard onto the real Qt widgets: project tree, notebook tabs, tool panels, console dock."
+    }
+  }
+}

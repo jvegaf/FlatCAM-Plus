@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>FlatCAM Plus — design system</title>
+<style>
+  :root{
+    /* panel dict — light (PS:22-36) */
+    --l-app-bg:#eef0f3; --l-surface:#ffffff; --l-subtle:#f8fafc; --l-text:#263244;
+    --l-selected-text:#111827; --l-border:#dfe4ec; --l-separator:#e3e8f0;
+    --l-hover:#eef4ff; --l-hover-border:#d9e6fb; --l-active:#dfeafe;
+    --l-active-border:#b9d1ff; --l-disabled:#a8b2c1; --l-hint:#6f7b8e;
+    --l-console-bg:#1e1e1e; --l-console-text:#d4d4d4;
+    --l-alert-bg:#fff1f2; --l-alert-hover:#ffe4e6; --l-alert-border:#f43f5e; --l-alert-text:#b4233a;
+    --l-selection:#0081db;
+    /* panel dict — dark (PS:40-54) */
+    --d-app-bg:#171717; --d-surface:#262626; --d-subtle:#171717; --d-text:#f0f0f0;
+    --d-selected-text:#ffffff; --d-border:#444444; --d-separator:#323232;
+    --d-hover:#323232; --d-hover-border:#444444; --d-active:#2b2b2b;
+    --d-active-border:#ff6900; --d-disabled:#777777; --d-hint:#999999;
+    --d-console-bg:#171717; --d-console-text:#f0f0f0;
+    --d-alert-bg:#3a1c28; --d-alert-hover:#4a2432; --d-alert-border:#f87171; --d-alert-text:#fecdd3;
+    --d-selection:#8ab4f7;
+    /* proposed, not project tokens */
+    --l-hint-strong:#5f6b7e; --d-hint-strong:#a8a8a8;
+
+    --font: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    width:1440px; font-family:var(--font); background:var(--l-app-bg);
+    color:var(--l-text); -webkit-font-smoothing:antialiased;
+  }
+  .wrap{padding:28px 32px 56px}
+  h1{font-size:26px; line-height:1.2; margin:0 0 6px; font-weight:600; letter-spacing:-.01em}
+  .sub{font-size:13px; color:var(--l-hint-strong); margin:0 0 4px}
+  .lede{font-size:13px; line-height:1.6; max-width:96ch; margin:12px 0 0; color:var(--l-text)}
+  .lede code{font-family:var(--mono); font-size:12px; background:#fff; border:1px solid var(--l-border); border-radius:3px; padding:1px 4px}
+  h2{font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+     color:var(--l-hint-strong); margin:36px 0 12px; padding-bottom:7px;
+     border-bottom:1px solid var(--l-separator)}
+  h2:first-of-type{margin-top:28px}
+  .h2note{text-transform:none; letter-spacing:0; font-weight:400; font-size:12px; color:var(--l-hint-strong)}
+  .board{background:var(--l-surface); border:1px solid var(--l-border); border-radius:8px; padding:18px}
+  .board--dark{background:var(--d-app-bg); border-color:var(--d-border); color:var(--d-text)}
+
+  /* swatches */
+  .grid{display:grid; grid-template-columns:repeat(5,1fr); gap:12px}
+  .sw{border:1px solid var(--l-border); border-radius:5px; overflow:hidden; background:var(--l-surface)}
+  .sw__chip{height:46px}
+  .sw__meta{padding:7px 8px}
+  .sw__name{font-family:var(--mono); font-size:11px; font-weight:600; display:block}
+  .sw__hex{font-family:var(--mono); font-size:10.5px; color:var(--l-hint-strong); display:block; margin-top:2px}
+  .sw__use{font-size:10.5px; line-height:1.35; color:var(--l-hint-strong); display:block; margin-top:4px}
+
+  /* type table */
+  .tbl{width:100%; border-collapse:collapse; font-size:12px}
+  .tbl th{text-align:left; font-weight:600; font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+          color:var(--l-hint-strong); padding:0 10px 8px 0; border-bottom:1px solid var(--l-separator)}
+  .tbl td{padding:8px 10px 8px 0; border-bottom:1px solid var(--l-separator); vertical-align:top}
+  .tbl tr:last-child td{border-bottom:0}
+  .tbl .m{font-family:var(--mono); font-size:11.5px}
+  .none{color:var(--l-alert-text); font-style:italic}
+
+  /* scale rows */
+  .rows{display:grid; gap:9px}
+  .row{display:grid; grid-template-columns:190px 1fr; gap:14px; align-items:center}
+  .row__k{font-family:var(--mono); font-size:11px; color:var(--l-hint-strong); text-align:right}
+  .bar{height:16px; background:var(--l-selection); border-radius:2px; opacity:.85}
+  .radii{display:flex; flex-wrap:wrap; gap:10px}
+  .rad{width:78px; text-align:center}
+  .rad__box{height:56px; background:var(--l-subtle); border:1px solid var(--l-border); margin-bottom:5px}
+  .rad__t{font-family:var(--mono); font-size:10.5px; color:var(--l-hint-strong)}
+
+  /* components */
+  .cmp{display:grid; grid-template-columns:repeat(2,1fr); gap:16px}
+  .spec{font-size:10.5px; font-family:var(--mono); color:var(--l-hint-strong); margin:0 0 8px; display:block}
+  .fld{display:grid; gap:6px; margin-bottom:10px}
+  .fld label{font-size:11.5px; font-weight:600}
+  .inp{height:28px; background:var(--l-surface); border:1px solid var(--l-border); border-radius:5px;
+       padding:4px 7px; font-family:var(--mono); font-size:12px; color:var(--l-text); display:flex;
+       align-items:center; justify-content:space-between}
+  .inp--focus{border-color:var(--l-active-border); box-shadow:0 0 0 2px #b9d1ff66}
+  /* the shipped focus affordance: border tint only, measured 1.15:1 in light */
+  .inp--shipped-focus{border-color:var(--l-active-border)}
+  .focustest{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:4px}
+  .focustest figcaption{font-size:10.5px; font-family:var(--mono); color:var(--l-hint-strong); margin-top:6px}
+  button{font-family:var(--font); font-size:12px; font-weight:600; color:var(--l-text);
+         background:var(--l-subtle); border:1px solid var(--l-border); border-radius:5px;
+         padding:5px 9px; min-height:24px; cursor:pointer}
+  button:hover{background:var(--l-hover); border-color:var(--l-hover-border); color:var(--l-selected-text)}
+  button:active{background:var(--l-active); border-color:var(--l-active-border)}
+  button.checked{background:var(--l-active); border-color:var(--l-active-border)}
+  button:disabled{background:var(--l-surface); color:var(--l-disabled); border-color:var(--l-separator); cursor:not-allowed}
+  button.primary{background:var(--l-selection); border-color:var(--l-selection); color:#f8f9fa}
+  button.alert{background:var(--l-alert-bg); border-color:var(--l-alert-border); color:var(--l-alert-text)}
+  button.alert:hover{background:var(--l-alert-hover)}
+  button:focus-visible, .inp:focus-visible{outline:2px solid var(--l-selection); outline-offset:2px}
+  .btnrow{display:flex; gap:7px; flex-wrap:wrap; align-items:center}
+
+  .tabs{display:flex; gap:4px; align-items:flex-end; border-bottom:1px solid var(--l-border); padding-top:4px}
+  .tab{background:var(--l-subtle); border:1px solid var(--l-border); border-bottom-color:var(--l-border);
+       border-radius:6px 6px 0 0; padding:7px 12px; font-size:12px; font-weight:600; color:var(--l-hint-strong);
+       min-width:82px; cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--l-surface); color:var(--l-text); border-bottom-color:var(--l-surface);
+       margin-bottom:-1px; padding-bottom:8px}
+  .tab:hover{background:var(--l-hover); border-color:var(--l-hover-border); color:var(--l-selected-text)}
+  .tabx{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+        border-radius:7px; margin-left:6px; font-size:12px; line-height:1}
+
+  .tree{border:1px solid var(--l-border); border-radius:8px; overflow:hidden; background:var(--l-surface)}
+  .trow{display:grid; grid-template-columns:16px 20px 1fr auto; gap:8px; align-items:center;
+        padding:5px; min-height:24px; font-size:12px; border-bottom:1px solid var(--l-separator)}
+  .trow:last-child{border-bottom:0}
+  .trow:nth-child(even){background:var(--l-subtle)}
+  .trow--sel{background:var(--l-active)!important; color:var(--l-selected-text)}
+  .trow--hover{background:var(--l-hover)!important; color:var(--l-selected-text)}
+  .cb{width:15px; height:15px; border:1px solid var(--l-border); border-radius:4px; background:var(--l-surface);
+      display:inline-flex; align-items:center; justify-content:center; font-size:10px; color:var(--l-selection); font-weight:700}
+  .kind{font-family:var(--mono); font-size:10px; color:var(--l-hint-strong); text-transform:uppercase; letter-spacing:.04em}
+  .trow--sel .kind{color:var(--l-selected-text)}
+  .ico{width:14px; height:14px; border:1.5px solid var(--l-hint-strong); border-radius:2px}
+  .ico--round{border-radius:50%}
+  .ico--path{border-radius:2px 6px 2px 6px}
+
+  .d .inp{background:var(--d-surface); border-color:var(--d-border); color:var(--d-text)}
+  .d button{background:var(--d-subtle); border-color:var(--d-border); color:var(--d-text)}
+  .d button:hover{background:var(--d-hover); border-color:var(--d-hover-border)}
+  .d button:active,.d button.checked{background:var(--d-active); border-color:var(--d-active-border)}
+  .d button:disabled{background:var(--d-surface); color:var(--d-disabled); border-color:var(--d-separator)}
+  .d button.primary{background:var(--d-active-border); border-color:var(--d-active-border); color:#171717}
+  .d button.alert{background:var(--d-alert-bg); border-color:var(--d-alert-border); color:var(--d-alert-text)}
+  .d .tabs{border-bottom-color:var(--d-border)}
+  .d .tab{background:var(--d-subtle); border-color:var(--d-border); color:var(--d-hint)}
+  .d .tab[aria-selected="true"]{background:var(--d-surface); color:var(--d-text); border-bottom-color:var(--d-surface)}
+  .d .tab:hover{background:var(--d-hover); border-color:var(--d-hover-border); color:var(--d-selected-text)}
+  .d .tree{background:var(--d-surface); border-color:var(--d-border)}
+  .d .trow{border-bottom-color:var(--d-separator)}
+  .d .trow:nth-child(even){background:var(--d-subtle)}
+  .d .trow--sel{background:var(--d-active)!important; color:var(--d-selected-text)}
+  .d .trow--hover{background:var(--d-hover)!important; color:var(--d-selected-text)}
+  .d .cb{background:var(--d-surface); border-color:var(--d-border); color:var(--d-active-border)}
+  .d .kind{color:var(--d-hint)}
+  .d .ico{border-color:var(--d-hint)}
+  .d .spec{color:var(--d-hint-strong)}
+  .d .none{color:var(--d-alert-text)}
+
+  .proposed{margin-top:8px; border:1px dashed var(--l-alert-border); border-radius:8px; padding:16px; background:var(--l-alert-bg)}
+  .proposed h3{margin:0 0 4px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--l-alert-text)}
+  .proposed p{margin:0 0 10px; font-size:12px; line-height:1.55; color:var(--l-text)}
+  .proposed .tbl th{color:var(--l-alert-text); border-bottom-color:#f43f5e55}
+  .proposed .tbl td{border-bottom-color:#f43f5e33}
+  footer{margin-top:32px; font-size:11.5px; color:var(--l-hint-strong); line-height:1.6}
+  footer code{font-family:var(--mono); font-size:11px}
+
+  @media (prefers-reduced-motion:no-preference){
+    button,.tab,.trow{transition:background-color .12s ease, border-color .12s ease, color .12s ease}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>FlatCAM Plus — design system</h1>
+  <p class="sub">Synced from <code>flatcam_plus/appGUI/PanelStyles.py</code> and <code>appGUI/themes/{dark,light}_style_sheet.py</code></p>
+  <p class="lede">
+    Colors, radii, metrics and component rules below are literal values from those files.
+    Typography, spacing scales, shadows, focus rings and error/success colors <strong>do not exist</strong>
+    in the sources, so they are shown as gaps rather than invented. Two color systems ship at once —
+    the panel dict and the vendor qdarktheme sheet — and they disagree about the accent color.
+  </p>
+
+  <h2>Color — panel dict <span class="h2note">PS:18–54 · drives panels, tabs, trees, inputs, own buttons</span></h2>
+  <div class="board">
+    <div class="grid">
+      <div class="sw"><div class="sw__chip" style="background:var(--l-app-bg)"></div><div class="sw__meta"><span class="sw__name">app_bg</span><span class="sw__hex">#eef0f3</span><span class="sw__use">window, splitter</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-surface)"></div><div class="sw__meta"><span class="sw__name">surface</span><span class="sw__hex">#ffffff</span><span class="sw__use">panels, inputs, menus</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-subtle)"></div><div class="sw__meta"><span class="sw__name">subtle</span><span class="sw__hex">#f8fafc</span><span class="sw__use">buttons, idle tabs</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-text)"></div><div class="sw__meta"><span class="sw__name">text</span><span class="sw__hex">#263244</span><span class="sw__use">body</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-border)"></div><div class="sw__meta"><span class="sw__name">border</span><span class="sw__hex">#dfe4ec</span><span class="sw__use">1px borders</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-separator)"></div><div class="sw__meta"><span class="sw__name">separator</span><span class="sw__hex">#e3e8f0</span><span class="sw__use">gridlines, rules</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-hover)"></div><div class="sw__meta"><span class="sw__name">hover</span><span class="sw__hex">#eef4ff</span><span class="sw__use">hover, list selection</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-active)"></div><div class="sw__meta"><span class="sw__name">active</span><span class="sw__hex">#dfeafe</span><span class="sw__use">pressed, tree selection</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-active-border)"></div><div class="sw__meta"><span class="sw__name">active_border</span><span class="sw__hex">#b9d1ff</span><span class="sw__use">focus border, checked</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-selection)"></div><div class="sw__meta"><span class="sw__name">selection_bg</span><span class="sw__hex">#0081db</span><span class="sw__use">vendor selection, default button</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-hint)"></div><div class="sw__meta"><span class="sw__name">hint</span><span class="sw__hex">#6f7b8e</span><span class="sw__use">idle tab labels · 3.97:1</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-disabled)"></div><div class="sw__meta"><span class="sw__name">disabled</span><span class="sw__hex">#a8b2c1</span><span class="sw__use">disabled text</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-console-bg); border-bottom:1px solid var(--l-border)"></div><div class="sw__meta"><span class="sw__name">console_bg</span><span class="sw__hex">#1e1e1e</span><span class="sw__use">CNC console</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-alert-bg)"></div><div class="sw__meta"><span class="sw__name">alert_bg</span><span class="sw__hex">#fff1f2</span><span class="sw__use">prefAlert button</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--l-alert-border)"></div><div class="sw__meta"><span class="sw__name">alert_border</span><span class="sw__hex">#f43f5e</span><span class="sw__use">alert outline</span></div></div>
+    </div>
+  </div>
+
+  <h2>Color — same dict, dark theme <span class="h2note">PS:40–54 · note app_bg == subtle (#171717)</span></h2>
+  <div class="board board--dark d">
+    <div class="grid">
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-app-bg); border-bottom:1px solid var(--d-border)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">app_bg</span><span class="sw__hex" style="color:var(--d-hint-strong)">#171717</span><span class="sw__use" style="color:var(--d-hint-strong)">window, splitter</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-surface); border-bottom:1px solid var(--d-border)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">surface</span><span class="sw__hex" style="color:var(--d-hint-strong)">#262626</span><span class="sw__use" style="color:var(--d-hint-strong)">panels, inputs</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-subtle); border-bottom:1px solid var(--d-border)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">subtle</span><span class="sw__hex" style="color:var(--d-hint-strong)">#171717</span><span class="sw__use" style="color:var(--d-hint-strong)">= app_bg, no 3rd level</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-text)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">text</span><span class="sw__hex" style="color:var(--d-hint-strong)">#f0f0f0</span><span class="sw__use" style="color:var(--d-hint-strong)">body</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-border)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">border</span><span class="sw__hex" style="color:var(--d-hint-strong)">#444444</span><span class="sw__use" style="color:var(--d-hint-strong)">1px borders</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-separator)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">separator</span><span class="sw__hex" style="color:var(--d-hint-strong)">#323232</span><span class="sw__use" style="color:var(--d-hint-strong)">gridlines, rules</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-hover)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">hover</span><span class="sw__hex" style="color:var(--d-hint-strong)">#323232</span><span class="sw__use" style="color:var(--d-hint-strong)">hover, list selection</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-active)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">active</span><span class="sw__hex" style="color:var(--d-hint-strong)">#2b2b2b</span><span class="sw__use" style="color:var(--d-hint-strong)">pressed, tree selection</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-active-border)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">active_border</span><span class="sw__hex" style="color:var(--d-hint-strong)">#ff6900</span><span class="sw__use" style="color:var(--d-hint-strong)">focus border, the dark accent</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-selection)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">selection_bg</span><span class="sw__hex" style="color:var(--d-hint-strong)">#8ab4f7</span><span class="sw__use" style="color:var(--d-hint-strong)">vendor accent — conflicts</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-hint)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">hint</span><span class="sw__hex" style="color:var(--d-hint-strong)">#999999</span><span class="sw__use" style="color:var(--d-hint-strong)">idle tab labels</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-disabled)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">disabled</span><span class="sw__hex" style="color:var(--d-hint-strong)">#777777</span><span class="sw__use" style="color:var(--d-hint-strong)">disabled text</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-console-bg); border-bottom:1px solid var(--d-border)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">console_bg</span><span class="sw__hex" style="color:var(--d-hint-strong)">#171717</span><span class="sw__use" style="color:var(--d-hint-strong)">CNC console</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-alert-bg)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">alert_bg</span><span class="sw__hex" style="color:var(--d-hint-strong)">#3a1c28</span><span class="sw__use" style="color:var(--d-hint-strong)">prefAlert button</span></div></div>
+      <div class="sw" style="background:var(--d-surface); border-color:var(--d-border)"><div class="sw__chip" style="background:var(--d-alert-border)"></div><div class="sw__meta"><span class="sw__name" style="color:var(--d-text)">alert_border</span><span class="sw__hex" style="color:var(--d-hint-strong)">#f87171</span><span class="sw__use" style="color:var(--d-hint-strong)">alert outline</span></div></div>
+    </div>
+  </div>
+
+  <h2>Typography <span class="h2note">no family and no size token exists — only these weights</span></h2>
+  <div class="board">
+    <table class="tbl">
+      <thead><tr><th style="width:240px">Role</th><th style="width:150px">Family</th><th style="width:110px">Size</th><th style="width:90px">Weight</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>Panel tabs</td><td class="none">undefined</td><td class="none">undefined</td><td class="m">600</td><td class="m">PS:190, 483, 610</td></tr>
+        <tr><td>Buttons / QToolButton</td><td class="none">undefined</td><td class="none">undefined</td><td class="m">600</td><td class="m">PS:233</td></tr>
+        <tr><td>Group box title</td><td class="none">undefined</td><td class="none">undefined</td><td class="m">600</td><td class="m">PS:217</td></tr>
+        <tr><td>Table / list header</td><td class="none">undefined</td><td class="none">undefined</td><td class="m">600</td><td class="m">PS:407</td></tr>
+        <tr><td>Properties sidebar title</td><td class="none">undefined</td><td class="none">undefined</td><td class="m">600</td><td class="m">PS:~805</td></tr>
+        <tr><td>QGroupBox (vendor)</td><td class="none">undefined</td><td class="none">undefined</td><td class="m">bold</td><td class="m">D:137 / L:110</td></tr>
+      </tbody>
+    </table>
+    <p class="spec" style="margin-top:14px">Artboards use <code>ui-sans-serif, -apple-system, "Segoe UI", Roboto, …</code> and a mono stack for coordinates. Their sizes are artboard decisions, not tokens.</p>
+    <div class="btnrow">
+      <span style="font-size:11px; font-weight:600">Weight 600 — section heading</span>
+      <span style="font-size:12px">Weight 400 — body / values</span>
+      <span style="font-family:var(--mono); font-size:12px">X 42.317 Y 18.902 — mono for numerics</span>
+    </div>
+  </div>
+
+  <h2>Spacing — as found <span class="h2note">no scale; these are ad hoc values across PS</span></h2>
+  <div class="board">
+    <div class="rows">
+      <div class="row"><span class="row__k">window margins 14/14/14/12</span><span class="bar" style="width:14px"></span></div>
+      <div class="row"><span class="row__k">splitter handle 12</span><span class="bar" style="width:12px"></span></div>
+      <div class="row"><span class="row__k">tab layout spacing 10</span><span class="bar" style="width:10px"></span></div>
+      <div class="row"><span class="row__k">right layout spacing 8</span><span class="bar" style="width:8px"></span></div>
+      <div class="row"><span class="row__k">button padding 5 7</span><span class="bar" style="width:7px"></span></div>
+      <div class="row"><span class="row__k">tree item padding 5</span><span class="bar" style="width:5px"></span></div>
+      <div class="row"><span class="row__k">icon widths 10–28</span><span class="bar" style="width:28px"></span></div>
+    </div>
+    <p class="spec" style="margin-top:12px">Also fixed: left sidebar min width <strong>320</strong>, tab bar min width <strong>82</strong>/<strong>90</strong>/<strong>98</strong>, button min-height <strong>24</strong> (prefs <strong>32</strong>), input min-height <strong>28</strong>, tree row <strong>24</strong>, scrollbar <strong>10</strong> wide with min handle <strong>24</strong>. · PS:849, 189, 234, 280, 648, 690</p>
+  </div>
+
+  <h2>Radius</h2>
+  <div class="board">
+    <div class="radii">
+      <div class="rad"><div class="rad__box" style="border-radius:3px"></div><span class="rad__t">3 · progress chunk</span></div>
+      <div class="rad"><div class="rad__box" style="border-radius:4px"></div><span class="rad__t">4 · checkbox</span></div>
+      <div class="rad"><div class="rad__box" style="border-radius:5px"></div><span class="rad__t">5 · buttons, inputs</span></div>
+      <div class="rad"><div class="rad__box" style="border-radius:6px"></div><span class="rad__t">6 · tab top</span></div>
+      <div class="rad"><div class="rad__box" style="border-radius:7px"></div><span class="rad__t">7 · tab close</span></div>
+      <div class="rad"><div class="rad__box" style="border-radius:8px"></div><span class="rad__t">8 · panels, lists</span></div>
+      <div class="rad"><div class="rad__box" style="border-radius:10px"></div><span class="rad__t">10 · project frame</span></div>
+      <div class="rad"><div class="rad__box" style="border-radius:12px"></div><span class="rad__t">12 · workspace tabs</span></div>
+    </div>
+    <p class="spec" style="margin-top:12px">Shadows: <strong class="none">none defined</strong>. No <code>box-shadow</code> and no <code>QGraphicsDropShadowEffect</code> in any of the three files.</p>
+  </div>
+
+  <h2>Components — light</h2>
+  <div class="board">
+    <div class="cmp">
+      <div>
+        <span class="spec">buttons: padding 5 7 · radius 5 · min-height 24 · weight 600</span>
+        <div class="btnrow">
+          <button>Isolation</button>
+          <button class="checked">Drilling</button>
+          <button class="primary">Generate</button>
+          <button disabled>Cutout</button>
+          <button class="alert">Delete object</button>
+        </div>
+        <span class="spec" style="margin-top:14px">inputs: radius 5 · min-height 28 · focus = border tint only</span>
+        <div class="fld"><label for="i1">Tool diameter (mm)</label><div class="inp" id="i1" tabindex="0">0.2000<span style="color:var(--l-hint-strong); font-size:10.5px">mm</span></div></div>
+        <div class="fld"><label for="i2">Feed rate (mm/min)</label><div class="inp inp--shipped-focus" id="i2" tabindex="0">120.0<span style="color:var(--l-hint-strong); font-size:10.5px">mm/min</span></div></div>
+        <div class="focustest">
+          <figure style="margin:0"><div class="inp inp--shipped-focus">shipped focus</div><figcaption>border #b9d1ff — 1.15:1 vs border</figcaption></figure>
+          <figure style="margin:0"><div class="inp" tabindex="0" style="box-shadow:0 0 0 2px var(--l-selection); border-color:var(--l-selection)">proposed ring</div><figcaption>2px #0081db ring, offset</figcaption></figure>
+        </div>
+      </div>
+      <div>
+        <span class="spec">tabs: radius 6 6 0 0 · padding 7 34 7 12 · min-width 82</span>
+        <div class="tabs" role="tablist">
+          <div class="tab" role="tab" aria-selected="true" tabindex="0">Project</div>
+          <div class="tab" role="tab" aria-selected="false" tabindex="0">Selected</div>
+        </div>
+        <span class="spec" style="margin-top:16px">project tree: row 24 · item padding 5 · selected = active</span>
+        <div class="tree" role="tree">
+          <div class="trow" role="treeitem"><span></span><span class="ico"></span><span>top_copper.gbr</span><span class="kind">Gerber</span></div>
+          <div class="trow" role="treeitem"><span></span><span class="ico ico--round"></span><span>drill_plated.drl</span><span class="kind">Excellon</span></div>
+          <div class="trow trow--sel" role="treeitem" aria-selected="true"><span class="cb">✓</span><span class="ico ico--path"></span><span>isolation_top</span><span class="kind">Geometry</span></div>
+          <div class="trow trow--hover" role="treeitem"><span class="cb">✓</span><span class="ico ico--path"></span><span>cutout</span><span class="kind">Geometry</span></div>
+          <div class="trow" role="treeitem"><span></span><span class="ico"></span><span>iso_top_cnc</span><span class="kind">CNC Job</span></div>
+        </div>
+        <p class="spec" style="margin-top:10px">row 3 selected (#dfeafe) · row 4 hover (#eef4ff) — the list/tree split uses different tokens</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>Components — dark</h2>
+  <div class="board board--dark d">
+    <div class="cmp">
+      <div>
+        <span class="spec">accent #ff6900 — 6.1:1 on #171717</span>
+        <div class="btnrow">
+          <button>Isolation</button>
+          <button class="checked">Drilling</button>
+          <button class="primary">Generate</button>
+          <button disabled>Cutout</button>
+          <button class="alert">Delete object</button>
+        </div>
+        <span class="spec" style="margin-top:14px">inputs: surface #262626 on app_bg #171717</span>
+        <div class="fld" style="color:var(--d-text)"><label for="i3">Tool diameter (mm)</label><div class="inp" id="i3" tabindex="0">0.2000<span style="color:var(--d-hint-strong); font-size:10.5px">mm</span></div></div>
+        <div class="fld" style="color:var(--d-text)"><label for="i4">Feed rate (mm/min)</label><div class="inp" id="i4" tabindex="0" style="border-color:var(--d-active-border); box-shadow:0 0 0 2px #ff690055">120.0<span style="color:var(--d-hint-strong); font-size:10.5px">mm/min</span></div></div>
+        <span class="spec">dark focus works: orange at 5.2:1 on surface</span>
+      </div>
+      <div>
+        <div class="tabs" role="tablist">
+          <div class="tab" role="tab" aria-selected="true" tabindex="0">Project</div>
+          <div class="tab" role="tab" aria-selected="false" tabindex="0">Selected</div>
+        </div>
+        <div class="tree" role="tree" style="margin-top:16px">
+          <div class="trow" role="treeitem"><span></span><span class="ico"></span><span>top_copper.gbr</span><span class="kind">Gerber</span></div>
+          <div class="trow" role="treeitem"><span></span><span class="ico ico--round"></span><span>drill_plated.drl</span><span class="kind">Excellon</span></div>
+          <div class="trow trow--sel" role="treeitem" aria-selected="true"><span class="cb">✓</span><span class="ico ico--path"></span><span>isolation_top</span><span class="kind">Geometry</span></div>
+          <div class="trow trow--hover" role="treeitem"><span class="cb">✓</span><span class="ico ico--path"></span><span>cutout</span><span class="kind">Geometry</span></div>
+          <div class="trow" role="treeitem"><span></span><span class="ico"></span><span>iso_top_cnc</span><span class="kind">CNC Job</span></div>
+        </div>
+        <p class="spec" style="margin-top:10px">in dark, subtle == app_bg, so the tree container has no contrasting frame</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="proposed">
+    <h3>Proposed additions — not tokens today</h3>
+    <p>Each one fills a gap listed in <code>design/system.md</code>. Nothing here is in the codebase; all of it needs a decision.</p>
+    <table class="tbl">
+      <thead><tr><th style="width:170px">Token</th><th style="width:210px">Value</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td class="m">hint-strong</td><td class="m">#5f6b7e / #a8a8a8</td><td>shipped <code>hint</code> is 3.97:1 on white — under AA for the small tab labels it colors</td></tr>
+        <tr><td class="m">focus_ring</td><td class="m">2px accent, offset 2</td><td><code>outline:0</code> plus a 1.15:1 border tint is not a perceivable focus state</td></tr>
+        <tr><td class="m">accent</td><td class="m">#0081db / #ff6900</td><td>collapse two coexisting accents to one per theme</td></tr>
+        <tr><td class="m">danger / success</td><td class="m">#f43f5e / #2f9e6b</td><td>states have no color; pair with a label, never color alone</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    Panel dict: <code>flatcam_plus/appGUI/PanelStyles.py:18-54</code> · applied at <code>appGUI/MainGUI.py:3184</code>, <code>appTool.py:38</code>, <code>appGUI/preferences/PreferencesUIManager.py:8</code>.<br>
+    Vendor sheets: <code>appGUI/themes/dark_style_sheet.py</code>, <code>light_style_sheet.py</code> · assigned at <code>flatcam_plus/appMain.py:633</code>, <code>:637</code>.<br>
+    Duplicated palette: <code>appPlugins/cnc_control/ui.py:76-107</code>.
+  </footer>
+</div>
+</body>
+</html>

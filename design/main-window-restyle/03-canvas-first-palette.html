@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>FlatCAM Plus — 03 Canvas-first with command palette</title>
+<style>
+  :root{
+    --app-bg:#171717; --surface:#262626; --text:#f0f0f0;
+    --selected-text:#ffffff; --border:#444444; --separator:#323232;
+    --hover:#323232; --hover-border:#444444; --active:#2b2b2b;
+    --accent:#ff6900; --accent-ink:#171717; --accent-wash:#ff690018;
+    --disabled:#777777; --hint:#999999; --hint-strong:#a8a8a8;
+    --alert-bg:#3a1c28; --alert-border:#f87171; --alert-text:#fecdd3;
+
+    --font: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+    --layer-copper:#e8874a; --layer-drill:#8ab4f7; --layer-outline:#6f7378;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; height:100%}
+  body{width:1440px; height:900px; overflow:hidden; display:flex; flex-direction:column;
+       font-family:var(--font); font-size:13px; background:var(--app-bg); color:var(--text);
+       -webkit-font-smoothing:antialiased}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:5px}
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex; align-items:center; gap:12px; height:40px; padding:0 14px 0 12px;
+          flex:0 0 40px; background:var(--app-bg); border-bottom:1px solid var(--separator)}
+  .mark{width:22px; height:22px; border-radius:5px; background:var(--accent); color:var(--accent-ink);
+        display:grid; place-items:center; font-family:var(--mono); font-size:11px; font-weight:700; flex:0 0 auto}
+  .projname{font-size:12.5px; font-weight:600; letter-spacing:-.01em}
+  .crumb{font-size:11.5px; color:var(--hint-strong); font-family:var(--mono)}
+  .topbar__sp{flex:1}
+  .cmdbtn{display:flex; align-items:center; gap:9px; height:26px; padding:0 8px 0 10px;
+          background:var(--surface); border:1px solid var(--border); border-radius:6px;
+          color:var(--hint-strong); font-family:inherit; font-size:11.5px; cursor:pointer; min-width:236px}
+  .cmdbtn:hover{background:var(--hover); border-color:var(--hover-border); color:var(--selected-text)}
+  .cmdbtn kbd{margin-left:auto; font-family:var(--mono); font-size:10px; color:var(--hint-strong);
+              background:var(--active); border:1px solid var(--border); border-radius:4px; padding:1px 5px}
+  .iconbtn{width:26px; height:26px; display:grid; place-items:center; background:transparent;
+           border:1px solid transparent; border-radius:5px; color:var(--hint-strong); cursor:pointer}
+  .iconbtn:hover{background:var(--hover); border-color:var(--hover-border); color:var(--selected-text)}
+  .units{display:flex; border:1px solid var(--border); border-radius:5px; overflow:hidden; height:24px}
+  .units button{background:transparent; border:0; color:var(--hint-strong); font-family:var(--mono);
+                font-size:10.5px; padding:0 8px; cursor:pointer}
+  .units button[aria-pressed="true"]{background:var(--active); color:var(--accent); font-weight:700}
+
+  /* ---------- main ---------- */
+  .main{flex:1; min-height:0; display:flex}
+
+  /* labeled rail — not icon-only, so tools stay discoverable without the palette */
+  .rail{width:72px; flex:0 0 72px; display:flex; flex-direction:column; align-items:stretch;
+        gap:2px; padding:8px 6px; background:var(--app-bg); border-right:1px solid var(--separator)}
+  .rail__btn{display:grid; justify-items:center; gap:4px; padding:8px 2px 6px; border-radius:6px;
+             background:transparent; border:1px solid transparent; color:var(--hint-strong);
+             font-family:inherit; font-size:9.5px; font-weight:600; letter-spacing:.02em;
+             cursor:pointer; position:relative}
+  .rail__btn:hover{background:var(--hover); border-color:var(--hover-border); color:var(--selected-text)}
+  .rail__btn[aria-current="true"]{background:var(--active); border-color:var(--border); color:var(--text)}
+  .rail__btn[aria-current="true"]::before{content:""; position:absolute; left:-6px; top:7px; bottom:7px;
+             width:2.5px; border-radius:0 3px 3px 0; background:var(--accent)}
+  .rail__btn[aria-current="true"] svg{color:var(--accent)}
+  .rail__sep{height:1px; background:var(--separator); margin:7px 4px}
+  .rail__sp{flex:1}
+
+  /* ---------- stage / canvas ---------- */
+  .stage{flex:1; min-width:0; position:relative; overflow:hidden; background:#101010;
+         background-image:
+           linear-gradient(to right, #ffffff08 1px, transparent 1px),
+           linear-gradient(to bottom, #ffffff08 1px, transparent 1px),
+           linear-gradient(to right, #ffffff12 1px, transparent 1px),
+           linear-gradient(to bottom, #ffffff12 1px, transparent 1px);
+         background-size:8px 8px, 8px 8px, 80px 80px, 80px 80px}
+  .plot{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+        padding-bottom:16px}
+  .axislabel{position:absolute; font-family:var(--mono); font-size:9.5px; color:#ffffff28; letter-spacing:.05em}
+
+  /* floating selection toolbar */
+  .ctxbar{position:absolute; left:50%; top:18px; transform:translateX(-50%);
+          display:flex; align-items:center; gap:1px; padding:3px; background:var(--surface);
+          border:1px solid var(--border); border-radius:8px}
+  .ctxbar button{display:flex; align-items:center; gap:6px; height:26px; padding:0 9px;
+                 background:transparent; border:0; border-radius:5px; color:var(--text);
+                 font-family:inherit; font-size:11.5px; font-weight:600; cursor:pointer}
+  .ctxbar button:hover{background:var(--hover); color:var(--selected-text)}
+  .ctxbar button[aria-pressed="true"]{background:var(--active); color:var(--accent)}
+  .ctxbar .vsep{width:1px; height:16px; background:var(--separator); margin:0 3px}
+  .ctxbar .sel{font-family:var(--mono); font-size:10.5px; color:var(--hint-strong); padding:0 7px;
+               display:flex; align-items:center; gap:6px}
+  .ctxbar .sel i{width:7px; height:7px; border-radius:2px; background:var(--accent); display:block}
+
+  /* selected object callout on canvas */
+  .flagmark{position:absolute; left:50%; top:52%; margin:-58px 0 0 118px; display:flex; align-items:center; gap:6px;
+            background:var(--surface); border:1px solid var(--accent); border-radius:5px; padding:3px 7px;
+            font-family:var(--mono); font-size:10px; color:var(--text); white-space:nowrap}
+  .flagmark i{width:5px; height:5px; border-radius:50%; background:var(--accent); display:block}
+  .coordread{position:absolute; right:14px; bottom:14px; display:flex; gap:1px; background:var(--surface);
+             border:1px solid var(--border); border-radius:6px; overflow:hidden}
+  .coordread span{font-family:var(--mono); font-size:10.5px; color:var(--hint-strong); padding:5px 9px;
+                  border-right:1px solid var(--border)}
+  .coordread span:last-child{border-right:0}
+  .coordread b{color:var(--text); font-weight:600}
+
+  /* ---------- command palette ---------- */
+  .scrim{position:absolute; inset:0; background:rgba(9,9,9,.62); display:flex; justify-content:center;
+         padding-top:104px}
+  .palette{width:660px; max-height:520px; display:flex; flex-direction:column; background:var(--surface);
+           border:1px solid var(--border); border-radius:10px; overflow:hidden;
+           box-shadow:0 18px 44px rgba(0,0,0,.55)}
+  .psearch{display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid var(--separator)}
+  .psearch svg{color:var(--hint-strong); flex:0 0 auto}
+  .psearch input{flex:1; background:transparent; border:0; color:var(--text); font-family:inherit;
+                 font-size:14.5px; padding:0}
+  .psearch input::placeholder{color:var(--hint)}
+  .psearch input:focus{outline:0}
+  .psearch .esc{font-family:var(--mono); font-size:10px; color:var(--hint-strong); background:var(--active);
+                border:1px solid var(--border); border-radius:4px; padding:2px 6px}
+  .plist{overflow:auto; padding:6px}
+  .pgroup{font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+          color:var(--hint-strong); padding:9px 10px 5px}
+  .pitem{position:relative; display:grid; grid-template-columns:16px minmax(0,1fr) auto; align-items:center; gap:10px;
+         padding:7px 9px; border-radius:6px; cursor:pointer; border:1px solid transparent}
+  .pitem:hover{background:var(--hover); border-color:var(--hover-border)}
+  .pitem[aria-selected="true"]{background:var(--active); border-color:var(--border)}
+  .pitem[aria-selected="true"]::before{content:""; position:absolute; left:0; top:6px; bottom:6px;
+         width:2.5px; border-radius:0 3px 3px 0; background:var(--accent)}
+  .pitem__t{font-size:12.5px; font-weight:600; line-height:1.3}
+  .pitem__t em{font-style:normal; color:var(--accent)}
+  .pitem__d{font-size:11px; color:var(--hint-strong); line-height:1.35;
+            overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .pitem kbd{font-family:var(--mono); font-size:10px; color:var(--hint-strong); background:var(--app-bg);
+             border:1px solid var(--border); border-radius:4px; padding:2px 5px; white-space:nowrap}
+  .pfoot{display:flex; align-items:center; gap:14px; padding:8px 14px; border-top:1px solid var(--separator);
+         font-size:10.5px; color:var(--hint-strong)}
+  .pfoot span{display:flex; align-items:center; gap:5px}
+  .pfoot kbd{font-family:var(--mono); font-size:9.5px; background:var(--app-bg); border:1px solid var(--border);
+             border-radius:3px; padding:1px 4px}
+  .pfoot .sp{flex:1}
+  .pfoot .hintline{font-family:var(--mono); font-size:10px; color:var(--hint)}
+
+  /* ---------- bottom object strip ---------- */
+  .bottomstrip{flex:0 0 58px; display:flex; align-items:center; gap:12px; padding:0 14px;
+               background:var(--app-bg); border-top:1px solid var(--separator)}
+  .strip__label{font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+                color:var(--hint-strong); flex:0 0 auto}
+  .chips{display:flex; align-items:center; gap:6px; overflow:hidden; flex:1; min-width:0}
+  .ochip{display:flex; align-items:center; gap:7px; height:34px; padding:0 10px;
+         background:var(--surface); border:1px solid var(--border); border-radius:6px;
+         color:var(--text); font-family:inherit; font-size:11.5px; cursor:pointer; white-space:nowrap; flex:0 0 auto}
+  .ochip:hover{background:var(--hover); border-color:var(--hover-border); color:var(--selected-text)}
+  .ochip[aria-selected="true"]{border-color:var(--accent); background:var(--active); color:var(--selected-text)}
+  .ochip__sw{width:7px; height:7px; border-radius:2px; flex:0 0 auto}
+  .ochip__k{font-family:var(--mono); font-size:9.5px; color:var(--hint-strong);
+            text-transform:uppercase; letter-spacing:.04em}
+  .ochip--off{opacity:.55}
+  .strip__status{display:flex; align-items:center; gap:12px; flex:0 0 auto; font-family:var(--mono);
+                 font-size:10.5px; color:var(--hint-strong)}
+  .strip__status .sep{width:1px; height:12px; background:var(--separator)}
+  .strip__status b{color:var(--text); font-weight:600}
+  .warnpill{display:flex; align-items:center; gap:6px; font-family:var(--font); font-size:11px;
+            color:var(--alert-text); background:var(--alert-bg); border:1px solid #f8717144;
+            border-radius:5px; padding:3px 8px}
+  .warnpill i{width:6px; height:6px; border-radius:50%; background:var(--alert-border); display:block}
+
+  @media (prefers-reduced-motion:no-preference){
+    .rail__btn,.ctxbar button,.ochip,.pitem,.iconbtn,.cmdbtn,.units button{transition:background-color .1s, border-color .1s, color .1s}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="mark" aria-hidden="true">FC</span>
+  <span class="projname">ESP32 sensor node</span>
+  <span class="crumb">top side · isolation</span>
+  <div class="topbar__sp"></div>
+  <button class="cmdbtn" type="button">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="5.2" cy="5.2" r="3.4"/><path d="M7.8 7.8 10.5 10.5"/></svg>
+    Search tools, objects, commands…
+    <kbd>Ctrl K</kbd>
+  </button>
+  <div class="units" role="group" aria-label="Units">
+    <button type="button" aria-pressed="true">mm</button>
+    <button type="button" aria-pressed="false">in</button>
+  </div>
+  <button class="iconbtn" type="button" aria-label="Preferences">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="2.2"/><path d="M7 1.5v1.6M7 10.9v1.6M1.5 7h1.6M10.9 7h1.6M3.1 3.1l1.1 1.1M9.8 9.8l1.1 1.1M10.9 3.1 9.8 4.2M4.2 9.8 3.1 10.9"/></svg>
+  </button>
+</header>
+
+<div class="main">
+
+  <nav class="rail" aria-label="Workspace">
+    <button class="rail__btn" type="button" aria-current="false">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M2 6h12M6 6v8"/></svg>
+      <span>Plot</span>
+    </button>
+    <button class="rail__btn" type="button" aria-current="false">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4h11M2.5 8h11M2.5 12h7"/></svg>
+      <span>Objects</span>
+    </button>
+    <button class="rail__btn" type="button" aria-current="true">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="4.4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/></svg>
+      <span>Tools</span>
+    </button>
+    <div class="rail__sep" role="presentation"></div>
+    <button class="rail__btn" type="button" aria-current="false">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13V9l5-6 5 6v4"/><path d="M3 13h10"/></svg>
+      <span>G-code</span>
+    </button>
+    <button class="rail__btn" type="button" aria-current="false">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M4.5 6.5l2 1.5-2 1.5"/><path d="M8.5 9.5h3"/></svg>
+      <span>Console</span>
+    </button>
+    <div class="rail__sp"></div>
+    <button class="rail__btn" type="button" aria-current="false">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5"/></svg>
+      <span>History</span>
+    </button>
+  </nav>
+
+  <section class="stage" aria-label="Plot canvas">
+
+    <span class="axislabel" style="left:16px; top:10px">Y 40.0</span>
+    <span class="axislabel" style="left:16px; bottom:10px">Y 0.0</span>
+    <span class="axislabel" style="right:16px; bottom:10px">X 90.0</span>
+
+    <div class="plot">
+      <svg width="700" height="470" viewBox="0 0 700 470" role="img"
+           aria-label="Board plot: copper traces, 38 drill hits, dashed cutout outline and the selected isolation geometry">
+        <title>Board plot — top copper, drills, cutout and selected isolation paths</title>
+        <rect x="60" y="40" width="580" height="390" fill="none" stroke="var(--layer-outline)"
+              stroke-width="1.4" stroke-dasharray="9 6"/>
+        <!-- isolation preview paths -->
+        <g fill="none" stroke="var(--accent)" stroke-width="1.3" opacity=".5" stroke-dasharray="4 3">
+          <path d="M118 148h108l38 38h84"/>
+          <path d="M96 260h72l46-46h96l34 34h84"/>
+          <path d="M120 348h144l52-52h108"/>
+        </g>
+        <g stroke="var(--layer-copper)" stroke-width="5.6" fill="none" stroke-linecap="round" opacity=".92">
+          <path d="M128 158h100l34 34h76"/>
+          <path d="M106 270h64l42-42h84l30 30h76"/>
+          <path d="M130 340h134l48-48h100"/>
+          <path d="M262 158v58l34 34v78"/>
+          <path d="M416 118v58l-34 34v52"/>
+          <path d="M190 226v76"/>
+          <path d="M356 344v42"/>
+        </g>
+        <g fill="var(--layer-copper)" opacity=".92">
+          <rect x="120" y="150" width="16" height="16" rx="2"/>
+          <rect x="254" y="150" width="16" height="16" rx="2"/>
+          <rect x="408" y="110" width="16" height="16" rx="2"/>
+          <rect x="98" y="262" width="16" height="16" rx="2"/>
+          <rect x="428" y="252" width="16" height="16" rx="2"/>
+          <rect x="182" y="288" width="16" height="16" rx="2"/>
+          <rect x="122" y="332" width="16" height="16" rx="2"/>
+          <rect x="368" y="332" width="16" height="16" rx="2"/>
+        </g>
+        <g fill="#101010" stroke="var(--layer-drill)" stroke-width="2">
+          <circle cx="128" cy="158" r="4.6"/>
+          <circle cx="262" cy="158" r="4.6"/>
+          <circle cx="416" cy="118" r="4.6"/>
+          <circle cx="106" cy="270" r="4.6"/>
+          <circle cx="436" cy="262" r="4.6"/>
+          <circle cx="190" cy="296" r="4.6"/>
+          <circle cx="130" cy="340" r="4.6"/>
+          <circle cx="376" cy="340" r="4.6"/>
+          <circle cx="30" cy="30" r="6.5"/>
+          <circle cx="670" cy="30" r="6.5"/>
+          <circle cx="30" cy="440" r="6.5"/>
+          <circle cx="670" cy="440" r="6.5"/>
+        </g>
+        <!-- selection handles on the selected geometry -->
+        <g fill="#101010" stroke="var(--accent)" stroke-width="1.4">
+          <rect x="122" y="292" width="7" height="7"/>
+          <rect x="425" y="249" width="7" height="7"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="ctxbar" role="toolbar" aria-label="Selection actions">
+      <button type="button" aria-pressed="true">Isolation</button>
+      <button type="button">Drilling</button>
+      <button type="button">Cutout</button>
+      <div class="vsep" role="presentation"></div>
+      <button type="button">Generate</button>
+      <button type="button">Export</button>
+      <div class="vsep" role="presentation"></div>
+      <span class="sel"><i aria-hidden="true"></i>isolation_top · 412 paths</span>
+    </div>
+
+    <div class="flagmark"><i aria-hidden="true"></i>X 42.317 Y 18.902</div>
+
+    <div class="coordread" aria-label="Canvas readout">
+      <span>ZOOM <b>4.2:1</b></span>
+      <span>GRID <b>1.00 mm</b></span>
+      <span>ORIGIN <b>0.000, 0.000</b></span>
+    </div>
+
+    <!-- command palette overlay -->
+    <div class="scrim">
+      <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+        <div class="psearch">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="6.5" cy="6.5" r="4.3"/><path d="M9.8 9.8 13 13"/></svg>
+          <label for="pal" style="position:absolute; left:-9999px">Search tools, objects and commands</label>
+          <input id="pal" value="iso" autofocus>
+          <span class="esc">Esc</span>
+        </div>
+
+        <div class="plist" role="listbox" aria-label="Results">
+          <div class="pgroup">Tools</div>
+          <div class="pitem" role="option" aria-selected="true">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--accent)" stroke-width="1.6"><circle cx="7" cy="7" r="4"/><circle cx="7" cy="7" r="1.2" fill="currentColor"/></svg>
+            <span><span class="pitem__t"><em>Iso</em>lation</span><span class="pitem__d">2 passes · 0.2 mm · 412 paths</span></span>
+            <kbd>I</kbd>
+          </div>
+          <div class="pitem" role="option" aria-selected="false">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--hint-strong)" stroke-width="1.6"><path d="M2.5 11.5h9"/><path d="M4.5 11.5V7L7 3.5 9.5 7v4.5"/></svg>
+            <span><span class="pitem__t"><em>Iso</em>lation → CNC job</span><span class="pitem__d">Generate G-code from isolation_top</span></span>
+            <kbd>⇧ I</kbd>
+          </div>
+
+          <div class="pgroup">Objects</div>
+          <div class="pitem" role="option" aria-selected="false">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--layer-copper)" stroke-width="1.6"><path d="M2 9h4l2-2h4"/><path d="M2 5h3l2 2"/></svg>
+            <span><span class="pitem__t"><em>iso</em>lation_top</span><span class="pitem__d">Geometry · generated 14:02 · 8 240 points</span></span>
+            <kbd>↵</kbd>
+          </div>
+          <div class="pitem" role="option" aria-selected="false">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--hint-strong)" stroke-width="1.6"><path d="M2.5 11.5h9"/><path d="M5 11.5V6l2-2.5L9 6v5.5"/></svg>
+            <span><span class="pitem__t"><em>iso</em>_top_cnc</span><span class="pitem__d">CNC Job · 18 402 lines · 7:12</span></span>
+            <kbd>↵</kbd>
+          </div>
+
+          <div class="pgroup">View</div>
+          <div class="pitem" role="option" aria-selected="false">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--hint-strong)" stroke-width="1.6"><rect x="2" y="2" width="10" height="10" rx="1.5"/><path d="M2 7h10M7 2v10"/></svg>
+            <span><span class="pitem__t">Toggle <em>iso</em>lation overlay</span><span class="pitem__d">Hide the orange preview paths</span></span>
+            <kbd>O</kbd>
+          </div>
+        </div>
+
+        <div class="pfoot">
+          <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+          <span><kbd>↵</kbd> run</span>
+          <span><kbd>Esc</kbd> close</span>
+          <span class="sp"></span>
+          <span class="hintline">5 results</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer class="bottomstrip">
+  <span class="strip__label">Objects</span>
+  <div class="chips">
+    <button class="ochip" type="button" aria-selected="false">
+      <span class="ochip__sw" style="background:var(--layer-copper)" aria-hidden="true"></span>
+      top_copper <span class="ochip__k">gerber</span>
+    </button>
+    <button class="ochip" type="button" aria-selected="false">
+      <span class="ochip__sw" style="background:var(--layer-copper)" aria-hidden="true"></span>
+      bottom_copper <span class="ochip__k">gerber</span>
+    </button>
+    <button class="ochip" type="button" aria-selected="false">
+      <span class="ochip__sw" style="background:var(--layer-drill)" aria-hidden="true"></span>
+      drill_plated <span class="ochip__k">drl</span>
+    </button>
+    <button class="ochip" type="button" aria-selected="true">
+      <span class="ochip__sw" style="background:var(--accent)" aria-hidden="true"></span>
+      isolation_top <span class="ochip__k">geometry</span>
+    </button>
+    <button class="ochip" type="button" aria-selected="false">
+      <span class="ochip__sw" style="background:var(--layer-outline)" aria-hidden="true"></span>
+      cutout <span class="ochip__k">geometry</span>
+    </button>
+    <button class="ochip ochip--off" type="button" aria-selected="false">
+      <span class="ochip__sw" style="background:var(--hint-strong)" aria-hidden="true"></span>
+      iso_top_cnc <span class="ochip__k">cnc</span>
+    </button>
+  </div>
+  <div class="strip__status">
+    <span class="warnpill"><i aria-hidden="true"></i>Cut Z −0.150 deeper than board</span>
+    <span class="sep" role="presentation"></span>
+    <span><b>9</b> objects</span>
+    <span class="sep" role="presentation"></span>
+    <span><b>mm</b> · mm/min</span>
+  </div>
+</footer>
+
+</body>
+</html>
