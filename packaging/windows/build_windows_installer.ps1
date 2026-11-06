@@ -393,7 +393,10 @@ function Build-InstallerTarget {
     }
 
     Write-Host "Inno Setup installer basliyor: $Arch"
-    & $InnoCompiler "/DAppVersion=""$Version""" "/DAppArch=""$Arch""" "/DAppInstallerArch=""$installerArch""" "/DAppIconFile=""$iconPath""" $InstallerScript
+    # Quote the whole argument, never the value: PowerShell 7 passes inner quotes through to
+    # ISCC literally, and a define whose value carries quotes produces an invalid filename such
+    # as FlatCAMPlus-Setup-"1.3.1"-x64.
+    & $InnoCompiler "/DAppVersion=$Version" "/DAppArch=$Arch" "/DAppInstallerArch=$installerArch" "/DAppIconFile=$iconPath" $InstallerScript
 
     if ($LASTEXITCODE -ne 0) {
         throw "$Arch Inno Setup installer derlemesi basarisiz oldu."
