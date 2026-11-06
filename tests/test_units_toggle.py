@@ -142,3 +142,74 @@ def test_a_refusing_object_aborts_the_whole_conversion(fc_app, restore_units, mo
     finally:
         _remove_last(fc_app, group_b)
         _remove_last(fc_app, group_a)
+
+
+class _CapturedDialog:
+    """Stands in for the modal, recording what the user would have been told."""
+
+    last_informative = None
+
+    def __init__(self, *args, **kwargs):
+        self._first = None
+
+    def addButton(self, *args, **kwargs):
+        token = object()
+        if self._first is None:
+            self._first = token
+        return token
+
+    def exec(self):
+        return 0
+
+    def clickedButton(self):
+        # Decline, so nothing is converted and the call is pure observation.
+        return None
+
+    def setInformativeText(self, text):
+        _CapturedDialog.last_informative = text
+
+    def __getattr__(self, name):
+        return lambda *a, **k: None
+
+
+def test_the_confirmation_warns_about_cnc_jobs(fc_app, restore_units, monkeypatch):
+    """Risky part surfaced where the decision is made, not in a log afterwards."""
+    from flatcam_plus.appGUI import MainGUI as main_gui
+
+    ui = fc_app.ui
+    plain = _ConvertibleObject("top_copper")
+    cnc = _ConvertibleObject("iso_top_cnc", kind="cncjob")
+
+    group_a = _insert(fc_app, plain)
+    group_b = _insert(fc_app, cnc)
+
+    try:
+        monkeypatch.setattr(main_gui, "FCMessageBox", _CapturedDialog)
+
+        assert ui.on_toggle_units() is False
+
+        text = _CapturedDialog.last_informative
+        assert text is not None
+        assert "CNC job" in text, "no warning about the lossy G-code rewrite: %r" % (text,)
+    finally:
+        _remove_last(fc_app, group_b)
+        _remove_last(fc_app, group_a)
+
+
+def test_the_confirmation_has_no_cnc_warning_without_cnc_jobs(fc_app, restore_units, monkeypatch):
+    from flatcam_plus.appGUI import MainGUI as main_gui
+
+    ui = fc_app.ui
+    plain = _ConvertibleObject("top_copper")
+    group = _insert(fc_app, plain)
+
+    try:
+        monkeypatch.setattr(main_gui, "FCMessageBox", _CapturedDialog)
+
+        assert ui.on_toggle_units() is False
+
+        text = _CapturedDialog.last_informative
+        assert text is not None
+        assert "CNC job" not in text, "the warning appeared without any CNC job: %r" % (text,)
+    finally:
+        _remove_last(fc_app, group)

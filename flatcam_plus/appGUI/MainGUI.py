@@ -1132,16 +1132,26 @@ class MainGUI(QtWidgets.QMainWindow):
         return objects
 
     def _confirm_unit_conversion(self, objects, current, target):
+        # CNCJob objects store already-generated G-code as text, and converting rewrites that text
+        # by regex at the configured decimals. The geometry round-trips within tolerance; the text
+        # does not have to. Say so where the decision is made, not in a log afterwards.
+        cnc_jobs = sum(1 for obj in objects if getattr(obj, "kind", None) == "cncjob")
+
+        detail = _("Convert %(n)d object(s) from %(src)s to %(dst)s?\n"
+                   "Their geometry and generated G-code will be rewritten.") % {
+            'n': len(objects), 'src': current, 'dst': target}
+        if cnc_jobs:
+            detail += "\n\n" + _(
+                "%(n)d CNC job(s) will have their existing G-code text rewritten. "
+                "That rewrite rounds to the configured decimals, so the file may not match "
+                "a freshly generated one; regenerate them if precision matters.") % {'n': cnc_jobs}
+
         msgbox = FCMessageBox(parent=self)
         title = _("Change units")
         msgbox.setWindowTitle(title)
         msgbox.setWindowIcon(QtGui.QIcon(self.app.resource_location + '/app128.png'))
         msgbox.setText('<b>%s</b>' % title)
-        msgbox.setInformativeText(
-            _("Convert %(n)d object(s) from %(src)s to %(dst)s?\n"
-              "Their geometry and generated G-code will be rewritten.")
-            % {'n': len(objects), 'src': current, 'dst': target}
-        )
+        msgbox.setInformativeText(detail)
         msgbox.setIcon(QtWidgets.QMessageBox.Icon.Question)
 
         bt_convert = msgbox.addButton(_('Convert'), QtWidgets.QMessageBox.ButtonRole.YesRole)
