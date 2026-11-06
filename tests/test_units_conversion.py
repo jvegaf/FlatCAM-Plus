@@ -83,3 +83,67 @@ def test_a_geometry_list_in_matching_units_is_copied_not_shared():
     converted = units.convert_geometry_list(geometries, "MM", "MM")
     assert converted == geometries
     assert converted is not geometries
+
+
+class _StubObject:
+    """Mimics an object whose convert_units either works or silently refuses."""
+
+    def __init__(self, name, refuses=False, bounds=(0.0, 0.0, 25.4, 25.4)):
+        from shapely.geometry import box
+
+        self.obj_options = {"name": name}
+        self.units = units.MM
+        self.refuses = refuses
+        self._box = box(*bounds)
+        self.solid_geometry = [self._box]
+
+    def convert_units(self, target):
+        if self.refuses:
+            return  # Gerber.convert_units returns early when the file declared units
+        factor = units.conversion_factor(self.units, target)
+        from shapely import transform as rebase
+
+        self._box = rebase(self._box, lambda coords: coords * factor)
+        self.solid_geometry = [self._box]
+        self.units = target
+
+
+def test_convert_objects_converts_everything_when_all_accept():
+    first = _StubObject("top_copper")
+    second = _StubObject("drill")
+
+    ok, refused = units.convert_objects([first, second], "MM", "IN")
+
+    assert ok is True
+    assert refused == []
+    assert first.units == "IN"
+    assert first.solid_geometry[0].bounds == pytest.approx((0.0, 0.0, 1.0, 1.0))
+    assert second.units == "IN"
+
+
+def test_a_silent_refusal_rolls_back_the_objects_already_converted():
+    """The whole point: no half-converted project, ever."""
+    willing = _StubObject("top_copper")
+    refusing = _StubObject("declared_units", refuses=True)
+
+    ok, refused = units.convert_objects([willing, refusing], "MM", "IN")
+
+    assert ok is False
+    assert refused == ["declared_units"]
+    assert willing.units == "MM", "a converted object was not rolled back"
+    assert willing.solid_geometry[0].bounds == pytest.approx((0.0, 0.0, 25.4, 25.4))
+    assert refusing.units == "MM"
+
+
+def test_matching_units_touch_nothing():
+    obj = _StubObject("top_copper")
+    ok, refused = units.convert_objects([obj], "MM", "MM")
+    assert ok is True
+    assert refused == []
+    assert obj.units == "MM"
+
+
+def test_an_empty_project_converts_trivially():
+    ok, refused = units.convert_objects([], "MM", "IN")
+    assert ok is True
+    assert refused == []
