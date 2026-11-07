@@ -365,3 +365,25 @@ on a background.
 Radius was not removed everywhere: buttons, inputs, tabs and list items keep their tokens. Only the
 container-level capsules went away, which is what made the window look assembled from separate pieces.
 
+
+## Dark theme and the flusher layout, verified by pixel
+
+The style changes were only checked in the light theme, and the artboard is dark where borders and radii
+come from different tokens. Rendering dark (persisted before the window is built) and sampling the actual
+pixels of the result:
+
+| Region | Colour |
+| --- | --- |
+| toolbar | `#171717` |
+| project tree | `#262626` |
+| properties sidebar header | `#202124` |
+| properties sidebar body | `#262626` |
+| console dock | `#202124` |
+
+Window margins are 0 and the splitter handle is 1px, as intended.
+
+**Withdrawn claim:** reading the screenshot by eye I concluded the properties panel was rendering light in
+the dark theme and started tracing the scroll-area viewport. The pixels say `#262626`; there was no
+defect. Measuring the artefact instead of eyeballing it is the same lesson this feature keeps teaching —
+the CNC console, the seventeen buttons, and now this.
+
