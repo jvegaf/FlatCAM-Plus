@@ -26,7 +26,7 @@ from rasterio import open as rasterio_open
 from rasterio.features import shapes
 
 from svgtrace import trace
-from pyppeteer.chromium_downloader import check_chromium
+
 from lxml import etree as ET
 
 from flatcam_plus.appParsers.ParseSVG import svgparselength, svgparse_viewbox, getsvggeo, getsvgtext
@@ -34,6 +34,20 @@ from flatcam_plus.appParsers.ParseSVG import svgparselength, svgparse_viewbox, g
 fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:
     _ = gettext.gettext
+
+
+def check_chromium():
+    """Report whether a Chromium binary is present, importing pyppeteer lazily.
+
+    The check is only meaningful when an image is imported in trace mode, but this module
+    is imported by ``appMain`` at start-up. Keeping the import here means the application
+    does not pay pyppeteer's import chain (plus websockets, urllib3, tqdm and appdirs) on
+    every launch, and Python 3.14 does not print SyntaxWarning noise from
+    ``pyppeteer/us_keyboard_layout.py`` while starting up.
+    """
+    from pyppeteer.chromium_downloader import check_chromium as _check_chromium
+
+    return _check_chromium()
 
 
 class ToolImage(AppTool):
