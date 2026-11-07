@@ -33,6 +33,9 @@ def main():
 
     tree = app.collection.view
     ui = app.ui
+    ui.show()
+    for _ in range(4):
+        qapp.processEvents()
     horizontal = QtCore.Qt.Orientation.Horizontal
     display = QtCore.Qt.ItemDataRole.DisplayRole
 
@@ -62,6 +65,9 @@ def main():
             tb.toolButtonStyle().name for tb in outside
             if tb.objectName() in ("Coords_TB", "Snap_TB", "Delta_Coords_TB")
         ],
+        "properties_visible": ui.properties_sidebar.isVisible(),
+        "properties_width": ui.splitter.sizes()[2] if len(ui.splitter.sizes()) > 2 else 0,
+        "dock_visible": ui.shell_dock.isVisible(),
         "theme": app.options.get("global_theme"),
         "dark_resources": "dark_resources" in str(app.resource_location),
         "vendor_sheet_chars": len(qapp.styleSheet() or ""),

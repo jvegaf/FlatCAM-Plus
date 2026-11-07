@@ -164,3 +164,11 @@ def test_a_new_process_boots_with_the_persisted_theme(tmp_path):
     assert second["cnc_mirror_accepts"] is True, (
         "the CNC console mirror did not accept an entry"
     )
+
+    # The window is specified to open with its panels visible; the defaults that do that are
+    # shipped behaviour, not a local preference, so a regression here must fail a test.
+    assert second["properties_visible"] is True, "the properties panel does not open visible"
+    assert second["properties_width"] > 0, (
+        "the properties pane is collapsed to zero width: %r" % (second["properties_width"],)
+    )
+    assert second["dock_visible"] is True, "the console dock does not open visible"
