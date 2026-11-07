@@ -557,8 +557,10 @@ class MainGUI(QtWidgets.QMainWindow):
         self.cnc_connection_status_btn.setStyleSheet(self.toolbar_status_button_style_sheet())
         self.toolbar_center_layout.addWidget(self.cnc_connection_status_btn)
 
-        if hasattr(self, "right_lay"):
-            self.right_lay.insertWidget(0, self.toolbar_center_host)
+        # Span the window: the host goes above the splitter, not into the center column between
+        # the panes. Guarded because the central container is assembled separately.
+        if hasattr(self, "central_lay"):
+            self.central_lay.insertWidget(0, self.toolbar_center_host)
 
     def add_centered_toolbar(self, toolbar):
         toolbar.setParent(self.toolbar_center_widget)
@@ -2721,7 +2723,19 @@ class MainGUI(QtWidgets.QMainWindow):
             QtWidgets.QSizePolicy.Policy.Expanding
         )
         self.splitter.setChildrenCollapsible(False)
-        self.setCentralWidget(self.splitter)
+
+        # The toolbar spans the whole window and the sidebars begin below it, instead of the
+        # toolbar living inside the center column, where it was squeezed between the panes and
+        # most of its commands ended up behind the overflow chevron.
+        self.central_container = QtWidgets.QWidget()
+        self.central_container.setObjectName("central_container")
+        self.central_lay = QtWidgets.QVBoxLayout(self.central_container)
+        self.central_lay.setContentsMargins(0, 0, 0, 0)
+        self.central_lay.setSpacing(0)
+        # The toolbar host does not exist yet; create_centered_toolbar_host() inserts it at index 0
+        # when it is built, which keeps it above the splitter without depending on call order.
+        self.central_lay.addWidget(self.splitter, 1)
+        self.setCentralWidget(self.central_container)
 
         # self.notebook = QtWidgets.QTabWidget()
         self.notebook = FCDetachableTab2(protect=True, protect_by_name=[_("Project")], parent=self)

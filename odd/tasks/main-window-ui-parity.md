@@ -289,3 +289,25 @@ future reader must not mistake the human review for a provider approval, and `Ri
 own merits: converting units rewrites user geometry, and CNC job G-code by regex at the configured
 decimals. The confirmation now says so before anything is touched.
 
+
+## Layout: the toolbar spans the window
+
+The user pointed out the real discrepancy: in the artboard the toolbar runs the full window width and the
+sidebars start level with the central view. In the app the host lived inside `right_widget`, i.e. inside the
+center column, between the panes.
+
+Change: the central widget is now a container holding `[toolbar_center_host][splitter]`, so the host sits
+above everything and the left sidebar, the notebook and the properties sidebar all begin below it.
+`create_centered_toolbar_host()` inserts the host into that layout when it builds it, because the host is
+created after the splitter and the order must not matter.
+
+**Corrections to earlier claims in this document, both from bad measurement:**
+
+1. "Host is 436px in a 1440 window" was wrong. 436px was measured in the window restored from
+   QSettings, which is 800px wide, not 1440.
+2. "All five toolbars clipped" came from summing each toolbar's `sizeHint()`, which includes stretch
+   slack and overstates what is needed. The 1440 render shows no overflow chevron at all.
+
+Measured truth at 1440x900 after the change: host width **1412px** (was inside the center column), and the
+rendered toolbar shows its full set with no `»` button.
+
