@@ -807,9 +807,11 @@ class App(QtCore.QObject):
         self.ui = MainGUI(self)
         # ########################
 
-        # Keep the Notebook side of the screen visible at startup.
+        # Keep the Notebook side of the screen visible at startup, and open the properties panel
+        # the window is specified to show instead of leaving it collapsed to zero width.
         self.ui.splitter.setSizes([320, 1000, 0])
         self.ui.ensure_notebook_visible()
+        self.ui.set_properties_sidebar_visible(True)
 
         # ###########################################################################################################
         # ########################################### Initialize Tcl Shell ##########################################

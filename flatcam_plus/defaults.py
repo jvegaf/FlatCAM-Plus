@@ -109,7 +109,7 @@ class AppDefaults:
         "global_language_current": 'English',
 
         "global_systray_icon": True,
-        "global_shell_at_startup": False,  # Show the shell at startup.
+        "global_shell_at_startup": True,  # Show the shell at startup.
         "global_project_at_startup": True,
         "global_version_check": True,
         "global_send_stats": True,

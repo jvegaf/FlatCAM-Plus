@@ -311,3 +311,24 @@ created after the splitter and the order must not matter.
 Measured truth at 1440x900 after the change: host width **1412px** (was inside the center column), and the
 rendered toolbar shows its full set with no `»` button.
 
+
+## Startup layout opens the panels
+
+The user chose to open with the panels visible, as the artboard shows. Implemented through the
+mechanisms the app already has, not by forcing sizes:
+
+- `set_properties_sidebar_visible(True)` is called after the window is built, which is the same path
+  the sidebar's own toggle uses. It sets the pane to 360px and makes it visible.
+- `global_shell_at_startup` now defaults to `True` (`defaults.py:112`). The dock's startup visibility
+  already belonged to that option; forcing the dock open in `MainGUI` would have ignored the preference.
+
+Measured on a 1440x900 window: splitter `[320, 986, 340]`, properties panel visible at 340px, dock
+visible at 269px with the `Log | CNC console | Tcl Shell` tabs. The window now matches the artboard's
+structure: full-width toolbar, left tree, centre view, right panel and bottom dock all open.
+
+**Process note:** my first attempt forced a `DEFAULT_PROPERTIES_WIDTH` constant into the splitter sizes and
+deleted `self.shell_dock.hide()`. Both were wrong for the same reason as earlier in this feature — the
+values have owners. Worse, an edit replaced the `def _toolbar_label_style` line instead of inserting
+before it, leaving the method headless; the parser accepted it and `test_app_boot` passed, so only reading
+the file caught it. Reverted to the existing APIs.
+

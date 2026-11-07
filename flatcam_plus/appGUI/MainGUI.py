@@ -1292,6 +1292,8 @@ class MainGUI(QtWidgets.QMainWindow):
         if terminal is not None:
             terminal._edit.setFocus()
 
+        # Widths used when no saved layout says otherwise: the properties panel is visible on open,
+        # matching the window the UI was specified against, instead of collapsed to zero.
     def _toolbar_label_style(self, compact=False):
         """The button style a command toolbar should use, read from the saved preference.
 
@@ -3250,6 +3252,7 @@ class MainGUI(QtWidgets.QMainWindow):
         self.cnc_console_view = CncConsoleView()
         self.add_shell_tab(self.cnc_console_view, _("CNC console"))
 
+        # Startup visibility belongs to the global_shell_at_startup option, which appMain applies.
         self.shell_dock.hide()
 
         # ########################################################################
