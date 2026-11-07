@@ -213,3 +213,39 @@ def test_the_confirmation_has_no_cnc_warning_without_cnc_jobs(fc_app, restore_un
         assert "CNC job" not in text, "the warning appeared without any CNC job: %r" % (text,)
     finally:
         _remove_last(fc_app, group)
+
+
+def test_the_toolbar_control_reflects_the_real_unit(fc_app, restore_units):
+    """Clicking a segment converts, and the checked state follows what actually happened."""
+    ui = fc_app.ui
+
+    assert ui.units_group is not None
+    assert ui.units_group.exclusive() is True
+
+    ui.on_units_segment_clicked("IN")
+    assert fc_app.app_units == "IN"
+    checked = [b.property("units") for b in ui.units_group.buttons() if b.isChecked()]
+    assert checked == ["IN"]
+
+    ui.on_units_segment_clicked("MM")
+    assert fc_app.app_units == "MM"
+    checked = [b.property("units") for b in ui.units_group.buttons() if b.isChecked()]
+    assert checked == ["MM"]
+
+
+def test_the_toolbar_control_reverts_when_the_conversion_is_declined(fc_app, restore_units, monkeypatch):
+    """A refused switch must not leave the control claiming a unit the project is not in."""
+    ui = fc_app.ui
+    obj = _ConvertibleObject("declared_units", refuses=True)
+    group = _insert(fc_app, obj)
+
+    try:
+        monkeypatch.setattr(ui, "_confirm_unit_conversion", lambda *a, **k: True)
+
+        ui.on_units_segment_clicked("IN")
+
+        assert fc_app.app_units == "MM"
+        checked = [b.property("units") for b in ui.units_group.buttons() if b.isChecked()]
+        assert checked == ["MM"], "the control is showing a unit the project is not in"
+    finally:
+        _remove_last(fc_app, group)

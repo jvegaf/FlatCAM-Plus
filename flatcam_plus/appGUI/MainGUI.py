@@ -557,6 +557,9 @@ class MainGUI(QtWidgets.QMainWindow):
         self.cnc_connection_status_btn.setStyleSheet(self.toolbar_status_button_style_sheet())
         self.toolbar_center_layout.addWidget(self.cnc_connection_status_btn)
 
+        # The mm/in control the window is specified to show, next to the status button.
+        self.create_units_toggle()
+
         # Span the window: the host goes above the splitter, not into the center column between
         # the panes. Guarded because the central container is assembled separately.
         if hasattr(self, "central_lay"):
@@ -1123,6 +1126,47 @@ class MainGUI(QtWidgets.QMainWindow):
             self.units_label.setToolTip(_("The application dimensional units is inch."))
         else:
             self.units_label.setToolTip(_("The application dimensional units is millimeter."))
+        self._refresh_units_toggle()
+
+    def create_units_toggle(self):
+        """A two-segment mm/in control, driven by the same conversion path as the Q shortcut."""
+        self.units_toggle = QtWidgets.QWidget()
+        self.units_toggle.setObjectName("Units_Toggle")
+        layout = QtWidgets.QHBoxLayout(self.units_toggle)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self.units_group = QtWidgets.QButtonGroup(self)
+        self.units_group.setExclusive(True)
+
+        for label, value in (("mm", "MM"), ("in", "IN")):
+            button = QtWidgets.QToolButton()
+            button.setText(label)
+            button.setCheckable(True)
+            button.setAutoRaise(False)
+            button.setProperty("units", value)
+            button.setStyleSheet(self.toolbar_status_button_style_sheet())
+            button.clicked.connect(lambda _checked=False, v=value: self.on_units_segment_clicked(v))
+            layout.addWidget(button)
+            self.units_group.addButton(button)
+
+        self.toolbar_center_layout.addWidget(self.units_toggle)
+        self._refresh_units_toggle()
+        return self.units_toggle
+
+    def _refresh_units_toggle(self):
+        """Show the unit the application is really in, not the one that was clicked."""
+        if not hasattr(self, "units_group"):
+            return
+        current = str(self.app.app_units).upper()
+        for button in self.units_group.buttons():
+            button.setChecked(button.property("units") == current)
+
+    def on_units_segment_clicked(self, target):
+        if str(self.app.app_units).upper() != target:
+            self.on_toggle_units()
+        # The conversion can be declined or rolled back, so the control follows the real state.
+        self._refresh_units_toggle()
 
     def _collect_project_objects(self):
         objects = []

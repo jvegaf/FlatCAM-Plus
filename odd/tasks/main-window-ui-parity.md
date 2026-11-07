@@ -332,3 +332,15 @@ values have owners. Worse, an edit replaced the `def _toolbar_label_style` line 
 before it, leaving the method headless; the parser accepted it and `test_app_boot` passed, so only reading
 the file caught it. Reverted to the existing APIs.
 
+
+## The mm/in control is now visible
+
+The artboard shows a segmented `mm | in` in the toolbar; only the `Q` shortcut and the status label
+existed. `create_units_toggle()` adds two exclusive checkable tool buttons next to the CNC status button,
+driven by the same conversion path (`on_units_segment_clicked` calls `on_toggle_units`).
+
+The checked state is refreshed from `app_units` rather than from the click, because a conversion can be
+declined or rolled back: the control must never claim a unit the project is not in. Pinned both ways —
+clicking a segment converts and the check follows, and a refused conversion leaves the control showing
+the real unit.
+
