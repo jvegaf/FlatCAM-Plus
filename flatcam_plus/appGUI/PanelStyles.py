@@ -793,7 +793,7 @@ def apply_modern_main_workspace_style(ui, app=None):
     c = modern_panel_colors(app)
 
     ui.setObjectName("main_window")
-    ui.setContentsMargins(14, 14, 14, 12)
+    ui.setContentsMargins(0, 0, 0, 0)
     ui.setStyleSheet(f"""
         QMainWindow#main_window {{
             background: {c['app_bg']};
@@ -809,8 +809,8 @@ def apply_modern_main_workspace_style(ui, app=None):
         widget.setObjectName(object_name)
         if isinstance(widget, QtWidgets.QSplitter):
             if object_name == "splitter":
-                widget.setHandleWidth(12)
-                widget.setContentsMargins(0, 8, 0, 0)
+                widget.setHandleWidth(1)
+                widget.setContentsMargins(0, 0, 0, 0)
                 widget.setCollapsible(0, False)
             widget.setStyleSheet(f"""
                 QSplitter#{object_name} {{
@@ -818,7 +818,7 @@ def apply_modern_main_workspace_style(ui, app=None):
                     border: 0px;
                 }}
                 QSplitter#{object_name}::handle {{
-                    background: {c['app_bg']};
+                    background: {c['border']};
                     margin: 0px;
                 }}
             """)
@@ -834,8 +834,9 @@ def apply_modern_main_workspace_style(ui, app=None):
             widget.setStyleSheet(f"""
                 QFrame#right_properties_sidebar {{
                     background: {c['surface']};
-                    border: 1px solid {c['border']};
-                    border-radius: 12px;
+                    border: 0px;
+                    border-left: 1px solid {c['border']};
+                    border-radius: 0px;
                 }}
                 QFrame#right_properties_header {{
                     background: {c['subtle']};

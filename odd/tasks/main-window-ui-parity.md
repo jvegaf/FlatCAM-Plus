@@ -344,3 +344,24 @@ declined or rolled back: the control must never claim a unit the project is not 
 clicking a segment converts and the check follows, and a refused conversion leaves the control showing
 the real unit.
 
+
+## Removing the floating-card look
+
+The user's read: the panels looked like widgets inside capsules with margins between them, which the
+artboard does not have. The cause was not the widgets but four values that made everything float:
+
+| Source | Before | After |
+| --- | --- | --- |
+| `apply_modern_main_workspace_style` | window margins `14, 14, 14, 12` | `0, 0, 0, 0` |
+| the splitter block | handle width `12`, contents `0, 8, 0, 0` | handle width `1`, contents `0, 0, 0, 0` |
+| same block | handle painted `app_bg` (invisible gap) | painted `border` (a 1px separator) |
+| `centered_toolbar_host_style_sheet` | 1px border, radius `12px` | no border, 1px bottom border, radius `0` |
+| `right_properties_sidebar` | 1px border, radius `12px` | left border only, radius `0` |
+
+Measured after: window margins `0 0 0 0`, splitter handle 1px, toolbar host at `(0, 0, 1648, 64)`, i.e.
+touching the window edges. The render now reads as one surface with separators instead of cards floating
+on a background.
+
+Radius was not removed everywhere: buttons, inputs, tabs and list items keep their tokens. Only the
+container-level capsules went away, which is what made the window look assembled from separate pieces.
+

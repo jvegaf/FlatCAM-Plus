@@ -479,13 +479,14 @@ class MainGUI(QtWidgets.QMainWindow):
         return f"""
             QFrame#Toolbar_Center_Host {{
                 background: {outer_bg};
-                border: 1px solid {border};
-                border-radius: 12px;
+                border: 0px;
+                border-bottom: 1px solid {border};
+                border-radius: 0px;
             }}
             QWidget#toolbar_center_widget {{
                 background: {inner_bg};
                 border: 0px;
-                border-radius: 8px;
+                border-radius: 0px;
             }}
         """
 
