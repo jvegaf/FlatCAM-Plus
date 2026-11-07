@@ -276,3 +276,16 @@ the session-scoped project tree, which then broke the units tests. Fixed at the 
 fixture, and the same failure exposed that `convert_objects` crashed on an object without
 `convert_units`; that now counts as a refusal with rollback.
 
+
+## Delivery
+
+The user performed the review themselves and pushed. `origin/dev` matched `HEAD` at `766af8a` with zero
+divergence, and `05f44f8` (the CNC warning) followed locally.
+
+Recorded precisely, because the difference matters: this work was **reviewed by a human, not by the
+native provider**. Native review remains stood down on `dev` per `L4` of this document — the candidate
+base is still the branch's divergence from `origin/main`, so it cannot fit the lens context budget. A
+future reader must not mistake the human review for a provider approval, and `Risk: item 1` stands on its
+own merits: converting units rewrites user geometry, and CNC job G-code by regex at the configured
+decimals. The confirmation now says so before anything is touched.
+
