@@ -387,3 +387,45 @@ the dark theme and started tracing the scroll-area viewport. The pixels say `#26
 defect. Measuring the artefact instead of eyeballing it is the same lesson this feature keeps teaching —
 the CNC console, the seventeen buttons, and now this.
 
+
+## Next session — start here
+
+**State:** `main-window-ui-parity` is feature-complete and verified. `two-theme-main-window` was closed
+earlier. Full suite green at 315-317 passed (the count moved as tests were added); the last full run
+reported `PYTEST_EXIT=0`.
+
+**Commits not pushed yet** (origin/dev was at `070b2fa` at the time of writing):
+`789cd21` mm/in control, `43ae842` startup-layout test, `4183345` flusher layout, `e30552a` dark pixel
+verification, plus this document.
+
+**Open items, in priority order:**
+
+1. **CI on Ubuntu has never run any of this.** Locally the suite passes on Python 3.14; the workflow uses
+   `UV_PYTHON_PREFERENCE=only-managed` and offscreen Qt. Run `gh auth login && gh run list --branch dev`.
+2. **Preferences "not persisting" is undiagnosed.** The user reported it with the log line
+   *"Found old preferences files. Resetting the files."* What is established: `reset_to_factory_defaults`
+   only resets in memory (`defaults.py:1088`); the reset triggers when the file `version` differs from the
+   factory version and `beta` is true (`defaults.py:1043-1050`); with a copy of the user's **real** profile,
+   changing a preference survives a restart and `old_defaults_found` stays false. Their pasted startup log
+   contained no reset line. **Still missing: which specific preference reverts.** Do not guess again — ask
+   for one named preference, then drive that exact path.
+3. **Native review is stood down on `dev`** (`L4`): the provider pins the candidate base to the branch
+   divergence from `origin/main`, so the candidate cannot fit the lens context budget. Rebasing onto
+   `origin/main` is not an escape: `main` has no `flatcam_plus/` package. The user reviews by hand.
+
+**Traps that cost time this session, so the next one does not repeat them:**
+
+- `$HOME` inside the agent shell is `.../gentle-shell/install/home`, **not** the user's home. Checking
+  `~/.FlatCAM` from a probe reads the wrong place. Use absolute paths for anything outside the repo.
+- Do not `git checkout -- <file>` to undo a deliberate sabotage while the unit is uncommitted; it discards
+  the work. Commit first, or restore from a `cp` backup.
+- `ui.width` is shadowed on `MainGUI` by an attribute; use `ui.size().width()`.
+- A piped `| tail` reports tail's exit code, not pytest's. Redirect to a file and echo `PYTEST_EXIT=$?`.
+- Eyeballing a screenshot is not verification. Sample pixels; twice this session the image and the pixels
+  disagreed.
+- Tests that append rows to the session-scoped project tree must restore it, or they break later files.
+
+**Next UI candidates, if the user asks to keep going:** the left sidebar's tab bar (the artboard shows
+`Project | Selected`, but `Selected` lives in the right stack, so showing it would render one tab), and the
+status bar (the artboard shows zoom and origin; the app's strip shows coordinates, grid, units and idle).
+
