@@ -1003,6 +1003,12 @@ class AppDefaults:
     # #### Additional Methods #####
     def write(self, filename: str):
         """Saves the defaults to a file on disk"""
+        # A file this build writes must be loadable by this build: ``load`` compares the
+        # stored version with ``factory_defaults['version']`` and treats a mismatch as an
+        # old profile. The dict being written is ``app.options``, which can carry another
+        # build's ``version`` (merged back from a project), so stamp our own here. It also
+        # heals a profile already poisoned that way at the first clean quit.
+        self.defaults['version'] = self.version
         with open(filename, "w") as file:
             simplejson.dump(self.defaults, file, default=to_dict, indent=2, sort_keys=True)
 

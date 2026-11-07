@@ -59,6 +59,26 @@ fcTranslate.apply_language('strings')
 if '_' not in builtins.__dict__:
     _ = gettext.gettext
 
+# The UI theme is an application-level preference, not project data: it is chosen in
+# Preferences, applied once at start-up (``appMain`` sets the application stylesheet before
+# any widget exists) and changing it needs a restart. A project used to store the whole
+# options dict, ``global_theme`` included, so opening a project saved under the light theme
+# put ``light`` back into ``app.options`` while the window kept the theme it started with.
+# Every panel built afterwards is styled from that option (``PanelStyles._theme_name``), so
+# the object properties panel came back white inside a dark window.
+#
+# ``version`` belongs here for the same reason: the project file already carries its own
+# top-level ``version`` field, so the copy that travels inside ``options`` must not exist
+# at all -- ``quit_application`` copies options into the defaults and the next launch
+# compares that value with the running build's version, resetting every preference on a
+# mismatch (``defaults.py::__is_old_defaults``).
+APP_SCOPED_OPTIONS = frozenset(("global_theme", "global_appearance", "version"))
+
+
+def _project_options(options):
+    """Drop the application-scoped values a project file must neither carry nor set."""
+    return {key: value for key, value in options.items() if key not in APP_SCOPED_OPTIONS}
+
 
 class appIO(QtCore.QObject):
     def __init__(self, app):
@@ -2804,7 +2824,7 @@ class appIO(QtCore.QObject):
         # interrupted normal project opening and the expected default action was
         # the "Yes" path.
         if 'options' in proj_dict:
-            self.app.options.update(proj_dict['options'])
+            self.app.options.update(_project_options(proj_dict['options']))
 
         self.app.project_filename = filename
 
@@ -2975,7 +2995,7 @@ class appIO(QtCore.QObject):
             except Exception as e:
                 self.log.error("save_project() --> There was no active object. Skipping read_form. %s" % str(e))
 
-            app_options = {k: v for k, v in self.app.options.items()}
+            app_options = {k: v for k, v in self.app.options.items() if k not in APP_SCOPED_OPTIONS}
             d = {
                 "objs":             [obj.to_dict() for obj in self.app.collection.get_list()],
                 "options":          app_options,
