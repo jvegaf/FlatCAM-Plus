@@ -315,6 +315,18 @@ The AI assistant feature is organized under `flatcam_plus/appPlugins/ai_assistan
 ### 1. Prerequisites
 - **Python 3.14** or greater (pinned in `.python-version`).
 - **[uv](https://docs.astral.sh/uv/)** (recommended). `uv.lock` pins the full resolved dependency set.
+- **Tcl/Tk**, as a system package. The Tcl shell and the scripting engine are built on
+  `tkinter`, whose `_tkinter` extension links against the system `libtk`. No Python dependency
+  can install it, so `uv sync` alone is not enough on Linux:
+
+  | Distribution | Command |
+  | --- | --- |
+  | Arch / CachyOS / Manjaro | `sudo pacman -S tk` |
+  | Debian / Ubuntu | `sudo apt install python3-tk` |
+  | Fedora | `sudo dnf install python3-tkinter` |
+
+  Windows and macOS ship Tcl/Tk with the python.org installers. The application refuses to
+  start when it is missing and prints the command for your platform.
 
 ### 2. Running from Sources
 

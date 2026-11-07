@@ -14,6 +14,13 @@ uv run --with pytest pytest tests -q      # run the test suite
 uv run --with pytest pytest tests/test_classify_contours.py -v
 ```
 
+- **Tcl/Tk is a system requirement, not a Python dependency.** `flatcam_plus/appMain.py` imports
+  `tkinter` at module scope and `flatcam_plus/appPlugins/ToolShell.py` builds the Tcl shell from
+  `tk.Tcl()`, so the app cannot start without it. `_tkinter` links against the system `libtk`,
+  which `pyproject.toml` cannot express and `uv sync` cannot install: Arch/CachyOS needs
+  `sudo pacman -S tk`, Debian/Ubuntu `python3-tk`, Fedora `python3-tkinter`, and the python.org
+  Windows installers ship it. `flatcam_plus/launcher.py` guards the import and prints the right
+  command instead of raising a bare `ImportError`, pinned by `tests/test_launcher_tcl_tk.py`.
 - `python -m flatcam_plus` and the `flatcam-plus` console script both call
   `flatcam_plus.launcher.main`; the app is one process-wide `App` object built by
   `flatcam_plus.appMain`. `pyproject.toml` uses the `uv_build` backend, so
@@ -34,6 +41,12 @@ uv run --with pytest pytest tests/test_classify_contours.py -v
   top-level work behind `if __name__ == "__main__"`. The repository root reaches
   `sys.path` through `pythonpath = ["."]` in `pyproject.toml`, not through an
   insert in `tests/conftest.py`, because the application packages stay at the root.
+- On a machine under memory or thread pressure, `numpy`'s import can die with `OpenBLAS
+  blas_thread_init: pthread_create failed ... Resource temporarily unavailable`. The suite then
+  reports it as a `KeyboardInterrupt` (`returncode -2`) in whichever test spawned the first
+  subprocess that boots the app, which reads like a regression and is not one. Confirm the cause
+  by rerunning those tests with `OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1` before investigating
+  the code.
 - `flatcam_plus.appMain.App` parses `sys.argv` with getopt at import time and exits on
   unknown options; `tests/conftest.py` replaces `sys.argv` so pytest's own flags
   cannot reach it.

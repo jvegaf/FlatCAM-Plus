@@ -67,6 +67,42 @@ except ImportError as exc:
             "python -m pip install --upgrade --force-reinstall -r requirements.txt"
         )
     raise
+
+
+def _require_tcl_tk():
+    """Explain a missing Tcl/Tk instead of surfacing a bare ``ImportError``.
+
+    ``tkinter`` is a stdlib module, but its ``_tkinter`` extension links against the system
+    ``libtk``. No Python dependency list can install that library, so a stock ``uv sync`` leaves
+    the application unstartable while ``pyproject.toml`` looks complete. The raw error names a
+    shared object the user never asked for, so name the system package and the command that
+    installs it on each platform.
+    """
+    try:
+        import tkinter  # noqa: F401
+    except ImportError as exc:
+        sys.stderr.write(
+            "FlatCAM Plus needs Tcl/Tk, and on Linux it is a system package rather than a\n"
+            "Python one, so `uv sync` cannot install it.\n"
+            "\n"
+            "    underlying error: %s\n"
+            "\n"
+            "Tcl/Tk provides the Tcl shell and the scripting engine, so the application cannot\n"
+            "start without it. Install it, then run the app again:\n"
+            "\n"
+            "    Arch / CachyOS / Manjaro:  sudo pacman -S tk\n"
+            "    Debian / Ubuntu:           sudo apt install python3-tk\n"
+            "    Fedora:                    sudo dnf install python3-tkinter\n"
+            "    Windows / macOS:           reinstall Python with the Tcl/Tk option enabled\n"
+            % (exc,)
+        )
+        raise SystemExit(1)
+
+
+# ``flatcam_plus.appMain`` imports ``tkinter`` at module scope, so this guard has to run before
+# the import below can fail.
+_require_tcl_tk()
+
 import flatcam_plus
 from flatcam_plus import appTranslation as fcTranslate
 from flatcam_plus.appMain import App
