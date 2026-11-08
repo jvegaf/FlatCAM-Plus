@@ -53,7 +53,12 @@ def test_the_sandbox_asks_for_no_more_than_it_needs():
 
     assert "--filesystem=home" not in manifest
     assert "--filesystem=host" not in manifest
+    assert "--socket=wayland" in manifest, (
+        "the payload ships libqwayland.so; pinning the backend to xcb made the bundled Qt fail "
+        "to get a GL context through XWayland and the app exited at start-up"
+    )
     assert "--socket=fallback-x11" in manifest
+    assert "QT_QPA_PLATFORM=xcb" not in manifest
     assert "--device=dri" in manifest, "the plot canvas needs the GPU"
     assert "--env=FLATCAM_PLUS_HOME=/app/lib/flatcam-plus" in manifest, (
         "the launcher the deb and the rpm install only knows /opt"

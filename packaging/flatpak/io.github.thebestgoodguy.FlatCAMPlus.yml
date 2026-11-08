@@ -1,9 +1,9 @@
 # Flatpak manifest for the self-hosted bundle published in the GitHub release.
 #
 # This is not a Flathub submission: Flathub forbids shipping a prebuilt binary payload, which is
-# exactly what a PyInstaller bundle is. The runtime supplies Qt for the desktop integration, while
-# the payload carries its own Qt for the application, so the session plugin comes from the payload
-# and the platform is pinned to xcb on purpose.
+# exactly what a PyInstaller bundle is. The payload carries its own Qt, and it does ship the
+# Wayland platform plugin (``libqwayland.so``), so the app runs natively on the session it is
+# given instead of being pinned to one backend.
 app-id: io.github.thebestgoodguy.FlatCAMPlus
 runtime: org.kde.Platform
 runtime-version: "6.11"
@@ -11,10 +11,13 @@ sdk: org.kde.Sdk
 command: flatcam-plus
 
 finish-args:
-  # X11 through XWayland while the bundled Qt ships no Wayland plugin.
+  # Native Wayland, with X11 as the fallback for an X11-only session. Pinning xcb made the
+  # bundled Qt go through XWayland, where it could not obtain a GL context ("qglx_findConfig:
+  # Failed to finding matching FBConfig", then "Could not initialize GLX") and the app exited at
+  # start-up on a hybrid-GPU machine.
+  - --socket=wayland
   - --socket=fallback-x11
   - --share=ipc
-  - --env=QT_QPA_PLATFORM=xcb
   - --device=dri
   - --talk-name=org.freedesktop.Notifications
   # The same launcher the deb and the rpm install, pointed at the sandbox path.
