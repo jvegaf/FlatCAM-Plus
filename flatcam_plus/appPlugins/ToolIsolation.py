@@ -1293,7 +1293,10 @@ class ToolIsolation(Gerber, AppTool):
                     if 'solid' in geo_el and geo_el['solid'] is not None and geo_el['solid'].is_valid:
                         total_geo.append(geo_el['solid'])
 
-        total_geo = MultiPolygon(total_geo)
+        # An aperture macro can contribute a MultiPolygon as a single solid, and
+        # MultiPolygon() rejects a sequence holding one. Flatten first so every element is a
+        # plain polygon and the distances below can be measured.
+        total_geo = MultiPolygon(flatten_shapely_geometry(total_geo))
         total_geo = total_geo.buffer(0)
 
         if isinstance(total_geo, Polygon):
@@ -1435,7 +1438,8 @@ class ToolIsolation(Gerber, AppTool):
                                 if 'solid' in geo_el and geo_el['solid'] is not None and geo_el['solid'].is_valid:
                                     total_geo.append(geo_el['solid'])
 
-                    total_geo = MultiPolygon(total_geo)
+                    # Same nesting hazard as the single-process variant above.
+                    total_geo = MultiPolygon(flatten_shapely_geometry(total_geo))
                     total_geo = total_geo.buffer(0)
                     total_geo = flatten_shapely_geometry(total_geo)
 

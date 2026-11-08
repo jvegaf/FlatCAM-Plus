@@ -1707,7 +1707,11 @@ class Gerber(Geometry):
             if self.use_buffer_for_union:
                 self.app.log.debug("Union by buffer...")
 
-                new_poly = MultiPolygon(poly_buffer)
+                # An aperture macro can contribute a MultiPolygon as a single solid, and
+                # MultiPolygon() rejects a sequence holding one. Flatten first so the union
+                # receives plain polygons; nested geometry is otherwise misread as an empty
+                # file by the guard above.
+                new_poly = MultiPolygon(flatten_shapely_geometry(poly_buffer))
                 if self.app.options["gerber_buffering"] == 'full':
                     new_poly = new_poly.buffer(0.000001)
                     new_poly = new_poly.buffer(-0.000001)

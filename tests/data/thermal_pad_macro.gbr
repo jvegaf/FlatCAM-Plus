@@ -1,0 +1,30 @@
+%FSLAX34Y34*%
+%MOMM*%
+G04 ================================================== *
+G04 Macro Definition: Parameterized 3-Spoke (Segment)  *
+G04                   Thermal Relief Pad               *
+G04 Variables:                                         *
+G04   $1 = Diameter                                    *
+G04   $2 = Total Air Gap (start with 2mm)              *
+G04   $3 = Spoke Angle Offset (start with 0 degrees)   *
+G04 Parameters: D=2.00mm, TotalGap=2mm, Offset=0       *
+G04 ================================================== *
+%AMTHM_3SEG*
+$4=$2/3*
+$5=$1-0.01*
+1,1,$1,0,0*
+1,0,$5,0,0*
+20,0,$4,0,0,0,$5,$3+1X360/3*
+20,0,$4,0,0,0,$5,$3+2X360/3*
+20,0,$4,0,0,0,$5,$3+3X360/3*%
+G04 ================================================== *
+G04 Map the macro with parameters (2.2mm, 2mm, 0 deg). *
+G04 ================================================== *
+%ADD10THM_3SEG,2.2X2X0*%
+G04 ================================================== *
+G04 Main Graphics Stream                               *
+G04 ================================================== *
+G04 Flash the default 2x2mm thermal                    *
+D10*
+X040000Y040000D03*
+M02*
