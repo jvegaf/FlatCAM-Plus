@@ -25405,3 +25405,7 @@ msgstr "Nenhum nome de geometria nos argumentos. Altere e tente novamente."
 
 #~ msgid "%s/Project_%s"
 #~ msgstr "%s/Projeto_%s"
+
+#: flatcam_plus/appPlugins/ToolIsolation.py:1310
+msgid "The Gerber object has no usable geometry to measure distances between."
+msgstr ""

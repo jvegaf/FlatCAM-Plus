@@ -20926,3 +20926,7 @@ msgstr "参数中没有Geometry名称。请提供名称，然后重试。"
 
 #~ msgid "tool_tab"
 #~ msgstr "工具标签"
+
+#: flatcam_plus/appPlugins/ToolIsolation.py:1310
+msgid "The Gerber object has no usable geometry to measure distances between."
+msgstr ""
