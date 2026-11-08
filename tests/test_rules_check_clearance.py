@@ -10,8 +10,11 @@ parses and isolates fine could still not be rule-checked.
 
 Two committed inputs cover it: ``tests/data/thermal_pad_macro.gbr`` is a ``THM_3SEG`` macro
 whose flashed pad is stored as one nested ``MultiPolygon``, and ``tests/data/square_outline.gbr``
-is a plain outline stored as a single ``Polygon``. ``tests/data/two_drills.drl`` supplies the
-Excellon side of the annular ring rule.
+is a plain outline stored as a single ``Polygon``. ``tests/data/thermal_pad_macro_two_flash.gbr``
+is the same macro flashed twice, at (4, 4) and (8, 8) mm: two nested solids, which is the case
+where flattening alone left the rules counting and slicing a multi-part result, so the old code
+failed on ``len()`` and iteration instead of on the constructor. ``tests/data/two_drills.drl``
+supplies the Excellon side of the annular ring rule.
 
 Every rule is driven through the same dict shape the plugin builds in ``RulesCheck.execute``:
 ``{'name': ..., 'apertures': <gerber>.tools}`` for a Gerber layer and
@@ -31,6 +34,9 @@ RULE = "clearance"
 
 # The macro pad is one 2.2 mm flash centred on (4, 4) mm, so its envelope is 2.9..5.1 mm.
 PAD_LEFT, PAD_BOTTOM, PAD_RIGHT, PAD_TOP = 2.9, 2.9, 5.1, 5.1
+# The two-flash input flashes the same pad again at (8, 8) mm, so the pair of pads spans
+# 2.9..9.1 mm on both axes: a location between the two pads cannot leave that envelope.
+TWO_FLASH_RIGHT = TWO_FLASH_TOP = 9.1
 # The plain outline is a 10x10 mm board.
 BOARD_LEFT, BOARD_BOTTOM, BOARD_RIGHT, BOARD_TOP = 0.0, 0.0, 10.0, 10.0
 
@@ -41,6 +47,14 @@ def macro_layer(fc_app, sample_input):
     gerber = Gerber(app=fc_app, steps_per_circle=64)
     assert gerber.parse_lines(sample_input("thermal_pad_macro.gbr")) is None
     return {"name": "macro", "apertures": gerber.tools}
+
+
+@pytest.fixture(scope="module")
+def multi_flash_layer(fc_app, sample_input):
+    """A Gerber layer whose macro is flashed twice: two nested ``MultiPolygon`` solids."""
+    gerber = Gerber(app=fc_app, steps_per_circle=64)
+    assert gerber.parse_lines(sample_input("thermal_pad_macro_two_flash.gbr")) is None
+    return {"name": "two_flash", "apertures": gerber.tools}
 
 
 @pytest.fixture(scope="module")
@@ -95,6 +109,32 @@ def test_inside_clearance_accepts_a_macro_solid(macro_layer):
     )
     assert violation["name"] == "macro"
     assert_points_within(violation["points"], PAD_LEFT, PAD_BOTTOM, PAD_RIGHT, PAD_TOP)
+
+
+def test_inside_clearance_accepts_a_macro_flashed_twice(multi_flash_layer):
+    # Two nested solids reach MultiPolygon(...) as a plain list, and the multi-part result then
+    # has to be counted and sliced as parts. Both pads are closer than the 20 mm window, so the
+    # rule reports the pairs it measured between them.
+    violation = one_violation(
+        RulesCheck.check_inside_gerber_clearance(multi_flash_layer, 20.0, RULE)
+    )
+    assert violation["name"] == "two_flash"
+    assert_points_within(
+        violation["points"], PAD_LEFT, PAD_BOTTOM, TWO_FLASH_RIGHT, TWO_FLASH_TOP
+    )
+
+
+def test_gerber_to_gerber_clearance_accepts_a_macro_flashed_twice(
+    multi_flash_layer, outline_layer
+):
+    # The same two nested solids against a plain outline layer. A location here is the midpoint
+    # between a pad edge and the board outline, so it can leave the pads' envelope and is only
+    # bounded by the 10x10 mm board.
+    violation = one_violation(
+        RulesCheck.check_gerber_clearance([multi_flash_layer, outline_layer], 20.0, RULE)
+    )
+    assert violation["name"] == ["two_flash", "outline"]
+    assert_points_within(violation["points"], BOARD_LEFT, BOARD_BOTTOM, BOARD_RIGHT, BOARD_TOP)
 
 
 def test_inside_clearance_for_a_plain_outline_is_unchanged(outline_layer):

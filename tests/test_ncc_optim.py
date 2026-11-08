@@ -2,16 +2,20 @@
 
 ``find_optim_mp`` is the public seam behind the "find optimal tool diameter" check for
 non-copper clearance. It collects the solid of every aperture, buffers it by 1e-7 and keeps
-only the valid results, so a self-intersecting solid contributes nothing. A layer that
-contributes fewer than two measurable polygons has no pair to compare: the check has to
-report that and hand back an unusable distance instead of dying inside ``min()`` on an empty
-dict.
+the results that are valid *after* buffering, so a self-intersecting solid is repaired rather
+than dropped. The pieces are then flattened but never unioned, so touching pieces stay
+separate. Both choices have a visible result: a gap of 0 mm is measured as 0 and reported
+trimmed, and a layer whose only defect is a self-intersecting solid still gets a distance. A
+layer that contributes fewer than two measurable polygons has no pair to compare: the check
+has to report that and hand back an unusable distance instead of dying inside ``min()`` on an
+empty dict.
 """
 
 import math
 
 import numpy as np
 import pytest
+from shapely import Polygon
 from shapely.geometry import box
 
 # ``flatcam_plus/appPlugins/__init__.py`` overwrites the package attribute with the plugin
@@ -41,6 +45,31 @@ def test_reports_a_layer_with_a_single_polygon():
     assert msg.startswith("[ERROR_NOTCL]")
     assert "Too few polygons" in msg
     assert math.isinf(min_dist)
+
+
+def test_measures_two_touching_squares_as_a_zero_gap():
+    # Two 1 mm squares sharing an edge. Each solid is buffered by 1e-7 before the distance is
+    # measured and the pieces are not unioned afterwards, so they stay two pieces 0 mm apart
+    # instead of merging into the one-polygon report. The result is the 0 mm gap trimmed by
+    # one decimal step: a diameter that cannot clear anything.
+    msg, min_dist = NonCopperClear.find_optim_mp(
+        aperture_storage(box(0, 0, 1, 1), box(1, 0, 2, 1)), 2
+    )
+    assert msg == "ok"
+    assert min_dist == pytest.approx(-0.01)
+
+
+def test_keeps_a_self_intersecting_solid_instead_of_dropping_it():
+    # The validity check runs on the buffered solid, not on the raw one: the 1e-7 buffer
+    # repairs the bowtie, so the layer keeps it. It overlaps the first square, so the measured
+    # gap is 0 mm and the trimmed result is -0.01. Dropping the invalid solid instead would
+    # leave the two squares and report the 2 mm gap between them.
+    tolerance = Polygon([(0.5, 0), (1.5, 1), (0.5, 1), (1.5, 0)])  # self-intersecting bowtie
+    msg, min_dist = NonCopperClear.find_optim_mp(
+        aperture_storage(box(0, 0, 1, 1), tolerance, box(3, 0, 4, 1)), 2
+    )
+    assert msg == "ok"
+    assert min_dist == pytest.approx(-0.01)
 
 
 def test_measures_the_distance_between_separate_elements():
