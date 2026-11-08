@@ -46,13 +46,27 @@ def test_flattens_the_multi_polygon_into_measurable_pieces():
     assert min_dist == pytest.approx(8.99)
 
 
-def test_collapses_on_a_layer_that_merges_into_one_polygon():
-    # Pre-existing behaviour, pinned as found: a layer whose geometry merges into a single
-    # polygon has no pair to measure, so `min()` runs on an empty dict and this raises
-    # before the intended "[ERROR_NOTCL] ... has one Polygon as geometry" report can be
-    # returned. The dead report is a separate defect; the assertion below is not approval.
-    with pytest.raises(ValueError):
-        ToolIsolation.find_optim_mp(aperture_storage(box(0, 0, 1, 1)), 2)
+def test_reports_a_layer_that_merges_into_one_polygon():
+    # Two touching 1 mm squares merge into a single polygon, so there is no pair to
+    # measure. The check must return the "one Polygon as geometry" report and no
+    # distance, instead of dying inside `min()` on an empty dict. The message is the
+    # caller's contract: it is emitted as-is and the caller stops before using the
+    # distance, so a missing distance must never come back with an 'ok' status.
+    msg, min_dist = ToolIsolation.find_optim_mp(
+        aperture_storage(box(0, 0, 1, 1), box(1, 0, 2, 1)), 2
+    )
+    assert msg.startswith("[ERROR_NOTCL]")
+    assert "one Polygon as geometry" in msg
+    assert "no distances between geometry elements" in msg
+    assert min_dist is None
+
+
+def test_reports_a_layer_with_no_geometry_to_measure():
+    # A layer that contributes no usable solid (here none at all) has no pair to
+    # measure either, and reaches the same "no distance" exit.
+    msg, min_dist = ToolIsolation.find_optim_mp(aperture_storage(), 2)
+    assert msg.startswith("[ERROR_NOTCL]")
+    assert min_dist is None
 
 
 def test_ignores_invalid_solids():

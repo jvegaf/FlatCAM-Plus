@@ -1299,13 +1299,18 @@ class ToolIsolation(Gerber, AppTool):
         total_geo = MultiPolygon(flatten_shapely_geometry(total_geo))
         total_geo = total_geo.buffer(0)
 
-        if isinstance(total_geo, Polygon):
+        w_geo = flatten_shapely_geometry(total_geo)
+        if len(w_geo) < 2:
+            # A layer whose geometry merges into a single polygon has no pair to measure, and
+            # `buffer(0)` reduces a layer with no usable solid at all to a single empty
+            # Polygon. Report that instead of letting `min()` fail on an empty dict, and never
+            # pair the report with a distance: the caller emits the message and then stops.
             msg = ('[ERROR_NOTCL] %s' % _("The Gerber object has one Polygon as geometry.\n"
                                           "There are no distances between geometry elements to be found."))
+            return msg, None
 
         min_dict = {}
         idx = 1
-        w_geo = flatten_shapely_geometry(total_geo)
         for geo in w_geo:
             for s_geo in w_geo[idx:]:
                 # minimize the number of distances by not taking into considerations
