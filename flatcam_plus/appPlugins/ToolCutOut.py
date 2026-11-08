@@ -128,10 +128,6 @@ class CutOut(AppTool):
         """
         interior_indices = set()
 
-        # Nothing can be nested in a single contour, and there is nothing to report about it.
-        if len(geometries) <= 1:
-            return interior_indices
-
         def warn(index, reason):
             if logger is not None:
                 logger.warning("Cutout: contour %d cannot be classified (%s); treating it as exterior."
@@ -139,6 +135,8 @@ class CutOut(AppTool):
 
         # Rebuild a filled shape for each contour; a contour that cannot describe one is
         # reported and left out of the depth count, which keeps it on the exterior path.
+        # There is no short circuit for a single contour: nothing can be nested in it, but a
+        # contour that cannot be described still has to be reported (S3).
         filled_polys = []
         for index, geo in enumerate(geometries):
             filled = None

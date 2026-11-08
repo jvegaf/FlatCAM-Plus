@@ -12,6 +12,8 @@ offset. The job itself runs inside a Qt worker behind ``app.proc_container`` and
 object, so it is not reachable from a test; the two methods are what it calls, verbatim.
 """
 
+import math
+
 import pytest
 from shapely import LineString, MultiLineString, Polygon
 
@@ -33,6 +35,15 @@ def _band(coords, width=0.254):
 
 def _outline():
     return _band([(0, 0), (100, 0), (100, 60), (0, 60), (0, 0)])
+
+
+def _circle_band(cx, cy, radius, width=0.254, segments=64):
+    """A circular Gerber profile path, buffered with the aperture width / 2."""
+    coords = []
+    for i in range(segments + 1):
+        angle = 2 * math.pi * i / segments
+        coords.append((cx + radius * math.cos(angle), cy + radius * math.sin(angle)))
+    return _band(coords, width)
 
 
 def _slot():
@@ -153,6 +164,83 @@ def test_with_the_option_off_a_negative_margin_is_unchanged(cutout, logged):
     for ring, wanted in zip(shape, expected):
         assert LineString(ring).equals(LineString(wanted))
     assert logged.messages == []
+
+
+# The contours the pre-c848b5a offset is pinned over: a closed thin band, a circular band, a
+# band carrying two rings, a polygon carrying three holes, and an open path with no exterior
+# ring at all.
+PRE_C848B5A_CONTOURS = {
+    'rectangular-band': _outline(),
+    'circular-band': _circle_band(0, 0, 30),
+    'band-with-two-interior-rings': Polygon(
+        [(0, 0), (40, 0), (40, 20), (0, 20), (0, 0)],
+        [
+            [(5, 5), (15, 5), (15, 15), (5, 15), (5, 5)],
+            [(25, 5), (35, 5), (35, 15), (25, 15), (25, 5)],
+        ],
+    ),
+    'polygon-with-three-holes': Polygon(
+        [(0, 0), (60, 0), (60, 20), (0, 20), (0, 0)],
+        [
+            [(5, 5), (15, 5), (15, 15), (5, 15), (5, 5)],
+            [(20, 5), (30, 5), (30, 15), (20, 15), (20, 5)],
+            [(35, 5), (45, 5), (45, 15), (35, 15), (35, 5)],
+        ],
+    ),
+    'open-linestring': LineString([(10, 10), (50, 10)]),
+}
+
+
+def pre_c848b5a_gerber_contour_shape(contour, margin, cut_dia):
+    """The per-contour Gerber offset exactly as it stood before ``c848b5a``.
+
+    Provenance: the revision before the classification landed, commit 6e4e7e3, file
+    ``appPlugins/ToolCutOut.py``, the ``else`` branch of ``CutOut.on_freeform_cutout`` that
+    iterates ``geom_struct``:
+
+        if margin >= 0:
+            geom_struct = (geom_struct.buffer(margin + abs(cut_dia / 2))).exterior
+        else:
+            geom_struct_buff = geom_struct.buffer(-margin + abs(cut_dia / 2))
+            geom_struct = geom_struct_buff.interiors
+
+    This expression is the specification S5 pins, so it is reproduced here on purpose: it is
+    the historical behaviour, and the production code has to keep matching it when the option
+    is off. It is a literal of plain shapely calls, not a reimplementation of any current
+    production path, so the test stays a characterisation of the old output in any checkout.
+    """
+    if margin >= 0:
+        return contour.buffer(margin + abs(cut_dia / 2)).exterior
+    return contour.buffer(-margin + abs(cut_dia / 2)).interiors
+
+
+@pytest.mark.parametrize(
+    'contour',
+    PRE_C848B5A_CONTOURS.values(),
+    ids=list(PRE_C848B5A_CONTOURS),
+)
+@pytest.mark.parametrize('margin', [-0.5, 0.0, 0.5], ids=['negative', 'zero', 'positive'])
+@pytest.mark.parametrize('cut_dia', [0.8, 2.0])
+def test_with_the_option_off_the_offset_is_the_pre_c848b5a_expression(
+        cutout, contour, margin, cut_dia):
+    """S5: off means every contour takes the old exterior path, on every branch.
+
+    The gate is off, so the interior set is empty, and ``_gerber_contour_shape`` has to
+    produce exactly the historical output for a positive margin (the exterior ring), a zero
+    margin and a negative one (the interior rings).
+    """
+    cutout.ui.auto_interior_cb.set_value(False)
+    assert cutout._auto_interior_indices([contour]) == set()
+
+    shape = cutout._gerber_contour_shape(contour, 0, margin, cut_dia, set())
+    expected = pre_c848b5a_gerber_contour_shape(contour, margin, cut_dia)
+
+    if margin < 0:
+        assert len(shape) == len(expected)
+        for ring, wanted in zip(shape, expected):
+            assert LineString(ring).equals(LineString(wanted))
+    else:
+        assert shape.equals(expected)
 
 
 # ============================================================================

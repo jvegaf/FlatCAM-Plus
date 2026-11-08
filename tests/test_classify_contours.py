@@ -299,6 +299,73 @@ class TestWarnings:
         assert result == {1}
         assert warnings.messages == []
 
+    def test_a_single_usable_contour_reports_nothing(self):
+        """A lone contour cannot contain anything, and a usable one is not a problem.
+
+        There is nothing to classify and nothing to report: the layer is one material
+        outline, so the silence here is deliberate, not the old early return.
+        """
+        outline = make_rectangular_outline(0, 0, 64, 40)
+        warnings = WarningRecorder()
+        result = _classify_contours([outline], logger=warnings)
+
+        assert result == set()
+        assert warnings.messages == []
+
+    @pytest.mark.parametrize(
+        'contour, reason',
+        [
+            pytest.param(
+                LineString([(10, 10), (50, 10)]),
+                'LineString',
+                id='open-linestring'),
+            pytest.param(
+                Polygon(),
+                'enclose any area',
+                id='empty-polygon'),
+            pytest.param(
+                Point(32, 20),
+                'Point',
+                id='point'),
+        ],
+    )
+    def test_a_lone_unclassifiable_contour_is_still_reported(self, contour, reason):
+        """S3 holds for a single-contour layer too: one unusable contour is a warning.
+
+        The single-contour shortcut used to return before the filled shapes were rebuilt, so
+        a layer that held nothing but an open LineString, an empty Polygon or a Point
+        produced no warning at all. Nothing can be nested in one contour, but a contour that
+        cannot be described is still something the user has to be told about.
+        """
+        warnings = WarningRecorder()
+        result = _classify_contours([contour], logger=warnings)
+
+        assert result == set()
+        assert len(warnings.messages) == 1
+        assert '0' in warnings.messages[0]
+        assert reason in warnings.messages[0]
+        assert 'treating it as exterior' in warnings.messages[0]
+
+    def test_an_unclassifiable_contour_in_the_middle_keeps_the_other_indices(self):
+        """The warning and the classification must name the same contour.
+
+        The unusable contour sits at index 1, between the outline and the slot: the warning
+        has to say 1, and the slot after it still has to come back as index 2. An index
+        shifted by the skipped contour would offset the wrong contour and warn about the
+        wrong one.
+        """
+        outline = make_rectangular_outline(0, 0, 64, 40)
+        open_line = LineString([(10, 10), (50, 10)])
+        slot = make_circular_outline(32, 20, 8)
+        warnings = WarningRecorder()
+
+        result = _classify_contours([outline, open_line, slot], logger=warnings)
+
+        assert result == {2}
+        assert len(warnings.messages) == 1
+        assert 'contour 1 ' in warnings.messages[0]
+        assert 'contour 2 ' not in warnings.messages[0]
+
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
