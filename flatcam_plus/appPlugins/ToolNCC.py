@@ -1115,6 +1115,13 @@ class NonCopperClear(Gerber, AppTool):
                     total_geo = flatten_shapely_geometry(total_geo)
 
                     geo_len = len(total_geo)
+                    if geo_len == 0:
+                        # No usable solid survived the collection, so there is no pair to
+                        # measure. Same report as the multiprocessing variant above.
+                        app_obj.inform.emit('[ERROR_NOTCL] %s' %
+                                            _("Too few polygons in the Gerber object to determine distances."))
+                        return 'fail'
+
                     if geo_len == 1:
                         app_obj.inform.emit('[ERROR_NOTCL] %s' %
                                             _("The Gerber object has one Polygon as geometry.\n"

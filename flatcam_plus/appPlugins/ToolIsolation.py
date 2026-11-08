@@ -1449,7 +1449,10 @@ class ToolIsolation(Gerber, AppTool):
                     total_geo = flatten_shapely_geometry(total_geo)
 
                     geo_len = len(total_geo)
-                    if geo_len == 1:
+                    if geo_len < 2:
+                        # A layer that contributes no usable solid reduces to an empty Polygon
+                        # through buffer(0) and is dropped by flatten_shapely_geometry, so it
+                        # arrives here with no piece at all. It has no pair to measure either.
                         msg = _("The Gerber object has one Polygon as geometry.\n"
                                 "There are no distances between geometry elements to be found.")
                         app_obj.inform.emit('[ERROR_NOTCL] %s' % msg)
