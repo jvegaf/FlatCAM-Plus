@@ -12,6 +12,7 @@ from PyQt6.QtCore import Qt
 from flatcam_plus.appEditors.appTextEditor import AppTextEditor
 from flatcam_plus.appObjects.CNCJobObject import CNCJobObject
 from flatcam_plus.appGUI.GUIElements import FCTextArea, FCEntry, FCButton, FCTable, GLay, FCLabel
+from flatcam_plus.appGUI.PanelStyles import apply_modern_panel_style
 
 # from io import StringIO
 
@@ -898,6 +899,9 @@ class AppGCodeEditorUI:
         layout.addWidget(self.exit_editor_button)
         # ############################ FINSIHED GUI ##################################################################
         # #############################################################################################################
+
+        # This tree is attached to the properties panel, so it carries the panel chrome.
+        apply_modern_panel_style(self.edit_widget, self.app)
 
     def confirmation_message(self, accepted, minval, maxval):
         if accepted is False:

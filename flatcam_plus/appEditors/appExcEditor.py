@@ -18,6 +18,7 @@ from flatcam_plus.appEditors.exc_plugins.ExcResizePlugin import ExcResizeEditorT
 from flatcam_plus.appEditors.exc_plugins.ExcCopyPlugin import ExcCopyEditorTool
 
 from flatcam_plus.appGUI.GUIElements import FCEntry, FCTable, FCDoubleSpinner, FCButton, FCLabel, GLay
+from flatcam_plus.appGUI.PanelStyles import apply_modern_panel_style
 from flatcam_plus.appEditors.appGeoEditor import FCShapeTool, DrawTool, DrawToolShape, DrawToolUtilityShape, AppGeoEditor
 
 from shapely import LineString, LinearRing, MultiLineString, Polygon, MultiPolygon, Point
@@ -5377,6 +5378,9 @@ class AppExcEditorUI:
 
         # ############################ FINSIHED GUI ###################################
         # #############################################################################
+
+        # This tree is attached to the properties panel, so it carries the panel chrome.
+        apply_modern_panel_style(self.exc_edit_widget, self.app)
 
     def confirmation_message(self, accepted, minval, maxval):
         if accepted is False:

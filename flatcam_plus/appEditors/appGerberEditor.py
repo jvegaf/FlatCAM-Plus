@@ -10,6 +10,7 @@ from flatcam_plus.appEditors.grb_plugins.GrbCommon import DrawToolUtilityShape, 
 
 from flatcam_plus.camlib import distance, arc, three_point_circle, flatten_shapely_geometry
 from flatcam_plus.appGUI.GUIElements import *
+from flatcam_plus.appGUI.PanelStyles import apply_modern_panel_style
 
 from flatcam_plus.appTool import AppTool
 from flatcam_plus.appEditors.grb_plugins.GrbPadPlugin import PadEditorTool
@@ -7150,6 +7151,9 @@ class AppGerberEditorUI:
             _("Exit from Editor.")
         )
         layout.addWidget(self.exit_editor_button)
+
+        # This tree is attached to the properties panel, so it carries the panel chrome.
+        apply_modern_panel_style(self.grb_edit_widget, self.app)
 
 
 class TransformEditorTool(AppTool):

@@ -19,6 +19,7 @@ import math
 from flatcam_plus.camlib import distance, arc, three_point_circle, Geometry, AppRTreeStorage, flatten_shapely_geometry
 from flatcam_plus.appGUI.GUIElements import FCLabel, GLay, FCDoubleSpinner, FCTree, FCButton, FCFrame, FCCheckBox, FCEntry, \
     FCTextEdit
+from flatcam_plus.appGUI.PanelStyles import apply_modern_panel_style
 from flatcam_plus.appGUI.VisPyVisuals import ShapeCollection
 
 from flatcam_plus.appEditors.geo_plugins.GeoBufferPlugin import BufferSelectionTool
@@ -2922,6 +2923,9 @@ class AppGeoEditorUI:
         # Signals
         self.level.toggled.connect(self.on_level_changed)
         self.exit_editor_button.clicked.connect(lambda: self.app.on_editing_finished())
+
+        # This tree is attached to the properties panel, so it carries the panel chrome.
+        apply_modern_panel_style(self.geo_edit_widget, self.app)
 
     def on_param_click(self):
         if self.param_button.get_value():
