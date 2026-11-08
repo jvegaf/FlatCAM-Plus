@@ -86,3 +86,24 @@ implemented but unreachable under shapely 2.2 (invalid polygons return `False` r
 raising), so only the two reachable warnings are tested. The Tools Database cutout form
 still has no Cut Z, Multi-Depth, Kind or Big-cursor fields, which predates this feature and
 is the parent's call, not a regression here.
+
+**L6** — Independent verification (2026-11-08), eight points, no blockers. It chose its own
+inputs: 126 contour/margin/diameter triples for S5 against the author's 25, and its S1
+probe showed the pre-change code wrong on half the cases (`{1,2}` where the pad is
+material, `{3}` for a two-board panel, `{1}` for a slot running off the edge). Two
+advisories: **S3 was not silent-proof for a single contour** — the `len(geometries) <= 1`
+early return ran before the validation loop, so a lone open LineString, empty Polygon or
+Point returned the exterior side and warned nothing; and the Cutout panel checkbox starts
+unchecked until a diameter is set, which is the same uninitialised state as every
+neighbouring field. The first is closed in `5ae2e0d`, which removes the short circuit and
+pins the S5 parity as a 30-combination committed test, so that guarantee no longer lives in
+scratch. Not verified, and stated as such: the end-to-end Cutout job itself, which runs in a
+Qt worker behind `proc_container` and is unreachable headless — the probes exercised the
+production functions it calls plus the cut handler.
+
+**Close** — `Risk: item 3`. The classification changes which side the tool cuts for an
+existing Gerber profile: an internal slot that used to be cut from the outside is now cut
+from the inside. That is the requested outcome and it is behind `tools_cutout_auto_interior`
+(default on, so the detection keeps running as it already did); a user who does not want
+the corrected side turns the option off and gets the pre-`c848b5a` output, which `5ae2e0d`
+pins over 30 combinations.
