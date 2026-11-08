@@ -8,6 +8,7 @@ nothing, or a sandbox permission that would quietly be too broad. The manifest i
 
 import os
 import re
+import shutil
 import subprocess
 import xml.etree.ElementTree as ElementTree
 
@@ -87,11 +88,22 @@ def test_the_build_script_takes_the_version_from_the_manifest():
 
 
 def test_the_build_script_explains_a_missing_toolchain(tmp_path):
+    """A PATH without flatpak-builder, and nothing else borrowed from the host.
+
+    ``/usr/bin:/bin`` is not enough: on a machine where flatpak-builder is installed the script
+    gets past this check, and if ``dist/linux`` happens to exist it starts a real build and hangs
+    until the timeout. The shim directory carries only what the script needs to reach the check.
+    """
+    shim = tmp_path / "bin"
+    shim.mkdir()
+    for tool in ("bash", "dirname"):
+        (shim / tool).symlink_to(shutil.which(tool))
+
     finished = subprocess.run(
         [BUILD_SCRIPT, "--skip-bundle"],
         capture_output=True,
         text=True,
-        env=dict(os.environ, PATH="/usr/bin:/bin"),
+        env=dict(os.environ, PATH=str(shim)),
         timeout=120,
     )
 
