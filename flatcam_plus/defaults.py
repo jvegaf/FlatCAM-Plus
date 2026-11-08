@@ -630,6 +630,7 @@ class AppDefaults:
         "tools_cutout_gapsize": 4,
         "tools_cutout_gaps_ff": "4",
         "tools_cutout_convexshape": False,
+        "tools_cutout_auto_interior": True,
         "tools_cutout_big_cursor": True,
         "tools_cutout_gap_type": 0,     # "Basic Gap"
         "tools_cutout_gap_depth": -1.0,

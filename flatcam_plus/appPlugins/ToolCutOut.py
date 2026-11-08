@@ -103,65 +103,129 @@ class CutOut(AppTool):
         self.cut_tool_dict = {}
 
     @staticmethod
-    def _classify_contours(geometries: list) -> set:
+    def _classify_contours(geometries: list, logger=None) -> set:
         """
-        Classify polygons as interior (contained within a larger exterior polygon).
+        Classify contours as interior (holes) or exterior (material) by nesting depth.
 
-        For PCB profile Gerbers with multiple contours (external outline + internal slots),
-        this detects which polygons are internal cutouts so they can receive inverted offset
-        (cut inside the hole instead of outside).
+        The role of a contour in a PCB profile follows from how many other filled contours
+        contain it: an even depth (0, 2, 4...) is material, cut from the outside, and an odd
+        depth (1, 3, 5...) is a hole, cut from the inside. Which contour is the largest says
+        nothing about either, so no size is ever compared here.
+
+        The solid_geometry of a Gerber profile is a thin band (a buffered LineString), so each
+        contour's filled shape is rebuilt from its exterior ring before the containment tests.
+        A contour that yields no usable filled shape cannot take part in the count: it is
+        reported through ``logger`` and left on the exterior path, which is the safe side.
 
         Args:
             geometries: List of Shapely geometries (output of flatten_shapely_geometry).
+            logger: Optional logger (``app.log``); receives one warning per contour that
+                could not be classified.
 
         Returns:
             Set of indices of geometries classified as interior contours.
             Geometries NOT in the set are considered exterior contours.
         """
-        if len(geometries) <= 1:
-            return set()
-
-        # Build filled polygons from each geometry's exterior ring.
-        # The solid_geometry from Gerber profile is a thin band (buffered LineString),
-        # so we need Polygon(geo.exterior) to get a filled shape for containment tests.
-        filled_polys = []
-        for geo in geometries:
-            try:
-                if hasattr(geo, 'exterior'):
-                    filled_polys.append(Polygon(geo.exterior))
-                else:
-                    # Geometry without exterior (e.g. LineString) — use convex_hull as proxy
-                    filled_polys.append(geo.convex_hull)
-            except Exception:
-                filled_polys.append(None)
-
-        # Find the polygon with the largest area — this is the exterior candidate
-        max_area = -1
-        exterior_idx = 0
-        for i, fp in enumerate(filled_polys):
-            if fp is not None and fp.area > max_area:
-                max_area = fp.area
-                exterior_idx = i
-
-        exterior_filled = filled_polys[exterior_idx]
-        if exterior_filled is None or exterior_filled.is_empty:
-            return set()
-
-        # Test each other polygon: if its representative point is inside the exterior,
-        # it is an interior contour (slot/cutout).
         interior_indices = set()
-        for i, geo in enumerate(geometries):
-            if i == exterior_idx:
+
+        # Nothing can be nested in a single contour, and there is nothing to report about it.
+        if len(geometries) <= 1:
+            return interior_indices
+
+        def warn(index, reason):
+            if logger is not None:
+                logger.warning("Cutout: contour %d cannot be classified (%s); treating it as exterior."
+                               % (index, reason))
+
+        # Rebuild a filled shape for each contour; a contour that cannot describe one is
+        # reported and left out of the depth count, which keeps it on the exterior path.
+        filled_polys = []
+        for index, geo in enumerate(geometries):
+            filled = None
+            if not hasattr(geo, 'exterior'):
+                warn(index, "a %s has no exterior ring to rebuild a filled shape from" % geo.geom_type)
+            else:
+                try:
+                    filled = Polygon(geo.exterior)
+                except Exception as err:
+                    warn(index, "its exterior ring is unusable: %s" % str(err))
+                else:
+                    if filled.is_empty or filled.area <= 0:
+                        warn(index, "its exterior ring does not enclose any area")
+                        filled = None
+            filled_polys.append(filled)
+
+        for index, filled in enumerate(filled_polys):
+            if filled is None:
                 continue
-            try:
-                test_point = geo.representative_point()
-                if exterior_filled.contains(test_point):
-                    interior_indices.add(i)
-            except Exception:
-                # If representative_point fails, treat as exterior (safe default)
-                pass
+
+            depth = 0
+            failure = None
+            for other_index, other in enumerate(filled_polys):
+                if other is None or other_index == index:
+                    continue
+                try:
+                    if other.contains(filled):
+                        depth += 1
+                except Exception as err:
+                    failure = "the containment test against contour %d failed: %s" % (other_index, str(err))
+                    break
+
+            if failure is not None:
+                warn(index, failure)
+                continue
+
+            if depth % 2 == 1:
+                interior_indices.add(index)
 
         return interior_indices
+
+    def _auto_interior_indices(self, object_geo):
+        """
+        Indices of the contours whose offset has to go inside them, as an empty set when off.
+
+        The detection is a Cutout option. With it off the tool behaves as it did before the
+        detection existed: no contour is classified, nothing is warned about and every contour
+        takes the exterior path. With it on, one line reports how many holes were found so the
+        user can see the tool took that decision.
+        """
+        if not self.ui.auto_interior_cb.get_value():
+            return set()
+
+        interior_indices = self._classify_contours(object_geo, logger=self.app.log)
+        self.app.log.debug(
+            "Cutout: auto interior detection classified %d of %d contours as holes."
+            % (len(interior_indices), len(object_geo)))
+        return interior_indices
+
+    def _gerber_contour_shape(self, geom_struct, contour_index, margin, cut_dia, interior_indices):
+        """
+        The line a Gerber profile contour is cut along, at the given margin.
+
+        A contour classified as a hole is offset inside itself and the rings of that offset
+        become the cut; all of them are kept, because a hole can be subdivided (a partition
+        wall inside a slot leaves two rings). Every other contour is offset outside.
+        """
+        if margin >= 0:
+            buffered = geom_struct.buffer(margin + abs(cut_dia / 2))
+            if contour_index in interior_indices:
+                # Interior contour (slot/cutout): offset inside the hole
+                if buffered.interiors:
+                    if len(buffered.interiors) == 1:
+                        return buffered.interiors[0]
+                    # One hole split into several regions: carry every ring, not just the first.
+                    return MultiLineString(buffered.interiors)
+
+                self.app.log.warning(
+                    "Cutout: interior contour %d has no interiors after buffer. "
+                    "Using exterior as fallback." % contour_index)
+                return buffered.exterior
+
+            # Exterior contour: offset outside the board
+            return buffered.exterior
+
+        geom_struct_buff = geom_struct.buffer(-margin + abs(cut_dia / 2))
+        return geom_struct_buff.interiors
 
     def on_type_obj_changed(self, val):
         obj_type = {'grb': 0, 'geo': 2}[val]
@@ -172,9 +236,13 @@ class CutOut(AppTool):
         if val == 'grb':
             self.ui.convex_box_label.setDisabled(False)
             self.ui.convex_box_cb.setDisabled(False)
+            self.ui.auto_interior_label.setDisabled(False)
+            self.ui.auto_interior_cb.setDisabled(False)
         else:
             self.ui.convex_box_label.setDisabled(True)
             self.ui.convex_box_cb.setDisabled(True)
+            self.ui.auto_interior_label.setDisabled(True)
+            self.ui.auto_interior_cb.setDisabled(True)
 
     def on_object_selection_changed(self, current, previous):
         found_idx = None
@@ -459,6 +527,9 @@ class CutOut(AppTool):
         self.ui.mb_dia_entry.set_value(float(tool_dict["tools_cutout_mb_dia"]))
         self.ui.mb_spacing_entry.set_value(float(tool_dict["tools_cutout_mb_spacing"]))
         self.ui.convex_box_cb.set_value(tool_dict['tools_cutout_convexshape'])
+        self.ui.auto_interior_cb.set_value(
+            bool(tool_dict.get("tools_cutout_auto_interior",
+                               self.app.options["tools_cutout_auto_interior"])))
         self.ui.gaps.set_value(tool_dict["tools_cutout_gaps_ff"])
 
         self.ui.cutz_entry.set_value(float(tool_dict["tools_cutout_z"]))
@@ -852,27 +923,16 @@ class CutOut(AppTool):
                     object_geo = flatten_shapely_geometry(object_geo)
 
                     # Classify interior vs exterior contours for automatic offset direction
-                    interior_indices = self._classify_contours(object_geo)
+                    if cutout_obj.kind == 'gerber':
+                        interior_indices = self._auto_interior_indices(object_geo)
+                    else:
+                        # the geometry branch offsets the contours it is given, unclassified
+                        interior_indices = set()
 
                     for i, geom_struct in enumerate(object_geo):
                         if cutout_obj.kind == 'gerber':
-                            if margin >= 0:
-                                buffered = geom_struct.buffer(margin + abs(cut_dia / 2))
-                                if i in interior_indices:
-                                    # Interior contour (slot/cutout): offset inside the hole
-                                    if buffered.interiors:
-                                        geom_struct = buffered.interiors[0]
-                                    else:
-                                        self.app.log.warning(
-                                            "Cutout: interior contour %d has no interiors after buffer. "
-                                            "Using exterior as fallback." % i)
-                                        geom_struct = buffered.exterior
-                                else:
-                                    # Exterior contour: offset outside the board
-                                    geom_struct = buffered.exterior
-                            else:
-                                geom_struct_buff = geom_struct.buffer(-margin + abs(cut_dia / 2))
-                                geom_struct = geom_struct_buff.interiors
+                            geom_struct = self._gerber_contour_shape(
+                                geom_struct, i, margin, cut_dia, interior_indices)
                         else:
                             if margin >= 0:
                                 geo_buf = geom_struct.buffer(margin)
@@ -2542,6 +2602,25 @@ class CutoutUI:
         )
         param_grid.addWidget(self.convex_box_label, 0, 0)
         param_grid.addWidget(self.convex_box_cb, 0, 1)
+
+        # Automatic interior detection
+        # Cut the holes inside the board from the inside instead of from the outside
+        self.auto_interior_label = FCLabel('%s:' % _("Auto Interior"))
+        self.auto_interior_label.setToolTip(
+            _("Detect which contours are holes in the board\n"
+              "and cut them from the inside. Turn it off to\n"
+              "cut every contour from the outside.\n"
+              "Used only if the source object type is Gerber.")
+        )
+        self.auto_interior_cb = FCCheckBox()
+        self.auto_interior_cb.setToolTip(
+            _("Detect which contours are holes in the board\n"
+              "and cut them from the inside. Turn it off to\n"
+              "cut every contour from the outside.\n"
+              "Used only if the source object type is Gerber.")
+        )
+        param_grid.addWidget(self.auto_interior_label, 1, 0)
+        param_grid.addWidget(self.auto_interior_cb, 1, 1)
 
         # Cut Z
         cutzlabel = FCLabel('%s:' % _('Cut Z'))
