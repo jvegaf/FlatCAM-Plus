@@ -20,14 +20,14 @@ import traceback
 
 from shapely import LineString, Polygon, MultiPolygon, MultiLineString, LinearRing
 from shapely.geometry import base
-from shapely.ops import unary_union, nearest_points
+from shapely.ops import unary_union
 
 import gettext
 from flatcam_plus import appTranslation as fcTranslate
 import builtins
 
 from flatcam_plus.appParsers.ParseGerber import Gerber
-from flatcam_plus.camlib import grace, flatten_shapely_geometry
+from flatcam_plus.camlib import grace, flatten_shapely_geometry, min_element_distance
 from matplotlib.backend_bases import KeyEvent as mpl_key_event
 
 fcTranslate.apply_language('strings')
@@ -977,33 +977,10 @@ class NonCopperClear(Gerber, AppTool):
         if len(total_geo) in [0, 1]:
             msg = ('[ERROR_NOTCL] %s' % _("Too few polygons in the Gerber object to determine distances."))
             return msg, np.inf
-        min_dict = {}
-        idx = 1
-        for geo in total_geo:
-            for s_geo in total_geo[idx:]:
-                # minimize the number of distances by not taking into considerations
-                # those that are too small
-                dist = geo.distance(s_geo)
-                dist = float('%.*f' % (decimals, dist))
-                loc_1, loc_2 = nearest_points(geo, s_geo)
 
-                proc_loc = (
-                    (float('%.*f' % (decimals, loc_1.x)), float('%.*f' % (decimals, loc_1.y))),
-                    (float('%.*f' % (decimals, loc_2.x)), float('%.*f' % (decimals, loc_2.y)))
-                )
-
-                if dist in min_dict:
-                    min_dict[dist].append(proc_loc)
-                else:
-                    min_dict[dist] = [proc_loc]
-
-            idx += 1
-
-        min_list = list(min_dict.keys())
-        min_dist = min(min_list)
-        min_dist -= 10**-decimals  # make sure that this works for isolation case
-
-        return msg, min_dist
+        min_dist = min_element_distance(total_geo, decimals)
+        # make sure that this works for isolation case
+        return msg, min_dist - 10**-decimals
 
     # multiprocessing variant
     def find_safe_tooldia_multiprocessing(self):
@@ -1096,7 +1073,6 @@ class NonCopperClear(Gerber, AppTool):
             with self.app.proc_container.new(_("Checking ...")):
                 try:
                     old_disp_number = 0
-                    pol_nr = 0
                     app_obj.proc_container.update_view_text(' %d%%' % 0)
                     total_geo = []
 
@@ -1131,42 +1107,17 @@ class NonCopperClear(Gerber, AppTool):
                                               "There are no distances between geometry elements to be found."))
                         return 'fail'
 
-                    geo_len = (geo_len * (geo_len - 1)) / 2
+                    def show_progress(processed, total):
+                        nonlocal old_disp_number
 
-                    min_dict = {}
-                    idx = 1
-                    for geo in total_geo:
-                        for s_geo in total_geo[idx:]:
-                            if self.app.abort_flag:
-                                # graceful abort requested by the user
-                                raise grace
+                        disp_number = int(np.interp(processed, [0, total], [0, 100]))
 
-                            # minimize the number of distances by not taking into considerations
-                            # those that are too small
-                            dist = geo.distance(s_geo)
-                            dist = float('%.*f' % (self.decimals, dist))
-                            loc_1, loc_2 = nearest_points(geo, s_geo)
+                        if old_disp_number < disp_number <= 100:
+                            app_obj.proc_container.update_view_text(' %d%%' % disp_number)
+                            old_disp_number = disp_number
 
-                            proc_loc = (
-                                (float('%.*f' % (self.decimals, loc_1.x)), float('%.*f' % (self.decimals, loc_1.y))),
-                                (float('%.*f' % (self.decimals, loc_2.x)), float('%.*f' % (self.decimals, loc_2.y)))
-                            )
-
-                            if dist in min_dict:
-                                min_dict[dist].append(proc_loc)
-                            else:
-                                min_dict[dist] = [proc_loc]
-
-                            pol_nr += 1
-                            disp_number = int(np.interp(pol_nr, [0, geo_len], [0, 100]))
-
-                            if old_disp_number < disp_number <= 100:
-                                app_obj.proc_container.update_view_text(' %d%%' % disp_number)
-                                old_disp_number = disp_number
-                        idx += 1
-
-                    min_list = list(min_dict.keys())
-                    min_dist = min(min_list)
+                    min_dist = min_element_distance(total_geo, self.decimals, on_pair=show_progress,
+                                                    abort_check=lambda: self.app.abort_flag)
 
                     min_dist_truncated = self.app.dec_format(float(min_dist), self.decimals)
                     self.safe_tooldia = min_dist_truncated

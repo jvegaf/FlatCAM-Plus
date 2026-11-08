@@ -7939,6 +7939,52 @@ def flatten_shapely_geometry(geometry, simplify_tolerance: float = 0.0) -> list:
     return flat_list
 
 
+def min_element_distance(geometries, decimals, on_pair=None, abort_check=None):
+    """
+    Measure the distance between every pair of geometries and return the smallest one.
+
+    :param geometries:  already flattened geometry pieces; a MultiPolygon or a nested
+                        sequence has to be flattened by the caller first
+    :param decimals:    the number of decimals each measured distance is rounded to
+    :param on_pair:     optional callback, called as on_pair(processed, total) once per
+                        measured pair, after its distance is rounded; total is the number of
+                        pairs, n * (n - 1) // 2, so the caller never has to count them
+    :param abort_check: optional callback, called once per pair before it is measured; when
+                        it returns True a graceful abort is raised
+    :return:            the smallest rounded distance, with no trimming step applied: the
+                        caller owns its own convention; None when there are fewer than two
+                        pieces (the caller owns the report and the tool-specific unusable
+                        distance)
+    :rtype:             float or None
+    """
+    geo_len = len(geometries)
+    if geo_len < 2:
+        return None
+
+    total = geo_len * (geo_len - 1) // 2
+    processed = 0
+    min_dist = None
+
+    idx = 1
+    for geo in geometries:
+        for s_geo in geometries[idx:]:
+            if abort_check is not None and abort_check():
+                # graceful abort requested by the user
+                raise grace
+
+            dist = float('%.*f' % (decimals, geo.distance(s_geo)))
+            if min_dist is None or dist < min_dist:
+                min_dist = dist
+
+            processed += 1
+            if on_pair is not None:
+                on_pair(processed, total)
+
+        idx += 1
+
+    return min_dist
+
+
 def get_bounds(geometry_list: list) -> list:
     """
     Will return limit values for a list of geometries

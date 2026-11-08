@@ -63,9 +63,21 @@ def test_reports_a_layer_that_merges_into_one_polygon():
 
 def test_reports_a_layer_with_no_geometry_to_measure():
     # A layer that contributes no usable solid (here none at all) has no pair to
-    # measure either, and reaches the same "no distance" exit.
+    # measure either. It used to borrow the one-Polygon report, which describes a layer
+    # that does have a solid; the empty layer says what it is.
     msg, min_dist = ToolIsolation.find_optim_mp(aperture_storage(), 2)
     assert msg.startswith("[ERROR_NOTCL]")
+    assert "no usable geometry to measure distances between" in msg
+    assert min_dist is None
+
+
+def test_reports_a_layer_with_a_single_solid():
+    # One piece cannot be compared with anything: that is the one-Polygon report, and its
+    # text is unchanged.
+    msg, min_dist = ToolIsolation.find_optim_mp(aperture_storage(box(0, 0, 1, 1)), 2)
+    assert msg.startswith("[ERROR_NOTCL]")
+    assert "one Polygon as geometry" in msg
+    assert "no distances between geometry elements" in msg
     assert min_dist is None
 
 
