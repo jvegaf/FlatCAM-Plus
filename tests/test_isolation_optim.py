@@ -46,9 +46,11 @@ def test_flattens_the_multi_polygon_into_measurable_pieces():
     assert min_dist == pytest.approx(8.99)
 
 
-def test_reports_a_single_polygon_as_geometry_without_distances():
-    # A plain Polygon is not a multi-element layer; the check reports it instead of
-    # measuring. The message is the pre-existing one, kept verbatim.
+def test_collapses_on_a_layer_that_merges_into_one_polygon():
+    # Pre-existing behaviour, pinned as found: a layer whose geometry merges into a single
+    # polygon has no pair to measure, so `min()` runs on an empty dict and this raises
+    # before the intended "[ERROR_NOTCL] ... has one Polygon as geometry" report can be
+    # returned. The dead report is a separate defect; the assertion below is not approval.
     with pytest.raises(ValueError):
         ToolIsolation.find_optim_mp(aperture_storage(box(0, 0, 1, 1)), 2)
 
