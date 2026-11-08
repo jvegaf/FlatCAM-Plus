@@ -28900,6 +28900,6 @@ msgstr ""
 #~ msgid "%s/Project_%s"
 #~ msgstr "%s/Project_%s"
 
-#: flatcam_plus/appPlugins/ToolIsolation.py:1310
+#: flatcam_plus/appPlugins/ToolIsolation.py:1326
 msgid "The Gerber object has no usable geometry to measure distances between."
 msgstr ""
