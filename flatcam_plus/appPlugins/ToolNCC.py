@@ -1110,7 +1110,10 @@ class NonCopperClear(Gerber, AppTool):
                                 if 'solid' in geo_el and geo_el['solid'] is not None and geo_el['solid'].is_valid:
                                     total_geo.append(geo_el['solid'])
 
-                    total_geo = MultiPolygon(total_geo)
+                    # An aperture macro can contribute a MultiPolygon as a single solid, and
+                    # MultiPolygon() rejects a sequence holding one. Same fix as the isolation
+                    # worker.
+                    total_geo = MultiPolygon(flatten_shapely_geometry(total_geo))
                     total_geo = total_geo.buffer(0)
                     total_geo = flatten_shapely_geometry(total_geo)
 
