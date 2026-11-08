@@ -51,10 +51,11 @@ through the same seam plus the option, not through reimplementations.
 
 | ID | Task | Specs | Route | Commit |
 | --- | --- | --- | --- | --- |
-| T1 | Add `tools_cutout_auto_interior` to defaults, UI and persistence | S4 | worker | not started |
-| T2 | Rewrite `_classify_contours` as depth parity over filled contours, with warnings | S1, S3 | worker | not started |
-| T3 | Wire the option and all interior rings into the offset branches | S2, S4, S5 | worker | not started |
-| T4 | Tests: depth cases, multi-ring, unclassifiable warning, option off parity | S1–S6 | worker | not started |
+| T1 | Add `tools_cutout_auto_interior` to defaults, UI and persistence | S4 | worker | `6ae4845`, `8d5c5f9` (preferences and Tools Database) |
+| T2 | Rewrite `_classify_contours` as depth parity over filled contours, with warnings | S1, S3 | worker | `6ae4845` |
+| T3 | Wire the option and all interior rings into the offset branches | S2, S4, S5 | worker | `6ae4845` |
+| T4 | Tests: depth cases, multi-ring, unclassifiable warning, option off parity | S1–S6 | worker | `6ae4845`, `8d5c5f9` |
+| T5 | Catalog the two new strings (label and tooltip) | S4 | parent | `7201884` |
 
 ## Log
 
@@ -67,3 +68,21 @@ Exception: pass`; and no way for a user to turn the behaviour off.
 already unconditional in `dev`, so a default of off would change every existing user's
 output, which is the class of unrequested change this cluster has been rejecting all
 along. The option is an escape hatch, not a migration.
+
+**L3** — Evidence for S1 (2026-11-08): against the pre-change code, a slot crossing the
+board edge classified as `{1}` instead of `set()`, a pad inside a slot as `{1, 2}` instead
+of `{1}`, a depth-3 contour as `{1, 2, 3}` instead of `{1, 3}`, and a two-board panel as
+`{1}` instead of `{1, 3}` — the second board's slot was never found because only the
+largest contour was treated as exterior.
+
+**L4** — Evidence for S5 (2026-11-08): with the option off, the per-contour offset is
+WKT-identical to the branch taken from `git show 6e4e7e3:appPlugins/ToolCutOut.py`, over
+25 contour/margin pairs (bands, a two-hole band, an open LineString; margins
+0.0/0.1/0.5/-0.1/-0.5). That comparison lived in scratch outside the worktree; no
+committed test reads git history.
+
+**L5** — Known gaps (2026-11-08): S3's "the containment test raises" sub-case is
+implemented but unreachable under shapely 2.2 (invalid polygons return `False` rather than
+raising), so only the two reachable warnings are tested. The Tools Database cutout form
+still has no Cut Z, Multi-Depth, Kind or Big-cursor fields, which predates this feature and
+is the parent's call, not a regression here.
