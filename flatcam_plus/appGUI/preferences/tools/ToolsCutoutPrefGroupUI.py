@@ -62,6 +62,16 @@ class ToolsCutoutPrefGroupUI(OptionsGroupUI):
         )
         param_grid.addWidget(self.convex_box, 2, 0, 1, 2)
 
+        # Automatic interior detection
+        self.auto_interior_cb = FCCheckBox('%s' % _("Auto Interior"))
+        self.auto_interior_cb.setToolTip(
+            _("Detect which contours are holes in the board\n"
+              "and cut them from the inside. Turn it off to\n"
+              "cut every contour from the outside.\n"
+              "Used only if the source object type is Gerber.")
+        )
+        param_grid.addWidget(self.auto_interior_cb, 4, 0, 1, 2)
+
         # Cut Z
         cutzlabel = FCLabel('%s:' % _('Cut Z'))
         cutzlabel.setToolTip(
@@ -76,8 +86,8 @@ class ToolsCutoutPrefGroupUI(OptionsGroupUI):
 
         self.cutz_entry.setSingleStep(0.1)
 
-        param_grid.addWidget(cutzlabel, 4, 0)
-        param_grid.addWidget(self.cutz_entry, 4, 1)
+        param_grid.addWidget(cutzlabel, 6, 0)
+        param_grid.addWidget(self.cutz_entry, 6, 1)
 
         # Multi-pass
         self.mpass_cb = FCCheckBox('%s:' % _("Multi-Depth"))
@@ -97,8 +107,8 @@ class ToolsCutoutPrefGroupUI(OptionsGroupUI):
 
         self.maxdepth_entry.setToolTip(_("Depth of each pass (positive)."))
 
-        param_grid.addWidget(self.mpass_cb, 6, 0)
-        param_grid.addWidget(self.maxdepth_entry, 6, 1)
+        param_grid.addWidget(self.mpass_cb, 8, 0)
+        param_grid.addWidget(self.maxdepth_entry, 8, 1)
 
         self.ois_md = OptionalInputSection(self.mpass_cb, [self.maxdepth_entry])
 
@@ -115,8 +125,8 @@ class ToolsCutoutPrefGroupUI(OptionsGroupUI):
             {"label": _("Single"), "value": "single"},
             {"label": _("Panel"), "value": "panel"},
         ])
-        param_grid.addWidget(kindlabel, 8, 0)
-        param_grid.addWidget(self.obj_kind_combo, 8, 1)
+        param_grid.addWidget(kindlabel, 10, 0)
+        param_grid.addWidget(self.obj_kind_combo, 10, 1)
 
         marginlabel = FCLabel('%s:' % _('Margin'))
         marginlabel.setToolTip(
@@ -130,8 +140,8 @@ class ToolsCutoutPrefGroupUI(OptionsGroupUI):
         self.cutout_margin_entry.set_precision(self.decimals)
         self.cutout_margin_entry.setSingleStep(0.1)
 
-        param_grid.addWidget(marginlabel, 10, 0)
-        param_grid.addWidget(self.cutout_margin_entry, 10, 1)
+        param_grid.addWidget(marginlabel, 12, 0)
+        param_grid.addWidget(self.cutout_margin_entry, 12, 1)
 
         self.gaps_label = FCLabel('%s' % _("Gaps"), color='green', bold=True)
         self.layout.addWidget(self.gaps_label)

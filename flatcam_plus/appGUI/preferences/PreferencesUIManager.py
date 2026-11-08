@@ -476,6 +476,7 @@ class PreferencesUIManager(QtCore.QObject):
             "tools_cutout_gapsize":         self.ui.plugin_pref_form.tools_cutout_group.cutout_gap_entry,
             "tools_cutout_gaps_ff":         self.ui.plugin_pref_form.tools_cutout_group.gaps_combo,
             "tools_cutout_convexshape":     self.ui.plugin_pref_form.tools_cutout_group.convex_box,
+            "tools_cutout_auto_interior":   self.ui.plugin_pref_form.tools_cutout_group.auto_interior_cb,
             "tools_cutout_big_cursor":      self.ui.plugin_pref_form.tools_cutout_group.big_cursor_cb,
 
             "tools_cutout_gap_type":        self.ui.plugin_pref_form.tools_cutout_group.gaptype_combo,

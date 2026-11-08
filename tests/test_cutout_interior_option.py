@@ -17,6 +17,8 @@ from shapely import LineString, MultiLineString, Polygon
 
 import flatcam_plus.appPlugins.ToolCutOut as tool_cutout
 from flatcam_plus import defaults as app_defaults
+from flatcam_plus.appDatabase import ToolsDB2
+from flatcam_plus.appGUI.GUIElements import FCCheckBox
 
 OPTION = "tools_cutout_auto_interior"
 
@@ -222,3 +224,137 @@ def test_an_interior_contour_without_a_hole_falls_back_loudly(cutout, logged):
     assert shape.equals(buffered.exterior)
     assert len(logged.messages) == 1
     assert "4" in logged.messages[0]
+
+
+# ============================================================================
+# S4 — the option is a Cutout preference, not only a tool-panel switch
+# ============================================================================
+
+def test_the_preferences_group_carries_the_option_with_the_shipped_default(fc_app):
+    """Edit -> Preferences offers the option, bound the way its neighbours are bound.
+
+    ``ToolsCutoutPrefGroupUI`` builds the widgets and ``PreferencesUIManager`` binds each one
+    to an option key; a widget the manager does not list is a control the user can toggle and
+    the application then ignores.
+    """
+    group = fc_app.ui.plugin_pref_form.tools_cutout_group
+    manager = fc_app.preferencesUiManager
+
+    widget = manager.defaults_form_fields[OPTION]
+    assert widget is group.auto_interior_cb
+    assert isinstance(widget, FCCheckBox)
+
+    try:
+        fc_app.defaults[OPTION] = False
+        manager.defaults_write_form()
+        assert widget.get_value() is False
+    finally:
+        fc_app.defaults[OPTION] = True
+        manager.defaults_write_form()
+
+    assert widget.get_value() is True
+    assert fc_app.defaults[OPTION] is True
+
+
+def test_a_changed_preference_reaches_the_option_the_tool_reads(fc_app):
+    """Applying preferences carries the value down the same path the neighbours use.
+
+    ``PreferencesUIManager.on_save_button`` reads the form into ``defaults`` and then copies
+    ``defaults`` over ``app.options``; the Cutout tool reads ``app.options`` when it builds its
+    own panel. A key missing from the form mapping never reaches either.
+    """
+    widget = fc_app.ui.plugin_pref_form.tools_cutout_group.auto_interior_cb
+    manager = fc_app.preferencesUiManager
+    tool = fc_app.cutout_tool
+
+    try:
+        widget.set_value(False)
+        manager.on_save_button(save_to_file=False)
+
+        assert fc_app.defaults[OPTION] is False
+        assert fc_app.options[OPTION] is False
+
+        tool.set_tool_ui()
+        assert tool.ui.auto_interior_cb.get_value() is False
+    finally:
+        widget.set_value(True)
+        manager.on_save_button(save_to_file=False)
+        tool.set_tool_ui()
+
+    assert fc_app.options[OPTION] is True
+
+
+def test_the_neighbouring_cutout_preferences_still_round_trip(fc_app):
+    """The shared preference plumbing still carries the options that already used it."""
+    group = fc_app.ui.plugin_pref_form.tools_cutout_group
+    manager = fc_app.preferencesUiManager
+    original = group.convex_box.get_value()
+
+    try:
+        group.convex_box.set_value(not original)
+        manager.on_save_button(save_to_file=False)
+        assert fc_app.options["tools_cutout_convexshape"] is (not original)
+    finally:
+        group.convex_box.set_value(original)
+        manager.on_save_button(save_to_file=False)
+
+    assert fc_app.options["tools_cutout_convexshape"] is original
+
+
+@pytest.fixture
+def tools_db(fc_app):
+    """A Tools Database editor built on the running application, without touching its file."""
+    return ToolsDB2(app=fc_app, callback_on_tool_request=lambda tool: None)
+
+
+def test_the_tools_database_cutout_form_binds_the_option(tools_db):
+    """A database edit has to know which option the checkbox drives.
+
+    ``update_storage`` and ``form_to_storage`` look the widget up in ``name2option``; a
+    control that is in neither dictionary is a checkbox that silently edits nothing.
+    """
+    widget = tools_db.form_fields[OPTION]
+
+    assert widget is tools_db.ui.cutout_auto_interior_cb
+    assert isinstance(widget, FCCheckBox)
+    assert tools_db.name2option[widget.objectName()] == OPTION
+
+
+def test_a_tools_database_preset_loads_the_option_into_the_form(tools_db):
+    """Opening a preset shows the value it stores, so the user can see and change it."""
+    record = {"name": "cutout preset", "tooldia": 1.0, "data": {OPTION: False}}
+
+    tools_db.storage_to_form(record)
+
+    assert tools_db.ui.cutout_auto_interior_cb.get_value() is False
+
+
+def test_a_new_tools_database_preset_starts_from_the_option(fc_app, monkeypatch):
+    """The cutout data template is what a fresh database preset carries.
+
+    The UI side effects of adding a row are stubbed out and normalization is bypassed, so the
+    template is the only place the value can come from.
+    """
+    db = ToolsDB2(app=fc_app, callback_on_tool_request=lambda tool: None)
+    monkeypatch.setattr(db, "normalize_tool_preset", lambda record: record)
+    monkeypatch.setattr(db, "update_storage", lambda: None)
+    monkeypatch.setattr(db, "build_db_ui", lambda: None)
+    monkeypatch.setattr(db, "on_tool_target_changed", lambda *args, **kwargs: None)
+    known_ids = set(db.db_tool_dict)
+
+    db.on_tool_add()
+
+    new_ids = set(db.db_tool_dict) - known_ids
+    assert len(new_ids) == 1
+    assert db.db_tool_dict[new_ids.pop()]["data"][OPTION] is True
+
+
+def test_the_neighbouring_database_cutout_field_still_round_trips(tools_db):
+    """The cutout section of the database editor still loads the values it always did."""
+    record = {"name": "cutout preset", "tooldia": 1.0,
+              "data": {"tools_cutout_convexshape": True, OPTION: True}}
+
+    tools_db.storage_to_form(record)
+
+    assert tools_db.ui.cutout_convex_box.get_value() is True
+    assert tools_db.ui.cutout_auto_interior_cb.get_value() is True

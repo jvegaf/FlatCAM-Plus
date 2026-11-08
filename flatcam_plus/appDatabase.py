@@ -1181,6 +1181,18 @@ class ToolsDB2UI:
 
         self.grid6.addWidget(self.cutout_convex_box, 23, 0, 1, 2)
 
+        # Automatic interior detection
+        self.cutout_auto_interior_cb = FCCheckBox('%s' % _("Auto Interior"))
+        self.cutout_auto_interior_cb.setToolTip(
+            _("Detect which contours are holes in the board\n"
+              "and cut them from the inside. Turn it off to\n"
+              "cut every contour from the outside.\n"
+              "Used only if the source object type is Gerber.")
+        )
+        self.cutout_auto_interior_cb.setObjectName('gdb_ct_auto_interior')
+
+        self.grid6.addWidget(self.cutout_auto_interior_cb, 25, 0, 1, 2)
+
         # Gaps
         self.cutout_gaps_label = FCLabel('%s:' % _('Gaps'))
         self.cutout_gaps_label.setToolTip(
@@ -1201,8 +1213,8 @@ class ToolsDB2UI:
         self.cutout_gaps.addItems(gaps_items)
         self.cutout_gaps.setObjectName('gdb_ct_gaps')
 
-        self.grid6.addWidget(self.cutout_gaps_label, 25, 0)
-        self.grid6.addWidget(self.cutout_gaps, 25, 1)
+        self.grid6.addWidget(self.cutout_gaps_label, 27, 0)
+        self.grid6.addWidget(self.cutout_gaps, 27, 1)
 
         # ####################################################################
         # ####################################################################
@@ -1440,6 +1452,7 @@ class ToolsDB2(QtWidgets.QWidget):
             "tools_cutout_gapsize":         self.ui.cutout_gapsize,
             "tools_cutout_gaps_ff":         self.ui.cutout_gaps,
             "tools_cutout_convexshape":     self.ui.cutout_convex_box,
+            "tools_cutout_auto_interior":   self.ui.cutout_auto_interior_cb,
 
             "tools_cutout_gap_type":        self.ui.cutout_gaptype_radio,
             "tools_cutout_gap_depth":       self.ui.cutout_thin_depth_entry,
@@ -1523,6 +1536,7 @@ class ToolsDB2(QtWidgets.QWidget):
             "gdb_ct_gapsize":           "tools_cutout_gapsize",
             "gdb_ct_gaps":              "tools_cutout_gaps_ff",
             "gdb_ct_convex":            "tools_cutout_convexshape",
+            "gdb_ct_auto_interior":     "tools_cutout_auto_interior",
 
             "gdb_ct_gap_type":          "tools_cutout_gap_type",
             "gdb_ct_gap_depth":         "tools_cutout_gap_depth",
@@ -2056,6 +2070,7 @@ class ToolsDB2(QtWidgets.QWidget):
             "tools_cutout_gapsize":         float(self.app.options["tools_cutout_gapsize"]),
             "tools_cutout_gaps_ff":         self.app.options["tools_cutout_gaps_ff"],
             "tools_cutout_convexshape":     self.app.options["tools_cutout_convexshape"],
+            "tools_cutout_auto_interior":   self.app.options["tools_cutout_auto_interior"],
 
             "tools_cutout_gap_type":        self.app.options["tools_cutout_gap_type"],
             "tools_cutout_gap_depth":       float(self.app.options["tools_cutout_gap_depth"]),
@@ -2680,6 +2695,8 @@ class ToolsDB2(QtWidgets.QWidget):
                 self.db_tool_dict[tool_id]['data']['tools_cutout_gaps_ff'] = val
             elif wdg_name == "gdb_ct_convex":
                 self.db_tool_dict[tool_id]['data']['tools_cutout_convexshape'] = val
+            elif wdg_name == "gdb_ct_auto_interior":
+                self.db_tool_dict[tool_id]['data']['tools_cutout_auto_interior'] = val
 
             elif wdg_name == "gdb_ct_gap_type":
                 self.db_tool_dict[tool_id]['data']['tools_cutout_gap_type'] = val
