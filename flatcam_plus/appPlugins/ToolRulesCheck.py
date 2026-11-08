@@ -18,6 +18,8 @@ from copy import deepcopy
 from shapely import Polygon, MultiPolygon
 from shapely.ops import nearest_points
 
+from flatcam_plus.camlib import flatten_shapely_geometry
+
 import gettext
 from flatcam_plus import appTranslation as fcTranslate
 import builtins
@@ -223,13 +225,20 @@ class RulesCheck(AppTool):
                     if geo_c.within(geo_s):
                         total_geo.append(geo_s.difference(geo_c))
         else:
-            total_geo = MultiPolygon(solid_geo)
+            # An aperture macro contributes a MultiPolygon as a single solid, and
+            # MultiPolygon() rejects a sequence that already holds one.
+            total_geo = MultiPolygon(flatten_shapely_geometry(solid_geo))
             total_geo = total_geo.buffer(0.000001)
 
         if isinstance(total_geo, Polygon):
             obj_violations['points'] = ['Failed. Only one polygon.']
             return rule_title, [obj_violations]
         else:
+            # shapely 2 dropped ``__len__``, iteration and slicing from the multi-part
+            # geometries, so take the parts as the list the pair loop below indexes. The
+            # ``clear_geo`` branch above has already built a plain list.
+            if hasattr(total_geo, 'geoms'):
+                total_geo = list(total_geo.geoms)
             iterations = len(total_geo)
             iterations = (iterations * (iterations - 1)) / 2
         # log.debug("RulesCheck.check_gerber_clearance(). Iterations: %s" % str(iterations))
@@ -312,22 +321,26 @@ class RulesCheck(AppTool):
                     if 'solid' in geo_el and geo_el['solid'] is not None:
                         total_geo_grb_3.append(geo_el['solid'])
 
-        total_geo_grb_1 = MultiPolygon(total_geo_grb_1)
+        total_geo_grb_1 = MultiPolygon(flatten_shapely_geometry(total_geo_grb_1))
         total_geo_grb_1 = total_geo_grb_1.buffer(0)
 
-        total_geo_grb_3 = MultiPolygon(total_geo_grb_3)
+        total_geo_grb_3 = MultiPolygon(flatten_shapely_geometry(total_geo_grb_3))
         total_geo_grb_3 = total_geo_grb_3.buffer(0)
 
         if isinstance(total_geo_grb_1, Polygon):
             len_1 = 1
             total_geo_grb_1 = [total_geo_grb_1]
         else:
+            # shapely 2 dropped ``__len__`` and iteration from the multi-part geometries, so
+            # take the parts as the list the pair loop below walks.
+            total_geo_grb_1 = list(total_geo_grb_1.geoms)
             len_1 = len(total_geo_grb_1)
 
         if isinstance(total_geo_grb_3, Polygon):
             len_3 = 1
             total_geo_grb_3 = [total_geo_grb_3]
         else:
+            total_geo_grb_3 = list(total_geo_grb_3.geoms)
             len_3 = len(total_geo_grb_3)
 
         iterations = len_1 * len_3
@@ -552,7 +565,7 @@ class RulesCheck(AppTool):
                         if 'solid' in geo_el and geo_el['solid'] is not None:
                             total_geo_grb.append(geo_el['solid'])
 
-        total_geo_grb = MultiPolygon(total_geo_grb)
+        total_geo_grb = MultiPolygon(flatten_shapely_geometry(total_geo_grb))
         total_geo_grb = total_geo_grb.buffer(0)
 
         total_geo_exc = []
@@ -574,6 +587,10 @@ class RulesCheck(AppTool):
             len_1 = 1
             total_geo_grb = [total_geo_grb]
         else:
+            # shapely 2 dropped ``__len__`` and iteration from the multi-part geometries, so
+            # take the parts as the list the pair loop below walks. ``total_geo_exc`` is
+            # already a plain list of drill solids.
+            total_geo_grb = list(total_geo_grb.geoms)
             len_1 = len(total_geo_grb)
 
         if isinstance(total_geo_exc, Polygon):
