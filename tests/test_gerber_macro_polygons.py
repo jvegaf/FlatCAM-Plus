@@ -34,13 +34,18 @@ def test_parses_a_macro_that_emits_polygons(parsed_macro):
 def test_keeps_the_flashed_pad_extent(parsed_macro):
     pad = unary_union(parsed_macro.gerber.solid_geometry)
     # One 2.2 mm flash centred on (4, 4) mm, so the envelope is 2.9..5.1 mm on both axes.
-    # The clear spokes trim arcs off that envelope, so assert containment in it and that the
-    # pad still spans nearly all of it instead of a chord-exact extent.
+    # The clear spokes trim arcs off that envelope. Assert containment one coordinate at a
+    # time: a tuple comparison is lexicographic, so a top far outside the envelope still
+    # compares below a right that is only slightly larger.
     left, bottom, right, top = pad.bounds
-    assert (left, bottom) > (2.9 - 1e-3, 2.9 - 1e-3)
-    assert (right, top) < (5.1 + 1e-3, 5.1 + 1e-3)
-    assert right - left > 2.0
-    assert top - bottom > 2.0
+    assert left >= 2.9 - 1e-3
+    assert bottom >= 2.9 - 1e-3
+    assert right <= 5.1 + 1e-3
+    assert top <= 5.1 + 1e-3
+    # The spokes cut arcs out of the ring without shrinking it, so the pad still spans the
+    # full flash diameter on at least one axis. A pad that silently lost its scale, or
+    # collapsed to the surviving arcs, fails here.
+    assert max(right - left, top - bottom) == pytest.approx(2.2, abs=1e-3)
 
 
 def test_honours_the_clear_polarity_inside_the_macro(parsed_macro):
