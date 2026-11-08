@@ -339,7 +339,9 @@ function Build-PyInstallerTarget {
         "--distpath", $archRoot,
         "--workpath", $workPath,
         "--specpath", $specPath,
-        "--add-data", (New-PyInstallerDataArg "pyproject.toml" "pyproject.toml"),
+        # PyInstaller 6 treats the destination as a directory and appends the basename,
+        # so a file is placed with "." as its destination.
+        "--add-data", (New-PyInstallerDataArg "pyproject.toml" "."),
         "--add-data", (New-PyInstallerDataArg "flatcam_plus\assets" "flatcam_plus/assets"),
         "--add-data", (New-PyInstallerDataArg "flatcam_plus\config" "flatcam_plus/config"),
         "--add-data", (New-PyInstallerDataArg "flatcam_plus\locale" "flatcam_plus/locale"),

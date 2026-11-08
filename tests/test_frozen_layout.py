@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import sys
+from pathlib import PurePosixPath
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_DIR = os.path.join(REPO_ROOT, "flatcam_plus")
@@ -102,7 +103,27 @@ def test_the_windows_helper_ships_the_data_into_the_package():
     for source, destination in pairs:
         assert destination and not destination.startswith("_internal"), (source, destination)
         assert "\\" not in destination and ":" not in destination, (source, destination)
-        assert destination == "pyproject.toml" or destination.startswith("flatcam_plus/"), (
+        # PyInstaller 6 treats the destination as a directory and appends the basename of the
+        # source. Naming the destination after the source basename therefore nests the file inside
+        # a directory of that name: the manifest landed in "_internal/pyproject.toml/pyproject.toml",
+        # so version.py found no file and the frozen app could not start.
+        assert destination != PurePosixPath(source.replace("\\", "/")).name, (
+            "PyInstaller appends the source basename to the destination, so this pair nests the "
+            'file inside a directory of its own name; use "." for a file source',
             source,
             destination,
         )
+        assert destination == MANIFEST_DESTINATION or destination.startswith(
+            "flatcam_plus/"
+        ), (
+            "the data directories live inside the package, so the bundle destination has to "
+            "match; anything else leaves _APP_ROOT pointing at an empty directory",
+            source,
+            destination,
+        )
+
+    # The version module reads the manifest from the bundle root at import time, so the pair has to
+    # exist; deleting the line must not silently pass this guard.
+    assert ("pyproject.toml", MANIFEST_DESTINATION) in pairs, pairs
+
+
