@@ -1283,13 +1283,28 @@ class ToolIsolation(Gerber, AppTool):
         self.find_safe_tooldia_worker()
 
     @staticmethod
-    def find_optim_mp(aperture_storage, decimals):
+    def find_optim_mp(aperture_storage, decimals, on_pair=None, abort_check=None):
+        """Measure the smallest gap between the solid geometry of the apertures.
+
+        :param aperture_storage: the tools dictionary of the Gerber object
+        :param decimals:         the number of decimals each measured distance is rounded to
+        :param on_pair:          optional progress callback, forwarded to the distance measure
+        :param abort_check:      optional abort callback, consulted once per collected solid and
+                                 once per measured pair; returning True raises ``grace``
+        :return:                 the message, 'ok' or a report to emit, and the distance trimmed
+                                 by one decimal step; the distance is None when there is no
+                                 pair to measure
+        """
         msg = 'ok'
         total_geo = []
 
         for ap in list(aperture_storage.keys()):
             if 'geometry' in aperture_storage[ap]:
                 for geo_el in aperture_storage[ap]['geometry']:
+                    if abort_check is not None and abort_check():
+                        # graceful abort requested by the user
+                        raise grace
+
                     if 'solid' in geo_el and geo_el['solid'] is not None and geo_el['solid'].is_valid:
                         total_geo.append(geo_el['solid'])
 
@@ -1314,7 +1329,7 @@ class ToolIsolation(Gerber, AppTool):
                                               "There are no distances between geometry elements to be found."))
             return msg, None
 
-        min_dist = min_element_distance(w_geo, decimals)
+        min_dist = min_element_distance(w_geo, decimals, on_pair=on_pair, abort_check=abort_check)
         # make sure that this works for isolation case
         return msg, min_dist - 10 ** -decimals
 
@@ -1411,36 +1426,6 @@ class ToolIsolation(Gerber, AppTool):
                 try:
                     old_disp_number = 0
                     app_obj.proc_container.update_view_text(' %d%%' % 0)
-                    total_geo = []
-
-                    for ap in list(fcobj.tools.keys()):
-                        if 'geometry' in fcobj.tools[ap]:
-                            for geo_el in fcobj.tools[ap]['geometry']:
-                                if self.app.abort_flag:
-                                    # graceful abort requested by the user
-                                    raise grace
-
-                                if 'solid' in geo_el and geo_el['solid'] is not None and geo_el['solid'].is_valid:
-                                    total_geo.append(geo_el['solid'])
-
-                    # Same nesting hazard as the single-process variant above.
-                    total_geo = MultiPolygon(flatten_shapely_geometry(total_geo))
-                    total_geo = total_geo.buffer(0)
-                    total_geo = flatten_shapely_geometry(total_geo)
-
-                    geo_len = len(total_geo)
-                    if geo_len < 2:
-                        # A layer that contributes no usable solid reduces to an empty Polygon
-                        # through buffer(0) and is dropped by flatten_shapely_geometry, so it
-                        # arrives here with no piece at all. It has no pair to measure either,
-                        # and neither has a layer that merges into a single polygon.
-                        if geo_len == 0:
-                            msg = _("The Gerber object has no usable geometry to measure distances between.")
-                        else:
-                            msg = _("The Gerber object has one Polygon as geometry.\n"
-                                    "There are no distances between geometry elements to be found.")
-                        app_obj.inform.emit('[ERROR_NOTCL] %s' % msg)
-                        return 'fail'
 
                     def show_progress(processed, total):
                         nonlocal old_disp_number
@@ -1451,8 +1436,13 @@ class ToolIsolation(Gerber, AppTool):
                             app_obj.proc_container.update_view_text(' %d%%' % disp_number)
                             old_disp_number = disp_number
 
-                    min_dist = min_element_distance(total_geo, self.decimals, on_pair=show_progress,
-                                                    abort_check=lambda: self.app.abort_flag)
+                    msg, min_dist = self.find_optim_mp(fcobj.tools, self.decimals,
+                                                       on_pair=show_progress,
+                                                       abort_check=lambda: self.app.abort_flag)
+
+                    if msg != 'ok':
+                        app_obj.inform.emit(msg)
+                        return 'fail'
 
                     min_dist_truncated = self.app.dec_format(float(min_dist), self.decimals)
                     self.safe_tooldia = min_dist_truncated

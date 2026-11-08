@@ -960,13 +960,28 @@ class NonCopperClear(Gerber, AppTool):
         self.find_safe_tooldia_worker()
 
     @staticmethod
-    def find_optim_mp(aperture_storage, decimals):
+    def find_optim_mp(aperture_storage, decimals, on_pair=None, abort_check=None):
+        """Measure the smallest gap between the polygons of the apertures.
+
+        :param aperture_storage: the tools dictionary of the Gerber object
+        :param decimals:         the number of decimals each measured distance is rounded to
+        :param on_pair:          optional progress callback, forwarded to the distance measure
+        :param abort_check:      optional abort callback, consulted once per collected solid and
+                                 once per measured pair; returning True raises ``grace``
+        :return:                 the message, 'ok' or a report to emit, and the distance trimmed
+                                 by one decimal step; the distance is a non-finite sentinel when
+                                 there is no pair to measure
+        """
         msg = 'ok'
         total_geo = []
 
         for ap in list(aperture_storage.keys()):
             if 'geometry' in aperture_storage[ap]:
                 for geo_el in aperture_storage[ap]['geometry']:
+                    if abort_check is not None and abort_check():
+                        # graceful abort requested by the user
+                        raise grace
+
                     if 'solid' in geo_el and geo_el['solid'] is not None:
                         buff_geo = geo_el['solid'].buffer(0.0000001)
                         if buff_geo.is_valid:
@@ -978,7 +993,7 @@ class NonCopperClear(Gerber, AppTool):
             msg = ('[ERROR_NOTCL] %s' % _("Too few polygons in the Gerber object to determine distances."))
             return msg, np.inf
 
-        min_dist = min_element_distance(total_geo, decimals)
+        min_dist = min_element_distance(total_geo, decimals, on_pair=on_pair, abort_check=abort_check)
         # make sure that this works for isolation case
         return msg, min_dist - 10**-decimals
 
@@ -1074,38 +1089,6 @@ class NonCopperClear(Gerber, AppTool):
                 try:
                     old_disp_number = 0
                     app_obj.proc_container.update_view_text(' %d%%' % 0)
-                    total_geo = []
-
-                    for ap in list(fcobj.tools.keys()):
-                        if 'geometry' in fcobj.tools[ap]:
-                            for geo_el in fcobj.tools[ap]['geometry']:
-                                if self.app.abort_flag:
-                                    # graceful abort requested by the user
-                                    raise grace
-
-                                if 'solid' in geo_el and geo_el['solid'] is not None and geo_el['solid'].is_valid:
-                                    total_geo.append(geo_el['solid'])
-
-                    # An aperture macro can contribute a MultiPolygon as a single solid, and
-                    # MultiPolygon() rejects a sequence holding one. Same fix as the isolation
-                    # worker.
-                    total_geo = MultiPolygon(flatten_shapely_geometry(total_geo))
-                    total_geo = total_geo.buffer(0)
-                    total_geo = flatten_shapely_geometry(total_geo)
-
-                    geo_len = len(total_geo)
-                    if geo_len == 0:
-                        # No usable solid survived the collection, so there is no pair to
-                        # measure. Same report as the multiprocessing variant above.
-                        app_obj.inform.emit('[ERROR_NOTCL] %s' %
-                                            _("Too few polygons in the Gerber object to determine distances."))
-                        return 'fail'
-
-                    if geo_len == 1:
-                        app_obj.inform.emit('[ERROR_NOTCL] %s' %
-                                            _("The Gerber object has one Polygon as geometry.\n"
-                                              "There are no distances between geometry elements to be found."))
-                        return 'fail'
 
                     def show_progress(processed, total):
                         nonlocal old_disp_number
@@ -1116,8 +1099,13 @@ class NonCopperClear(Gerber, AppTool):
                             app_obj.proc_container.update_view_text(' %d%%' % disp_number)
                             old_disp_number = disp_number
 
-                    min_dist = min_element_distance(total_geo, self.decimals, on_pair=show_progress,
-                                                    abort_check=lambda: self.app.abort_flag)
+                    msg, min_dist = self.find_optim_mp(fcobj.tools, self.decimals,
+                                                       on_pair=show_progress,
+                                                       abort_check=lambda: self.app.abort_flag)
+
+                    if msg != 'ok':
+                        app_obj.inform.emit(msg)
+                        return 'fail'
 
                     min_dist_truncated = self.app.dec_format(float(min_dist), self.decimals)
                     self.safe_tooldia = min_dist_truncated
