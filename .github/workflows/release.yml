@@ -24,7 +24,7 @@ env:
   # RHEL/Alma/Rocky 9 (2.34) is the oldest distribution this can support.
   MANYLINUX_IMAGE: quay.io/pypa/manylinux_2_34_x86_64
   GLIBC_FLOOR: "2.34"
-  KDE_RUNTIME_VERSION: "6.9"
+  KDE_RUNTIME_VERSION: "6.11"
 
 jobs:
   test:

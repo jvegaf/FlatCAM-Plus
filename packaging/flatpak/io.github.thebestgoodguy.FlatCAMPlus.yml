@@ -6,7 +6,7 @@
 # and the platform is pinned to xcb on purpose.
 app-id: io.github.thebestgoodguy.FlatCAMPlus
 runtime: org.kde.Platform
-runtime-version: "6.9"
+runtime-version: "6.11"
 sdk: org.kde.Sdk
 command: flatcam-plus
 
