@@ -222,20 +222,47 @@ build_portable() {
     fi
 
     prune_system_libraries
+    bundle_runtime_libraries
     write_desktop_launcher
 }
 
+bundle_runtime_libraries() {
+    # PyOpenGL reaches libGLU through ctypes, so PyInstaller never sees it as an ELF dependency
+    # and does not collect it. A host with mesa installed hides that: the deb, the rpm and the
+    # tarball run against the system copy. The Flatpak sandbox has neither libGLU nor a way to
+    # install it, and vispy then fails every tessellation with "Attempt to call an undefined
+    # function gluNewTess" and draws no geometry at all. libGLU asks only for GLIBC_2.14, far
+    # under the floor this bundle promises, so shipping it is safe everywhere.
+    # GLU_LIBRARY lets CI hand over a copy prepared outside the unprivileged build container,
+    # whose image ships neither libGLU nor sudo to install it.
+    local source="${GLU_LIBRARY:-}"
+    if [[ -z "$source" ]]; then
+        source="$(ldconfig -p 2>/dev/null | awk '/libGLU\.so\.1 /{print $NF; exit}')"
+    fi
+    if [[ -z "$source" || ! -f "$source" ]]; then
+        echo "[WARN] libGLU.so.1 is missing on this build host; the Flatpak will draw no geometry."
+        echo "       Install it first, for example: dnf install mesa-libGLU"
+        return
+    fi
+    cp -L "$source" "$APP_DIR/_internal/libGLU.so.1"
+    echo "[INFO] Bundled runtime library: _internal/libGLU.so.1"
+}
+
 prune_system_libraries() {
-    # PyInstaller copies libgcc_s from the build host, and that copy pins the whole bundle to a
-    # newer glibc than the target distributions have: on a manylinux_2_34 base it was the only
-    # file asking for GLIBC_2.35. Every glibc system already provides this library, and the
-    # loader finds it, so shipping it only raises the floor. check_glibc_floor.py verifies the
-    # result is under the promised one.
+    # PyInstaller copies libgcc_s and libstdc++ from the build host. Both pin the bundle to the
+    # build host's toolchain: on a manylinux_2_34 base libgcc_s was the only file asking for
+    # GLIBC_2.35, and the vendored libstdc++ caps GLIBCXX at 3.4.29. That cap breaks the system
+    # GL stack inside the Flatpak: the frozen binary carries DT_RPATH=$ORIGIN, so the copy next
+    # to the executable wins, dlopen("libEGL_mesa.so.0") then pulls libgallium, which needs
+    # GLIBCXX_3.4.30, the load fails, and the canvas comes up with "EGL not available" and no
+    # OpenGL context. Every supported target (glibc >= 2.34, the declared floor) already ships a
+    # libstdc++ that satisfies this bundle, and the loader finds it.
+    # check_glibc_floor.py verifies the result is under the promised floor.
     local candidate
     while IFS= read -r candidate; do
         echo "[INFO] Pruning host library: ${candidate#"$APP_DIR"/}"
         rm -f "$candidate"
-    done < <(find "$APP_DIR" -name 'libgcc_s.so*' -type f)
+    done < <(find "$APP_DIR" \( -name 'libgcc_s.so*' -o -name 'libstdc++.so*' \) -type f)
 }
 
 create_archive() {

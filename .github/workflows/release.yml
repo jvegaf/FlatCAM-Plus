@@ -100,11 +100,22 @@ jobs:
           set -euo pipefail
           # The interpreter this image ships is built without --enable-shared and PyInstaller
           # refuses it, so the build asks uv for a managed CPython (standalone, shared library).
+          # PyOpenGL loads libGLU through ctypes, so PyInstaller cannot collect it, and this
+          # image ships neither libGLU nor sudo. Prepare it as root first; the build itself stays
+          # unprivileged so the workspace is not left owned by root.
+          mkdir -p build
+          docker run --rm --user 0:0 \
+            -v "$PWD/build:/out" "${MANYLINUX_IMAGE}" /bin/bash -lc '
+            set -euo pipefail
+            dnf install -y mesa-libGLU
+            cp -L "$(ldconfig -p | awk "/libGLU\\.so\\.1 /{print \$NF; exit}")" /out/libGLU.so.1
+          '
           docker run --rm \
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
             -e UV_PYTHON_PREFERENCE=only-managed \
             -e UV_CACHE_DIR=/tmp/uv-cache \
+            -e GLU_LIBRARY=/work/build/libGLU.so.1 \
             -v "$PWD/.uv-cache:/tmp/uv-cache" \
             -v "$PWD:/work" -w /work "${MANYLINUX_IMAGE}" /bin/bash -lc '
             set -euo pipefail
