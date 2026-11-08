@@ -127,3 +127,49 @@ def test_the_windows_helper_ships_the_data_into_the_package():
     assert ("pyproject.toml", MANIFEST_DESTINATION) in pairs, pairs
 
 
+def test_freeze_support_runs_before_the_application_import(tmp_path):
+    """A frozen ``forkserver`` child must answer the handshake before ``sys.argv`` is parsed.
+
+    Python 3.14 made ``forkserver`` the default start method on Linux, and its child is
+    re-executed with a ``-c "from multiprocessing.forkserver import main; main(...)"`` style
+    command line. ``flatcam_plus.appMain`` parses ``sys.argv`` with getopt in the ``App`` class
+    body, so importing it in that child raises ``getopt.GetoptError`` and calls ``sys.exit(2)``
+    before the handshake is answered; the parent then dies on ``ConnectionResetError`` when it
+    builds its ``Pool``. ``freeze_support()`` therefore has to run at module level, before any
+    import that can parse the command line.
+    """
+    probe = (
+        "import multiprocessing, sys\n"
+        "calls = []\n"
+        "def spy():\n"
+        "    calls.append('flatcam_plus.appMain' in sys.modules)\n"
+        "multiprocessing.freeze_support = spy\n"
+        "import flatcam_plus.launcher  # noqa: F401\n"
+        "print('CALLS', calls)\n"
+        "print('APPMAIN', 'flatcam_plus.appMain' in sys.modules)\n"
+    )
+    finished = subprocess.run(
+        [sys.executable, "-c", probe],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        env=dict(
+            os.environ,
+            QT_QPA_PLATFORM="offscreen",
+            HOME=str(tmp_path),
+            XDG_CONFIG_HOME=str(tmp_path / ".config"),
+            PYTHONPATH=REPO_ROOT,
+        ),
+        timeout=300,
+    )
+
+    assert finished.returncode == 0, finished.stderr
+    lines = {line.split(" ", 1)[0]: line.split(" ", 1)[1] for line in finished.stdout.splitlines()}
+    # The import has to reach the application, or a probe that never imports it would pass.
+    assert lines.get("APPMAIN") == "True", finished.stdout
+    assert lines.get("CALLS") == "[False]", (
+        "freeze_support() has to run before the import that parses sys.argv; a frozen forkserver "
+        "child re-executes the entry point with its own -c command line, and appMain's "
+        "import-time getopt exits on it before the handshake is answered",
+        finished.stdout,
+    )

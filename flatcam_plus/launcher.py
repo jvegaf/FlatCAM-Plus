@@ -103,6 +103,17 @@ def _require_tcl_tk():
 # the import below can fail.
 _require_tcl_tk()
 
+from multiprocessing import freeze_support
+
+# This call has to precede every import that can parse ``sys.argv``, so it cannot wait for
+# ``main()``. Python 3.14 made ``forkserver`` the default start method on Linux, and its child is
+# re-executed with a ``-c "from multiprocessing.forkserver import main; main(...)"`` style command
+# line. ``flatcam_plus.appMain`` parses ``sys.argv`` with getopt in the ``App`` class body, so
+# importing it first raises ``getopt.GetoptError`` and calls ``sys.exit(2)`` in that child, before
+# ``freeze_support()`` answers the handshake. The parent then fails building its ``Pool`` with
+# ``ConnectionResetError``: that is the frozen start-up crash this ordering prevents.
+freeze_support()
+
 import flatcam_plus
 from flatcam_plus import appTranslation as fcTranslate
 from flatcam_plus.appMain import App
@@ -111,8 +122,6 @@ from flatcam_plus.version import APP_NAME, APP_VERSION
 from flatcam_plus.appCommon.recent_projects import load_recent_project_paths
 
 from flatcam_plus.appGUI.GUIElements import FCMessageBox
-
-from multiprocessing import freeze_support
 
 # The data directories ship inside the package. This module's own ``__file__`` cannot anchor them:
 # as a PyInstaller entry script it resolves to the bundle root rather than to the package, so the
@@ -441,6 +450,9 @@ def main():
     # All X11 calling should be thread safe otherwise we have strange issues
     # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)
     # NOTE: Never talk to the GUI from threads! This is why I commented the above.
+    # The handshake is already answered by the module-level ``freeze_support()`` above the
+    # ``appMain`` import; this second call is a no-op outside a helper child and stays as the
+    # belt-and-braces path for a caller that imports ``main`` from elsewhere.
     freeze_support()
 
     portable = False
