@@ -4,62 +4,21 @@ Unit tests for CutOut._classify_contours()
 Tests the automatic detection of interior vs exterior contours
 for the Cutout Tool's auto-interior-detection feature.
 
-Run with: python -m pytest tests/test_classify_contours.py -v
-Requires only: shapely >= 2.0
+Run with: uv run --with pytest pytest tests/test_classify_contours.py -v
+Requires shapely and PyQt6 (the plugin module imports Qt); no QApplication is started.
 """
 
 import pytest
 from shapely import Polygon, LineString, LinearRing, Point
 
+# Call the production code, not a copy of it. This module used to carry its own
+# reimplementation, so the tests could not notice a change to the real one. `CutOut` is a
+# QWidget subclass, but importing the class and reaching its staticmethod needs no
+# QApplication.
+import flatcam_plus.appPlugins.ToolCutOut as tool_cutout
 
-# Import the static method directly to test without PyQt6/app dependencies
-# We replicate the function here for standalone testing (same logic as in ToolCutOut.py)
-def _classify_contours(geometries: list) -> set:
-    """
-    Classify polygons as interior (contained within a larger exterior polygon).
-    Standalone copy for testing without app dependencies.
-    """
-    if len(geometries) <= 1:
-        return set()
+_classify_contours = tool_cutout.CutOut._classify_contours
 
-    filled_polys = []
-    for geo in geometries:
-        try:
-            if hasattr(geo, 'exterior'):
-                filled_polys.append(Polygon(geo.exterior))
-            else:
-                filled_polys.append(geo.convex_hull)
-        except Exception:
-            filled_polys.append(None)
-
-    max_area = -1
-    exterior_idx = 0
-    for i, fp in enumerate(filled_polys):
-        if fp is not None and fp.area > max_area:
-            max_area = fp.area
-            exterior_idx = i
-
-    exterior_filled = filled_polys[exterior_idx]
-    if exterior_filled is None or exterior_filled.is_empty:
-        return set()
-
-    interior_indices = set()
-    for i, geo in enumerate(geometries):
-        if i == exterior_idx:
-            continue
-        try:
-            test_point = geo.representative_point()
-            if exterior_filled.contains(test_point):
-                interior_indices.add(i)
-        except Exception:
-            pass
-
-    return interior_indices
-
-
-# ============================================================================
-# Helper: simulate Gerber profile geometry (thin band = LineString.buffer(width/2))
-# ============================================================================
 
 def make_gerber_band(coords, width=0.254):
     """Simulate a Gerber profile path: LineString buffered with aperture width/2."""
