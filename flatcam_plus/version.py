@@ -17,7 +17,7 @@ from importlib import metadata
 from pathlib import Path
 
 APP_NAME = "FlatCAM Plus"
-APP_VERSION_DATE = "2026.11.06"
+APP_VERSION_DATE = "2026.11.08"
 APP_RELEASE_CHANNEL = "beta"
 APP_BETA = True
 

@@ -15,8 +15,7 @@ the file the app writes has to load again in the same build without a reset.
 import json
 
 from flatcam_plus.defaults import AppDefaults
-
-VERSION = "1.3.2"
+from flatcam_plus.version import APP_VERSION as VERSION
 
 
 class _Inform:
