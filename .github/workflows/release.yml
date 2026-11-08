@@ -103,11 +103,14 @@ jobs:
           # PyOpenGL loads libGLU through ctypes, so PyInstaller cannot collect it, and this
           # image ships neither libGLU nor sudo. Prepare it as root first; the build itself stays
           # unprivileged so the workspace is not left owned by root.
+          # gettext is installed here for the same reason: build_linux_portable.sh compiles the
+          # .po files with msgfmt, and without it the build only warns and the bundle ships no
+          # translations (no .mo files are committed).
           mkdir -p build
           docker run --rm --user 0:0 \
             -v "$PWD/build:/out" "${MANYLINUX_IMAGE}" /bin/bash -lc '
             set -euo pipefail
-            dnf install -y mesa-libGLU
+            dnf install -y mesa-libGLU gettext
             cp -L "$(ldconfig -p | awk "/libGLU\\.so\\.1 /{print \$NF; exit}")" /out/libGLU.so.1
           '
           docker run --rm \

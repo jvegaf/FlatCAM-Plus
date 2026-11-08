@@ -133,7 +133,8 @@ compile_translations() {
     fi
 
     if ! command -v msgfmt >/dev/null 2>&1; then
-        echo "[WARN] msgfmt was not found; existing .mo files will be used."
+        echo "[WARN] msgfmt was not found; the bundle will ship without translations."
+        echo "       No .mo files are committed, so nothing is reused from the repository."
         echo "       On Ubuntu/Debian install it with: sudo apt install gettext"
         return
     fi
@@ -141,7 +142,15 @@ compile_translations() {
     echo "[INFO] Compiling translations..."
     find flatcam_plus/locale -name "strings.po" -print0 |
         while IFS= read -r -d '' po_file; do
-            msgfmt "$po_file" -o "${po_file%.po}.mo"
+            # The .po files keep their obsolete (#~) entries on purpose: they are the
+            # translators' history. msgfmt counts those entries too, and in every shipped
+            # language an obsolete entry repeats an active msgid, so feeding the file
+            # straight to msgfmt fails with "duplicate message definition" and no
+            # translation is compiled at all. msgattrib cannot be used to filter them
+            # either: it rejects the same files while parsing, before --no-obsolete
+            # applies. Drop the obsolete lines on the way in instead, so the .mo file
+            # carries only live translations and the sources keep their history.
+            sed '/^#~/d' "$po_file" | msgfmt -o "${po_file%.po}.mo" -
         done
 }
 
