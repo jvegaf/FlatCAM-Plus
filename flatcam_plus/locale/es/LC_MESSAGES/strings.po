@@ -26329,3 +26329,15 @@ msgstr ""
 #: flatcam_plus/appPlugins/ToolIsolation.py:1326
 msgid "The Gerber object has no usable geometry to measure distances between."
 msgstr ""
+
+#: flatcam_plus/appPlugins/ToolCutOut.py:2608
+msgid "Auto Interior"
+msgstr ""
+
+#: flatcam_plus/appPlugins/ToolCutOut.py:2610
+msgid ""
+"Detect which contours are holes in the board\n"
+"and cut them from the inside. Turn it off to\n"
+"cut every contour from the outside.\n"
+"Used only if the source object type is Gerber."
+msgstr ""
